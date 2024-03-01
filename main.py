@@ -7,7 +7,7 @@ def tim_ide():
 
 @tim_ide.command()
 def login():
-    """Returns a login link"""
+    """Returns a login link."""
     # Do something
     click.echo("Login link: https://example.org/")
 
@@ -26,7 +26,7 @@ def list(course=None):
     Lists user courses. If course is provided, it will list the course tasks.
 
     Usage:
-    tim_ide list [OPTIONS] [COURSE]
+    [OPTIONS] [COURSE]
 
     Options:
     COURSE  Course name (not required)
@@ -46,7 +46,7 @@ def pull(course, task=None):
     Fetches course or task data
     
     Usage:
-    tim_ide pull [OPTIONS] COURSE
+    [OPTIONS] COURSE
     
     Options:
     --task NAME (not required)
