@@ -66,7 +66,7 @@ def push(course, task=None):
     Submits course or task data
     
     Usage:
-    tim_ide push [OPTIONS] COURSE
+    [OPTIONS] COURSE
     
     Options:
     --task NAME (not required)
