@@ -1,84 +1,82 @@
-import os
-
-from OauthSinFlask import authenticate, get_ideTasksByBooksmarks
-
 import click
-from dotenv import load_dotenv
-
-# test
 
 @click.group()
-def cli():
-    load_dotenv()
+def tim_ide():
 
+    pass
 
-@cli.command()
+@tim_ide.command()
 def login():
-    if os.environ.get('OAUTH_TOKEN'):
-        click.echo("You are already logged in.")
-    else:
-        token = authenticate()
-        if token:
-            with open('.env', 'a') as env_file:
-                env_file.write(f'OAUTH_TOKEN={token}\n')
-            click.echo("Login successful.")
-
-        else:
-            click.echo("Login failed.")
+    """Returns a login link."""
+    # Do something
+    click.echo("Login link: https://example.org/")
 
 
-@cli.command()
-def login_status():
-    click.echo("status")
-
-
-@cli.command()
+@tim_ide.command()
 def logout():
-    if os.environ.get('OAUTH_TOKEN'):
-        os.environ['OAUTH_TOKEN'] = ''
-        click.echo("Logout successful.")
+    """User logout"""
+    # Do something
+    click.echo("Logout successful.")
+
+
+@tim_ide.command()
+@click.argument("course", required=False)
+def list(course=None):
+    """
+    Lists user courses. If course is provided, it will list the course tasks.
+
+    Usage:
+    [OPTIONS] [COURSE]
+
+    Options:
+    COURSE  Course name (not required)
+    """
+    # Do something
+    if course:
+        click.echo(f"Listed tasks for course {course}")
     else:
-        click.echo("You are not logged in.")
+        click.echo("Listed all courses")
 
 
-@cli.command()
-@click.option('--courseID', help='Tasks from course folder')
-def tasks():
-    login_check()
-    get_ideTasksByBooksmarks()
-
-
-@cli.command()
-def courses():
+@tim_ide.command()
+@click.argument("course")
+@click.option("--task",  help="Specific task to pull")
+def pull(course, task=None):
     """
-    All courses bookmarked by user
-    :return: Dict of courses
+    Fetches course or task data
+    
+    Usage:
+    [OPTIONS] COURSE
+    
+    Options:
+    --task NAME (not required)
     """
-    login_check()
-    click.echo(get_ideTasksByBooksmarks())
+    # Do something
+    if task:
+        click.echo(f"Pulled task {task} for course {course}")
+    else:
+        click.echo(f"Pulled course {course}")
 
 
-@cli.command()
-@click.option('--path', default='/courses', help='Path where courses are saved related to TIDE-app')
-def config(path):
-    login_check()
-    with open('.env', 'a') as env_file:
-        env_file.write(f'TIDE_COURSES_PATH={path}\n')
+@tim_ide.command()
+@click.argument("course")
+@click.option("--task",  help="Specific task to submit")
+def push(course, task=None):
+    """
+    Submits course or task data
+    
+    Usage:
+    [OPTIONS] COURSE
+    
+    Options:
+    --task NAME (not required)
+    """
+    # Do something
+    if task:
+        click.echo(f"Pushed task {task} for course {course}")
+    else:
+        click.echo(f"Pushed course {course}")
 
 
-@cli.command()
-@click.option('--course', '--tasks_ID', help='Submit answer to task with given ID')
-def submit_answer(course, task_ID):
-    login_check()
-    # TODO: Vastaus tehtävän idllä
-
-
-def login_check():
-    if os.environ.get('OAUTH_TOKEN') == '':
-        click.echo("Please login.")
-        # TODO: Tokenin voimassaolon tarkistus
-        raise click.Abort()  # Abort the command if not logged in
-
-
-if __name__ == '__main__':
-    cli()
+if __name__ == "__main__":
+    tim_ide()
