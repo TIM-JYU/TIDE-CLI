@@ -1,10 +1,9 @@
 import requests
 
-from src.utils.handle_token import get_token
+from utils.handle_token import get_token
 
 
-def get_ide_tasks_by_bookmarks (username: str):
-
+def get_ide_tasks_by_bookmarks(username: str):
     access_token = get_token(username)
 
     res = requests.get(

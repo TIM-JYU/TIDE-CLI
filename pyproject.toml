@@ -2,10 +2,12 @@
 name = "TIDE-CLI"
 version = "0.1.0"
 description = ""
-authors = ["TIDE-porject"]
+authors = ["TIDE-project"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "TIDE-CLI"}]
+packages = [
+    {include = "TIDE-CLI", from = "src"}
+]
 
 [tool.poetry.dependencies]
 python = "^3.12"

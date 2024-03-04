@@ -4,7 +4,7 @@ import urllib.parse
 import webbrowser
 from http.server import SimpleHTTPRequestHandler
 import requests
-from src.utils.handle_token import save_token
+from utils.handle_token import save_token
 
 
 def authenticate():
