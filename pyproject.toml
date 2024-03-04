@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "TIDE-CLI"
+version = "0.1.0"
+description = ""
+authors = ["TIDE-porject"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "TIDE-CLI"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.31.0"
+click = "^8.1.7"
+python-dotenv = "^1.0.1"
+keyring = "^24.3.1"
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
