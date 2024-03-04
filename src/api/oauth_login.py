@@ -4,6 +4,7 @@ import urllib.parse
 import webbrowser
 from http.server import SimpleHTTPRequestHandler
 import requests
+from src.utils.handle_token import save_token
 
 
 def authenticate():
@@ -50,24 +51,17 @@ def authenticate():
                     response = requests.post(os.environ['TOKEN_URL'], data=token_params)
                     access_token = response.json().get("access_token")
 
-                    # self.send_response(200)
-                    # self.send_header("Content-type", "text/html")
-                    # self.end_headers()
-                    # self.wfile.write(
-                    #     bytes(
-                    #         f"Authentication successful! You can return to TIDE-cli.",
-                    #         "utf-8",
-                    #     )
-                    # )
+                    save_token(access_token, "username")
 
-                    res = requests.get(
-                        "http://webapp04.it.jyu.fi/oauth/ideTasksByBooksmarks",
-                        headers={"Authorization": f"Bearer {access_token}"},
-                    )
                     self.send_response(200)
-                    self.send_header("Content-type", "application/json")
+                    self.send_header("Content-type", "text/html")
                     self.end_headers()
-                    self.wfile.write(bytes(res.text, "utf-8"))
+                    self.wfile.write(
+                        bytes(
+                            f"Authentication successful! You can return to TIDE-cli.",
+                            "utf-8",
+                        )
+                    )
                     httpd.shutdown()
                     httpd.server_close()
 
@@ -79,21 +73,3 @@ def authenticate():
     print(f"Open http://localhost:{port}/ in your web browser.")
     webbrowser.open(f"http://localhost:{port}/")
     httpd.serve_forever()
-
-
-def get_ideTasksByBooksmarks():
-    access_token = os.environ['OAUTH_TOKEN']
-    res = requests.get(
-        "http://webapp04.it.jyu.fi/oauth/ideTasksByBooksmarks",
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
-
-    return res.json()
-
-
-# def find_free_port():
-#     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#     sock.bind(("", 0))
-#     free_port = sock.getsockname()[1]
-#     sock.close()
-#     return free_port
