@@ -6,17 +6,21 @@ authors = ["TIDE-project"]
 license = "MIT"
 readme = "README.md"
 packages = [
-    {include = "TIDE-CLI", from = "src"}
+    {include = "tidecli", from = "src"}
 ]
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.10"
 requests = "^2.31.0"
 click = "^8.1.7"
 python-dotenv = "^1.0.1"
 keyring = "^24.3.1"
 
+[tool.poetry.group.test]
+optional = true
 
+[tool.poetry.group.test.dependencies]
+pytest = "^8.0.0"
 
 [build-system]
 requires = ["poetry-core"]
