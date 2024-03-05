@@ -1,16 +1,31 @@
 import requests
 
-from utils.login_handler import get_token
+from tidecli.utils.handle_token import get_token
+
+import configparser
 
 
-def get_ide_tasks_by_bookmarks(username: str):
-    access_token = get_token(username)
+def validate_token(username: str):
+    """
+    Validate the token for the user
+
+    :param username: Username to validate the token for
+    return: JSON response  of token time validity
+    """
+    try:
+        access_token = get_token(username)
+    except Exception as e:
+        print(f"Error getting token: {e}")
+        return None
+
+    cf = configparser.ConfigParser()
+    cf.read("config.ini")
+    base_url = cf["OAuthConfig"]["base_url"]
+    validate_token_endpoint = cf["OAuthConfig"]["validate_token_endpoint"]
 
     res = requests.get(
-        "http://webapp04.it.jyu.fi/oauth/ideTasksByBooksmarks",
+        f"{base_url}{validate_token_endpoint}",
         headers={"Authorization": f"Bearer {access_token}"},
     )
 
     return res.json()
-
-def check

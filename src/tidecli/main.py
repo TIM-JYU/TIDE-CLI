@@ -1,6 +1,6 @@
 import click
 
-from utils.login_handler import LoginHandler
+from tidecli.api.oauth_login import authenticate
 
 
 @click.group()
@@ -13,13 +13,10 @@ def login():
     """
     Opens a login link.
     """
-    lh = LoginHandler()
-    if lh.is_logged_in():
-        # Validate the token
-        click.echo(f"You are already logged in as {lh.username}.")
-        return
+    if authenticate():
+        click.echo("Login successful.")
     else:
-        click.echo("You are not logged in.")
+        click.echo("Login failed.")
 
 
 @tim_ide.command()
