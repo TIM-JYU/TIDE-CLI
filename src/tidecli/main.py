@@ -1,15 +1,25 @@
 import click
 
+from utils.login_handler import LoginHandler
+
+
 @click.group()
 def tim_ide():
-
     pass
+
 
 @tim_ide.command()
 def login():
-    """Returns a login link."""
-    # Do something
-    click.echo("Login link: https://example.org/")
+    """
+    Opens a login link.
+    """
+    lh = LoginHandler()
+    if lh.is_logged_in():
+        # Validate the token
+        click.echo(f"You are already logged in as {lh.username}.")
+        return
+    else:
+        click.echo("You are not logged in.")
 
 
 @tim_ide.command()
@@ -31,7 +41,7 @@ def list(course=None):
     Options:
     COURSE  Course name (not required)
     """
-    # Do something
+
     if course:
         click.echo(f"Listed tasks for course {course}")
     else:
@@ -40,14 +50,14 @@ def list(course=None):
 
 @tim_ide.command()
 @click.argument("course")
-@click.option("--task",  help="Specific task to pull")
+@click.option("--task", help="Specific task to pull")
 def pull(course, task=None):
     """
     Fetches course or task data
-    
+
     Usage:
     [OPTIONS] COURSE
-    
+
     Options:
     --task NAME (not required)
     """
@@ -60,14 +70,14 @@ def pull(course, task=None):
 
 @tim_ide.command()
 @click.argument("course")
-@click.option("--task",  help="Specific task to submit")
+@click.option("--task", help="Specific task to submit")
 def push(course, task=None):
     """
     Submits course or task data
-    
+
     Usage:
     [OPTIONS] COURSE
-    
+
     Options:
     --task NAME (not required)
     """
