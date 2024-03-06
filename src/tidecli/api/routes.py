@@ -42,10 +42,10 @@ def get_user_task_by_taskId(task_id: str, doc_id: int):
     token = get_signed_in_user().password
 
     # ide_task_by_taskId_endpoint = /ide-task-by-id/<int:doc_id>/<string:ide_task_id>
-    endpoint.format(doc_id=doc_id, ide_task_id=task_id)
+    url = f"{base_url}{endpoint.format(doc_id=doc_id, ide_task_id=task_id)}"
 
     res = requests.get(
-        f"{base_url}{endpoint}/{task_id}",
+        url,
         headers={"Authorization": f"Bearer {token}"},
     )
 
