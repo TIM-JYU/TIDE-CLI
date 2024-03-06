@@ -1,5 +1,4 @@
 import base64
-import os
 from dataclasses import dataclass
 import hashlib
 import requests
@@ -10,15 +9,7 @@ import http.server
 
 import configparser
 
-config = configparser.ConfigParser()
-config_path = os.path.abspath(os.path.join('..', 'config.ini'))
-config.read(config_path)
-
-client_id = config['OAuthConfig']['client_id']
-auth_url = config['OAuthConfig']['auth_url']
-token_url = config['OAuthConfig']['token_url']
-redirect_uri = config['OAuthConfig']['redirect_uri']
-scope = config['OAuthConfig']['scope']
+from tidecli.utils.handle_token import save_token
 
 
 def create_s256_code_challenge(code_verifier: str):
@@ -26,123 +17,146 @@ def create_s256_code_challenge(code_verifier: str):
     return base64.urlsafe_b64encode(data).rstrip(b"=").decode("utf-8")
 
 
-# Apuluokka, joka hoitaa OAuth-autentikoinnin ilman lisäkirjastoja
 @dataclass
 class OAuthAuthenticator:
-    client_id: str  # Sovelluksen ID (oltava sama kuin TIM:ssä)
-    auth_url: str  # URL, johon käyttäjä ohjataan autentikoinnin ajaksi
-    token_url: str  # URL, josta saa API-avaimen
-    port: int  # Portti, jossa odotetaan autentikointipalvelimen vastausta. Tämä oltava TIMin tiedossa.
-    scope: str  # Mitä oikeuksia avain pyytää
+    """
+    Class for OAuth2 authenticating
+    """
 
-    def authenticate(self) -> str:
-        # Generoidaan varmistusavain
-        # Tämä avain toimii samalla tavalla kuin client_secret, mutta se generoidaan autentikoinnin yhteydessä
+    # Might need to define path manually TODO: why?
+    # config_path = os.path.abspath(os.path.join('..', 'config.ini'))
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+
+    client_id: str = config["OAuthConfig"][
+        "client_id"
+    ]  # Application ID (must be the same as in TIM)
+    base_url: str = config["OAuthConfig"][
+        "base_url"
+    ]  # URL to which the user is directed for authentication
+    auth_endpoint: str = config["OAuthConfig"][
+        "auth_endpoint"
+    ]  # Endpoint to which the user is directed for authentication
+    token_endpoint: str = config["OAuthConfig"][
+        "token_endpoint"
+    ]  # Endpoint to obtain the API key
+    port: int = int(
+        config["OAuthConfig"]["port"]
+    )  # Port where the authentication server response is expected. This must be known to TIM.
+    scope: str = config["OAuthConfig"]["scope"]  # Scope of the rights the key requests
+    redirect_uri: str = config["OAuthConfig"][
+        "redirect_uri"
+    ]  # URL where the user is redirected after authentication
+    profile_endpoint: str = config["OAuthConfig"][
+        "profile_endpoint"
+    ]  # Endpoint to obtain the user profile
+
+    def auth(self) -> bool:
+        # Generating a random string for the code verifier
         code_verifier = secrets.token_urlsafe(48)
-        # Hashataan varmistusavain, joka lähetetään autentikointipalvelimelle
+        # Generating the code challenge hash
         code_challenge = create_s256_code_challenge(code_verifier)
 
-        # Tämä osoite tulee olla TIMin tiedossa. Tähän ohjataan käyttäjä autentikoinnin jälkeen.
-        redirect_uri = f"http://localhost:{self.port}/callback"
-
         auth_params = {
-            "client_id": self.client_id,  # Sovelluksen ID (oltava sama kuin TIM:ssä)
-            "redirect_uri": redirect_uri,  # URL, johon TIM vie autentikoinnin jälkeen (oltava sama kuin TIM:ssä)
-            "scope": self.scope,  # Mitä oikeuksia avain pyytää
+            "client_id": self.client_id,
+            "redirect_uri": self.redirect_uri.format(port=self.port),
+            "scope": self.scope,
             "response_type": "code",
-            # Mitä avainta pyydetään. code = autentikointikoodi, jolla voi pyytää väliaikaisia avaimia
-            "code_challenge": code_challenge,  # Varmistusavaimen hash, joka palvelin tallentaa
-            "code_challenge_method": "S256",  # Varmistuksen tyyppi
+            "code_challenge": code_challenge,
+            "code_challenge_method": "S256",
         }
 
-        # URL, johon käyttäjä ohjataan autentikoinnin ajaksi
-        auth_url_with_params = f"{self.auth_url}?{urllib.parse.urlencode(auth_params)}"
+        # URL where the user is directed for authentication
+        auth_url_with_params = (
+            f"{self.base_url}{self.auth_endpoint}?{urllib.parse.urlencode(auth_params)}"
+        )
 
-        # API-avain, jota voi käyttää API-pyyntöihin
-        # access_token kannattaa tallentaa johonkin, sillä se on voimassa aina pitkän ajan (oletuksena 10 pv, voi säätää TIMin puolella)
-        access_token = None
+        base_url = self.base_url
+        token_endpoint = self.token_endpoint
+        profile_endpoint = self.profile_endpoint
+        login_successful = False
 
-        # OAuth-autentikointi vaatii, että käyttäjän tietokoneella käynnistetään väliaikainen palvelin, joka kuuntelee autentikointipalvelimen vastausta
-        # Tämä tehdään siksi, koska onnistuneen autentikoinnin jälkeen käyttäjä ohjataan takaisin sovellukseen autentikointikoodin kanssa
         class Handler(http.server.BaseHTTPRequestHandler):
+            """
+            Temporary server to handle the callback
+            This class is used to handle the callback from the authentication server.
+            """
+
             def do_GET(self):
-                # Kikka, jolla access_token saadaan ulos tästä metodista
-                nonlocal access_token
+
+                # To access the variables from the outer function
+                nonlocal base_url
+                nonlocal token_endpoint
+                nonlocal profile_endpoint
+                nonlocal login_successful
 
                 url = urllib.parse.urlparse(self.path)
                 query = urllib.parse.parse_qs(url.query)
 
-                # Handle the case where the user denied the authorization / closed the browser
+                # Handles the case where the user denied the authorization / closed the browser
                 if "error" in query:
-                    # Handle the case where the user denied the authorization
                     print(f"Authorization denied by user: {query['error'][0]}")
                     self.send_error(403, "Authorization denied by user")
                     return
 
-                # Väliaikainen autentikointikoodi, jolla voi pyytää API-avainta
-                # Oletuksena autentikointikoodi on voimassa 5 minuuttia, jonka aikana sitä saa käyttää vain kerran
+                # Temporary code, which is used to obtain the API key
                 code = query.get("code")[0]
 
-                # API-avain on voimassa rajoitetun ajan (oletuksena 10 pv, voi säätää TIMin puolella)
                 token_params = {
-                    "client_id": client_id,  # Sovelluksen ID (oltava sama kuin TIM:ssä)
-                    "redirect_uri": redirect_uri,
-                    # URL, johon TIM vie autentikoinnin jälkeen (oltava sama kuin TIM:ssä)
+                    "client_id": "oauth2_tide",
+                    "redirect_uri": "http://localhost:8083/callback",
                     "grant_type": "authorization_code",
-                    # Autentikointityyppi. authorization_code = käytetään autentikointikoodia, jota saatiin autentikoinnissa
-                    "code": code,  # Autentikointikoodi
+                    "code": code,
                     "code_verifier": code_verifier,
-                    # Varmistusavain. Huom, tätä ei nyt hashata, vaan lähetetään sellaisenaan
                 }
 
+                response = requests.post(
+                    url=f"{base_url}{token_endpoint}",
+                    data=token_params,
+                )
 
-                response = requests.post(url=token_url, data=token_params)
-                # Huomaa, että nyt code ei ole enää käyttökelpoinen, vaan se on hävitetty
-
-                # Talletetaan API-avain access_token-muuttujaan
-
+                # If the response is successful, the API key is saved, else an error message is printed
                 if response.status_code == 200:
                     access_token = response.json().get("access_token")
                 else:
-                    print(f"Virheellinen vastauskoodi: {response.status_code}, Virheviesti: {response.text}")
-                    return None
+                    print(f"{response.status_code}, Error message: {response.text}")
+                    return
 
-                access_token = response.json().get("access_token")
+                # Get the user profile to save token for right user
+                try:
+                    res = requests.get(
+                        f"{base_url}{profile_endpoint}",
+                        headers={"Authorization": f"Bearer {access_token}"},
+                    )
+                except requests.exceptions.RequestException as e:
+                    print(f"Error: {e}")
+                    return
 
+                save_token(token=access_token, username=res.json().get("username"))
 
-
-                # Lähetetään joku vastaus, jossa pyydetään käyttäjä sulkemaan selain
                 self.send_response(200)
-                # Palauta tekstiä UTF-8 -muodossa
                 self.send_header("Content-type", "text/plain; charset=utf-8")
                 self.end_headers()
                 self.wfile.write(
-                    "Sisäänkirjautuminen onnistui! Voit sulkea tämän selainikkunan.".encode(
-                        "utf-8"
-                    )
+                    "Login successful! You can now close the browser.".encode("utf-8")
                 )
+                login_successful = True
 
-        # Käynnistetään väliaikainen palvelin, joka kuuntelee autentikointipalvelimen vastausta
+        # Start temporary server to handle the callback
         server = http.server.HTTPServer(("localhost", self.port), Handler)
 
-        # Avataan selain, jonka osoite on autentikointipalvelimen osoite
+        # Open the TIM login page
         webbrowser.open(auth_url_with_params)
 
-        # Odotetaan, että käyttäjä kirjautuu sisään ja palvelin saa vastauksen
+        # Wait for the user to sign in or deny the authorization
         server.handle_request()
 
-        return access_token
+        return login_successful
 
 
-authenticator = OAuthAuthenticator(client_id, auth_url, token_url, 8083, scope)
-
-if __name__ == "__main__":
-    authentication_code = authenticator.authenticate()
-
-    # Koodia voi nyt käyttää API-kutsuihin
-    # Esimerkiksi:
-    res = requests.get(
-        "http://webapp04.it.jyu.fi/oauth/profile",
-        headers={"Authorization": f"Bearer {authentication_code}"},
-    )
-    print(res.json())
+def authenticate() -> bool:
+    """
+    Authenticates the user for the TIM API
+    """
+    auth = OAuthAuthenticator()
+    return auth.auth()

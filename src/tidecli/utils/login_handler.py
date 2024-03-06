@@ -1,81 +1,89 @@
-from dataclasses import dataclass
+import click
 
-import keyring as kr
-
-import configparser
+from tidecli.api.oauth_login import authenticate
 
 
-def get_current_username() -> str:
-    try:
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-        return config.get('User', 'username')
-
-    except (configparser.NoSectionError, configparser.NoOptionError, FileNotFoundError) as e:
-        print(f"Error: {e}")
-    return ""
+@click.group()
+def tim_ide():
+    pass
 
 
-@dataclass
-class LoginHandler:
-    username: str = None
-    token: str = None
-    config_path: str = 'user_info.ini'
+@tim_ide.command()
+def login():
+    """
+    Opens a login link.
+    """
+    if authenticate():
+        click.echo("Login successful.")
+    else:
+        click.echo("Login failed.")
 
-    def __post_init__(self):
-        try:
-            cf = configparser.ConfigParser()
-            self.config = cf.read(self.config_path)
-            username = cf.get('User', 'username')
-            if username != "":
-                self.username = username
-                self.token = kr.get_password("TIDE", self.username)
 
-        except (configparser.NoSectionError, configparser.NoOptionError, FileNotFoundError) as e:
-            print(f"Error: {e}")
+@tim_ide.command()
+def logout():
+    """User logout"""
+    # Do something
+    click.echo("Logout successful.")
 
-    def is_logged_in(self) -> bool:
-        if self.token is not None:
-            return True
-        return False
 
-    def save_username(self, username: str):
-        try:
-            config = configparser.ConfigParser()
-            config['User'] = {'username': username}
-            with open('config.ini', 'w') as configfile:
-                config.write(configfile)
-        except Exception as e:
-            print(f"Error: {e}")
+@tim_ide.command()
+@click.argument("course", required=False)
+def list(course=None):
+    """
+    Lists user courses. If course is provided, it will list the course tasks.
 
-    def save_token_to_user(token, username):
-        """
-        Save the token in the keyring for the user
+    Usage:
+    [OPTIONS] [COURSE]
 
-        :param token: The token to save
-        :param username: The username to save the token for
-        """
-        try:
-            # Remove the token if it already exists to avoid duplicates
-            if kr.get_password("TIDE", "username"):
-                kr.delete_password("TIDE", "username")
+    Options:
+    COURSE  Course name (not required)
+    """
 
-            kr.set_password("TIDE", username, token)
-        except Exception as e:
-            return f"Error saving token: {e}"
+    if course:
+        click.echo(f"Listed tasks for course {course}")
+    else:
+        click.echo("Listed all courses")
 
-    def username_has_token(username: str) -> bool:
-        """
-        Check if the token exists for the user
 
-        :param username: The username to check the token for
-        """
-        return kr.get_password("TIDE", username) is not None
+@tim_ide.command()
+@click.argument("course")
+@click.option("--task", help="Specific task to pull")
+def pull(course, task=None):
+    """
+    Fetches course or task data
 
-    def remove_token(username: str):
-        """
-        Remove the token from the keyring for the user
+    Usage:
+    [OPTIONS] COURSE
 
-        :param username: The username to remove the token for
-        """
-        kr.delete_password("TIDE", username)
+    Options:
+    --task NAME (not required)
+    """
+    # Do something
+    if task:
+        click.echo(f"Pulled task {task} for course {course}")
+    else:
+        click.echo(f"Pulled course {course}")
+
+
+@tim_ide.command()
+@click.argument("course")
+@click.option("--task", help="Specific task to submit")
+def push(course, task=None):
+    """
+    Submits course or task data
+
+    Usage:
+    [OPTIONS] COURSE
+
+    Options:
+    --task NAME (not required)
+    """
+    # Do something
+    if task:
+        click.echo(f"Pushed task {task} for course {course}")
+    else:
+        click.echo(f"Pushed course {course}")
+
+
+if __name__ == "__main__":
+    tim_ide()
