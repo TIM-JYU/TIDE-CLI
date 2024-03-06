@@ -1,103 +1,89 @@
-import configparser
+import click
 
-from tidecli.api.routes import validate_token
-from tidecli.utils.handle_token import get_token
+from tidecli.api.oauth_login import authenticate
 
 
-def get_signed_user() -> str or None:
+@click.group()
+def tim_ide():
+    pass
+
+
+@tim_ide.command()
+def login():
     """
-    Get the current username from the config file and verifies that user token is valid. Returns token validity time.
-    Returns None if the username is not found.
+    Opens a login link.
     """
-    try:
-        user_info = configparser.ConfigParser()
-        user_info.read("user_info.ini")
-        username = user_info.get("User", "username")
-    except (
-        configparser.NoSectionError,
-        configparser.NoOptionError,
-        FileNotFoundError,
-    ) as e:
-        print(f"Error: {e}")
-        return None
-
-    token = get_token(username)
-
-    if token is None:
-        return None
-
-    token_validity = validate_token(username)
-
-    # TODO: Tarkista tokenin voimassaoloaika
-
-    return {"username": username, "token_validity": token_validity}
+    if authenticate():
+        click.echo("Login successful.")
+    else:
+        click.echo("Login failed.")
 
 
-# Jos haluaa toteuttaa luokalla, ehkä turhaa..
-# @dataclass
-# class LoginHandler:
-#     username: str = None
-#     token: str = None
-#     config_path: str = "user_info.ini"
-#
-#     def __post_init__(self):
-#         try:
-#             cf = configparser.ConfigParser()
-#             self.config = cf.read(self.config_path)
-#             username = cf.get("User", "username")
-#             if username != "":
-#                 self.username = username
-#                 self.token = kr.get_password("TIDE", self.username)
-#
-#         except (
-#             configparser.NoSectionError,
-#             configparser.NoOptionError,
-#             FileNotFoundError,
-#         ) as e:
-#             print(f"Error: {e}")
-#
-#     def is_logged_in(self) -> bool:
-#         if self.token is not None:
-#             return True
-#         return False
-#
-#     def save_username(self, username: str):
-#         try:
-#             config = configparser.ConfigParser()
-#             config["User"] = {"username": username}
-#             with open("config.ini", "w") as configfile:
-#                 config.write(configfile)
-#         except Exception as e:
-#             print(f"Error: {e}")
-#
-#     def save_token_to_user(token, username):
-#         """
-#         Save the token in the keyring for the user
-#
-#         :param token: The token to save
-#         :param username: The username to save the token for
-#         """
-#         try:
-#             # Remove the token if it already exists to avoid duplicates
-#             if kr.get_password("TIDE", "username"):
-#                 kr.delete_password("TIDE", "username")
-#
-#             kr.set_password("TIDE", username, token)
-#         except Exception as e:
-#             return f"Error saving token: {e}"
-#
-#     def username_has_token(username: str) -> bool:
-#         """
-#         Check if the token exists for the user
-#
-#         :param username: The username to check the token for
-#         """
-#         return kr.get_password("TIDE", username) is not None
-#
-#     def remove_token(username: str):
-#         """
-#         Remove the token from the keyring for the user
-#
-#         :param username: The username to remove the token for
-#         """
-#         kr.delete_password("TIDE", username)
+@tim_ide.command()
+def logout():
+    """User logout"""
+    # Do something
+    click.echo("Logout successful.")
+
+
+@tim_ide.command()
+@click.argument("course", required=False)
+def list(course=None):
+    """
+    Lists user courses. If course is provided, it will list the course tasks.
+
+    Usage:
+    [OPTIONS] [COURSE]
+
+    Options:
+    COURSE  Course name (not required)
+    """
+
+    if course:
+        click.echo(f"Listed tasks for course {course}")
+    else:
+        click.echo("Listed all courses")
+
+
+@tim_ide.command()
+@click.argument("course")
+@click.option("--task", help="Specific task to pull")
+def pull(course, task=None):
+    """
+    Fetches course or task data
+
+    Usage:
+    [OPTIONS] COURSE
+
+    Options:
+    --task NAME (not required)
+    """
+    # Do something
+    if task:
+        click.echo(f"Pulled task {task} for course {course}")
+    else:
+        click.echo(f"Pulled course {course}")
+
+
+@tim_ide.command()
+@click.argument("course")
+@click.option("--task", help="Specific task to submit")
+def push(course, task=None):
+    """
+    Submits course or task data
+
+    Usage:
+    [OPTIONS] COURSE
+
+    Options:
+    --task NAME (not required)
+    """
+    # Do something
+    if task:
+        click.echo(f"Pushed task {task} for course {course}")
+    else:
+        click.echo(f"Pushed course {course}")
+
+
+if __name__ == "__main__":
+    tim_ide()

@@ -1,8 +1,5 @@
 import click
 
-from tidecli.api.oauth_login import authenticate
-
-
 @click.group()
 def tim_ide():
     pass

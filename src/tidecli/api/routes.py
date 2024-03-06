@@ -1,6 +1,6 @@
 import requests
 
-from tidecli.utils.handle_token import get_token
+from utils.login_handler import get_token
 
 import configparser
 
@@ -29,3 +29,5 @@ def validate_token(username: str):
     )
 
     return res.json()
+
+def check
