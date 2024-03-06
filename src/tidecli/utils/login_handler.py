@@ -1,89 +1,28 @@
-import click
-
 from tidecli.api.oauth_login import authenticate
+from tidecli.api.routes import validate_token
+from tidecli.utils.handle_token import get_signed_in_user
 
 
-@click.group()
-def tim_ide():
-    pass
-
-
-@tim_ide.command()
-def login():
+def login_details():
     """
-    Opens a login link.
-    """
-    if authenticate():
-        click.echo("Login successful.")
-    else:
-        click.echo("Login failed.")
-
-
-@tim_ide.command()
-def logout():
-    """User logout"""
-    # Do something
-    click.echo("Logout successful.")
-
-
-@tim_ide.command()
-@click.argument("course", required=False)
-def list(course=None):
-    """
-    Lists user courses. If course is provided, it will list the course tasks.
-
-    Usage:
-    [OPTIONS] [COURSE]
-
-    Options:
-    COURSE  Course name (not required)
+    Get the login details for the user, if the user is already logged in then return the token validity time
+    If the user is not logged in then return the login link
     """
 
-    if course:
-        click.echo(f"Listed tasks for course {course}")
-    else:
-        click.echo("Listed all courses")
+    user_login = get_signed_in_user()
 
+    # If the username exist in credential manager then return the token validity
+    if user_login:
 
-@tim_ide.command()
-@click.argument("course")
-@click.option("--task", help="Specific task to pull")
-def pull(course, task=None):
-    """
-    Fetches course or task data
+        token_validity_time = validate_token(user_login.password)
 
-    Usage:
-    [OPTIONS] COURSE
+        # If the token is expired then return the message
+        # TODO: confirm that token time cannot go negative or below 0:00:00
+        if token_validity_time.get("validityTime") == "0:00:00":
+            if authenticate():
+                return "Login successful! You can now close the browser."
+            else:
+                return "Login failed. Please try again."
 
-    Options:
-    --task NAME (not required)
-    """
-    # Do something
-    if task:
-        click.echo(f"Pulled task {task} for course {course}")
-    else:
-        click.echo(f"Pulled course {course}")
-
-
-@tim_ide.command()
-@click.argument("course")
-@click.option("--task", help="Specific task to submit")
-def push(course, task=None):
-    """
-    Submits course or task data
-
-    Usage:
-    [OPTIONS] COURSE
-
-    Options:
-    --task NAME (not required)
-    """
-    # Do something
-    if task:
-        click.echo(f"Pushed task {task} for course {course}")
-    else:
-        click.echo(f"Pushed course {course}")
-
-
-if __name__ == "__main__":
-    tim_ide()
+        # If the token is not expired then return the token validity time
+        return "Token is still valid for " + token_validity_time.get("validityTime")

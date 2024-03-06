@@ -1,5 +1,10 @@
 import click
 
+from tidecli.api.oauth_login import authenticate
+from tidecli.api.routes import get_user_task_by_taskId
+from tidecli.utils.login_handler import login_details
+
+
 @click.group()
 def tim_ide():
     pass
@@ -10,10 +15,7 @@ def login():
     """
     Opens a login link.
     """
-    if authenticate():
-        click.echo("Login successful.")
-    else:
-        click.echo("Login failed.")
+    click.echo(login_details())
 
 
 @tim_ide.command()
@@ -57,7 +59,7 @@ def pull(course, task=None):
     """
     # Do something
     if task:
-        click.echo(f"Pulled task {task} for course {course}")
+        click.echo(get_user_task_by_taskId(task_id="Ohjelmointi2:T1", doc_id=43))
     else:
         click.echo(f"Pulled course {course}")
 

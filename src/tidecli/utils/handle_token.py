@@ -27,3 +27,16 @@ def get_token(username) -> str or None:
     except Exception as e:
         print(f"Error getting token: {e}")
         return None
+
+
+def get_signed_in_user() -> str or None:
+    """
+    Get the signed in user from the keyring
+
+    return: The signed in user username and token
+    """
+    try:
+        return kr.get_credential("TIDE", None)
+    except Exception as e:
+        print(f"Error getting signed in user: {e}")
+        return None
