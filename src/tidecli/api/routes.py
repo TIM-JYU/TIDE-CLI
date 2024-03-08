@@ -1,3 +1,5 @@
+import os
+
 import requests
 import configparser
 
@@ -13,7 +15,11 @@ def validate_token(token: str):
     """
 
     cf = configparser.ConfigParser()
-    cf.read("config.ini")
+    config_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../config.ini")
+    )
+    cf.read(config_path)
+
     base_url = cf["OAuthConfig"]["base_url"]
     validate_token_endpoint = cf["OAuthConfig"]["validate_token_endpoint"]
 
@@ -37,7 +43,7 @@ def get_user_task_by_taskId(task_id: str, doc_id: int):
     cf = configparser.ConfigParser()
     cf.read("config.ini")
     base_url = cf["OAuthConfig"]["base_url"]
-    endpoint = cf["OAuthConfig"]["ide_task_by_taskId_endpoint"]
+    endpoint = cf["OAuthConfig"]["ide-task-by-doc_name-task_id_endpoint"]
 
     token = get_signed_in_user().password
 
