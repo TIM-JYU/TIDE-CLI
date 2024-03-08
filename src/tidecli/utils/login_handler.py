@@ -20,9 +20,16 @@ def login_details():
         # TODO: confirm that token time cannot go negative or below 0:00:00
         if token_validity_time.get("validityTime") == "0:00:00":
             if authenticate():
-                return "Login successful! You can now close the browser."
+                return "Login successful!"
             else:
                 return "Login failed. Please try again."
 
         # If the token is not expired then return the token validity time
         return "Token is still valid for " + token_validity_time.get("validityTime")
+
+    # If the username does not exist in credential manager then return the login link
+    else:
+        if authenticate():
+            return "Login successful!"
+        else:
+            return "Login failed. Please try again."
