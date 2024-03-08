@@ -3,6 +3,7 @@ import click
 from tidecli.api.oauth_login import authenticate
 from tidecli.api.routes import get_user_task_by_taskId
 from tidecli.utils.login_handler import login_details
+from tidecli.utils.handle_token import delete_token
 
 
 @click.group()
@@ -19,10 +20,16 @@ def login():
 
 
 @tim_ide.command()
-def logout():
-    """User logout"""
+@click.argument("username")
+def logout(username):
+    """
+    Logs out the user and deletes the token from the keyring
 
-    click.echo("Logout successful.")
+    Usage:
+    [OPTIONS] USERNAME
+    """
+
+    click.echo(delete_token(username))
 
 
 @tim_ide.command()

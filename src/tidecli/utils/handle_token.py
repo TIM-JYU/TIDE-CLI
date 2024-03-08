@@ -45,3 +45,16 @@ def get_signed_in_user() -> str or None:
     except Exception as e:
         print(f"Error getting signed in user: {e}")
         return None
+
+
+def delete_token(username):
+    """
+    Delete the token from the keyring for the user
+    when log out is called
+    """
+    try:
+        kr.delete_password("TIDE", username)
+        return f"Token for {username} deleted successfully"
+    except Exception as e:
+        print(f"Error deleting token: {e} for username {username}")
+        return None
