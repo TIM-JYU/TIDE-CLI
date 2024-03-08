@@ -1,8 +1,8 @@
 import click
 
 from tidecli.api.oauth_login import authenticate
-from tidecli.api.routes import get_user_task_by_taskId
 from tidecli.utils.login_handler import login_details
+from tidecli.utils.file_saver import create_task_file
 
 
 @click.group()
@@ -59,9 +59,11 @@ def pull(course, task=None):
     """
     # Do something
     if task:
-        click.echo(get_user_task_by_taskId(task_id="Ohjelmointi2:T1", doc_id=43))
+        create_task_file(course, task)
+
     else:
         click.echo(f"Pulled course {course}")
+
 
 
 @tim_ide.command()
