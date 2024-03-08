@@ -21,7 +21,7 @@ def login():
 @tim_ide.command()
 def logout():
     """User logout"""
-    # Do something
+
     click.echo("Logout successful.")
 
 

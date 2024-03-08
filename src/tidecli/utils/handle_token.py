@@ -9,7 +9,12 @@ def save_token(token, username):
     :param username: The username to save the token for
     """
     try:
-        kr.delete_password("TIDE", username)
+        credentials = kr.get_credential("TIDE", None)
+        if credentials:
+            # Remove the old token if it exists to avoid duplicates
+            kr.delete_password("TIDE", credentials.username)
+        kr.set_password("TIDE", username, token)
+
         kr.set_password("TIDE", username, token)
     except Exception as e:
         return f"Error saving token: {e}"
