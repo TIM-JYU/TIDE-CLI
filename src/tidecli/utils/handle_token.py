@@ -15,7 +15,6 @@ def save_token(token, username):
             kr.delete_password("TIDE", credentials.username)
         kr.set_password("TIDE", username, token)
 
-        kr.set_password("TIDE", username, token)
     except Exception as e:
         return f"Error saving token: {e}"
 
