@@ -52,101 +52,87 @@ class Routes:
             print(e)
             raise RequestError("Request failed" + str(e))
 
-    def validate_token(self, token: str) -> dict:
+    def validate_token(self) -> dict:
         """
         Validate the token for the user
-
-        :param token: token to validate
-        return: JSON response  of token time validity
+        return: JSON response  of token time validity or TODO: This might not work as expected
         """
         endpoint = self.cf["OAuthConfig"]["validate_token_endpoint"]
-        return self.make_request(endpoint=endpoint, params={"token": token})
+        return self.make_request(endpoint=endpoint)
 
     def get_profile(self) -> dict:
         """
         Get the user profile
-
         return: JSON response  of user profile
         """
-
         endpoint = self.cf["OAuthConfig"]["profile_endpoint"]
         return self.make_request(endpoint=endpoint)
-
-    def get_user_task_by_taskId(self, task_id: str, doc_id: int):
-        """
-        Get the user task by task id
-
-        :param doc_id: document id
-        :param task_id: task id
-        return: JSON response  of user task
-        """
-
-        endpoint = self.cf["OAuthConfig"]["ide-task-by-doc_name-task_id_endpoint"]
-        return self.make_request(
-            endpoint=endpoint, params={"doc_id": doc_id, "task_id": task_id}
-        )
 
     def get_ide_courses(self):
         """
         Get the logged in user courses that are in user bookmarks and have ideCourse tag
-
-        return: JSON response of courses
+        return: JSON response of course name and course path, course id and paths for demo documents
         """
-
         endpoint = self.cf["OAuthConfig"]["ide-courses_endpoint"]
         return self.make_request(endpoint=endpoint)
 
     def get_demos_by_doc_id(self, doc_id: int):
         """
         Get the demos that are listed in ideDocuments tag in document tags by document id
-
         :param doc_id: document id
         return: JSON response of demos
         """
         endpoint = self.cf["OAuthConfig"]["demos_by_doc_id_endpoint"]
         return self.make_request(endpoint=endpoint, params={"doc_id": doc_id})
 
-    def get_demos_by_course_name(self, course_name: str):
+    def get_demos_by_doc_path(self, doc_path: str):
         """
         Get the demos that are listed in ideDocuments tag in document tags by course name
-
-        :param course_name: course name
+        :param doc_path: Course main document path
         return: JSON response of demos
         """
-        endpoint = self.cf["OAuthConfig"]["demos_by_course_name_endpoint"]
-        return self.make_request(endpoint=endpoint, params={"course_name": course_name})
+        endpoint = self.cf["OAuthConfig"]["demos_by_doc_path_endpoint"]
+        return self.make_request(endpoint=endpoint, params={"doc_path": doc_path})
+
+    def get_tasks_by_doc_path(self, doc_path: str):
+        """
+        Get the tasks by demo document path
+        :param doc_path: Demo document path
+        return: JSON response of tasks
+        """
+        endpoint = self.cf["OAuthConfig"]["tasks_by_doc_path_endpoint"]
+        return self.make_request(endpoint=endpoint, params={"doc_path": doc_path})
 
     def get_tasks_by_doc_id(self, doc_id: int):
         """
         Get the tasks by demo document id
-
         :param doc_id: Demo document id
         return: JSON response of tasks
         """
         endpoint = self.cf["OAuthConfig"]["tasks_by_doc_id_endpoint"]
         return self.make_request(endpoint=endpoint, params={"doc_id": doc_id})
 
-    def get_tasks_by_doc_path(self, path: str):
+    def get_task_by_ideTask_id(
+        self,
+        ide_task_id: str,
+        demo_path: str = None,
+        doc_id: int = None,
+    ):
         """
-        Get the tasks by demo document path
-
-        :param path: Demo document path
-        return: JSON response of tasks
-        """
-        endpoint = self.cf["OAuthConfig"]["tasks_by_doc_path_endpoint"]
-        return self.make_request(endpoint=endpoint, params={"path": path})
-
-    def get_tasks_by_ideTask_id(self, path: str, ide_task_id: str):
-        """
-        Get the tasks by ideTask id
-
-        :param path: Demo document path
+        Get the tasks by ideTask id and demo document path or id
+        :param demo_path: Demo document path
         :param ide_task_id: ideTask id
+        :param doc_id: Demo document id
         return: JSON response of tasks
         """
-        endpoint = self.cf["OAuthConfig"]["tasks_by_ideTask_id_endpoint"]
+        endpoint = self.cf["OAuthConfig"]["task_by_ide_task_id_endpoint"]
         return self.make_request(
-            endpoint=endpoint, params={"path": path, "ideTask_id": ide_task_id}
+            endpoint=endpoint,
+            params={
+                "doc_id": doc_id,
+                "demo_path": demo_path,
+                "ide_task_id": ide_task_id,
+            },
         )
 
 

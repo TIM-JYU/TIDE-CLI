@@ -53,20 +53,19 @@ class TestAuthentication(unittest.TestCase):
         return_value = {"validityTime": "10 days, 0:00:00"}
 
         with self.patch:
-            res = self.routes.validate_token(token="token")
+            res = self.routes.validate_token()
             assert res == return_value
 
     def test_validate_token_with_expired_time(self):
         """
         TDD-unit test model for the route to validate token which time has expired
-        # T
         """
         self.mock_response.json.return_value = {"validityTime": "0:00:00"}
 
         return_value = {"validityTime": "0:00:00"}
 
         with self.patch:
-            res = self.routes.validate_token(token="token")
+            res = self.routes.validate_token()
             assert res == return_value
 
 
@@ -86,11 +85,13 @@ class TestGetCourse(unittest.TestCase):
         self.mock_response.json.return_value = [
             {
                 "course_name": "Ohjelmointi 1",
-                "course_id": "22",  # This should be saved to metadata in ide or temp variable in cli
+                "course_path": "/view/courses/ohjelmointi1",
+                "document_id": "1",
             },
             {
                 "course_name": "Testikurssi 5",
-                "course_id": "11",
+                "course_path": "/view/courses/testikurssi5",
+                "document_id": "5",
             },
         ]
 
@@ -116,11 +117,11 @@ class TestGetDemos(unittest.TestCase):
 
         # This should return the list of documents in the course with parameter defined in document tag:
         # ideDocuments:
-        #   - Path: "kurssit/tie/Ohjelmointi2/Demo1
-        #   - Path: "kurssit/tie/Ohjelmointi2/Demo2
-        #   - Path: "kurssit/tie/Ohjelmointi2/Demo3
-        #   - Path: "kurssit/tie/Ohjelmointi2/Demo4
-        #   - Path: "kurssit/tie/Ohjelmointi2/Demo5
+        #   - path: "kurssit/tie/Ohjelmointi2/Demo1
+        #   - path: "kurssit/tie/Ohjelmointi2/Demo2
+        #   - path: "kurssit/tie/Ohjelmointi2/Demo3
+        #   - path: "kurssit/tie/Ohjelmointi2/Demo4
+        #   - path: "kurssit/tie/Ohjelmointi2/Demo5
 
         self.mock_response.json.return_value = {
             "Ohjelmointi2": [
@@ -172,7 +173,7 @@ class TestGetDemos(unittest.TestCase):
         }
 
         with self.patch:
-            res = self.routes.get_demos_by_course_name(course_name="Ohjelmointi2")
+            res = self.routes.get_demos_by_doc_path(doc_path="Ohjelmointi2")
             assert res == self.mock_response.json.return_value
 
 
@@ -272,10 +273,6 @@ class TestGetTasks(unittest.TestCase):
             res = self.routes.get_tasks_by_doc_id(doc_id=1)
             assert res == self.mock_response.json.return_value
 
-    def test_get_all_course_tasks(self):
-        # TODO: Return the list of of all demos and tasks in the course, is this needed?
-        pass
-
     def test_get_tasks_by_demo_doc_path(self):
         """
         TDD-unit test model for the route to get tasks by demo doc path
@@ -305,7 +302,7 @@ class TestGetTasks(unittest.TestCase):
         }
         with self.patch:
             res = self.routes.get_tasks_by_doc_path(
-                path="kurssit/tie/Ohjelmointi2/Demo1"
+                doc_path="kurssit/tie/Ohjelmointi2/Demo1"
             )
             assert res == self.mock_response.json.return_value
 
@@ -335,8 +332,8 @@ class TestGetTasks(unittest.TestCase):
         }
 
         with self.patch:
-            res = self.routes.get_tasks_by_ideTask_id(
-                path="kurssit/tie/Ohjelmointi2/Demo1", ide_task_id="T1"
+            res = self.routes.get_task_by_ideTask_id(
+                demo_path="kurssit/tie/Ohjelmointi2/Demo1", ide_task_id="T1"
             )
             assert res == self.mock_response.json.return_value
 
