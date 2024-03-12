@@ -22,9 +22,6 @@ def login():
 def logout():
     """
     Logs out the user and deletes the token from the keyring
-
-    Usage:
-    [OPTIONS] USERNAME
     """
 
     click.echo(delete_token())
