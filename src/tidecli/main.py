@@ -40,23 +40,25 @@ def courses():
 
 
 @tim_ide.command()
-@click.argument("course")
-@click.option("--task", help="Specific task to pull")
-def pull(course, task=None):
+@click.argument("demo_path", type=str, required=True)
+def tasks(demo_path):
     """
-    Fetches course or task data
-
-    Usage:
-    [OPTIONS] COURSE
-
-    Options:
-    --task NAME (not required)
+    Hakee käyttäjän tehtävät valitusta hakemistopolusta.
     """
-    # Do something
-    if task:
-        click.echo(f"Pulled task {task} for course {course}")
-    else:
-        click.echo(f"Pulled course {course}")
+
+    click.echo(Routes().get_tasks_by_doc_path(doc_path=demo_path))
+
+
+@tim_ide.command()
+@click.argument("ide_task_id", type=str, required=True)
+@click.argument("demo_path", type=str, required=True)
+def task(ide_task_id, demo_path):
+    print(ide_task_id, demo_path)
+    """
+    Tallentaa valitun tehtävän hakemistopolkuun.
+    """
+
+    click.echo(Routes().get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path))
 
 
 @tim_ide.command()

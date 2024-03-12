@@ -119,12 +119,12 @@ class Routes:
     def get_task_by_ide_task_id(
         self,
         ide_task_id: str,
-        demo_path: str = None,
+        doc_path: str = None,
         doc_id: int = None,
     ):
         """
         Get the tasks by ideTask id and demo document path or id
-        :param demo_path: Demo document path
+        :param doc_path: Demo document path
         :param ide_task_id: ideTask id
         :param doc_id: Demo document id
         return: JSON response of tasks
@@ -134,7 +134,7 @@ class Routes:
             endpoint=endpoint,
             params={
                 "doc_id": doc_id,
-                "demo_path": demo_path,
+                "doc_path": doc_path,
                 "ide_task_id": ide_task_id,
             },
         )
