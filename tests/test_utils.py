@@ -9,20 +9,20 @@ file_data = {
     "paragraph_id": "P1",
 }
 
-class TestFolderStructure(unittest.TestCase):
+class TestCreateFolders(unittest.TestCase):
     """
     Test the folder structure creation
     """
 
-    def test_create_structure():
+    def test_create_folders():
         pass
 
 
 class TestCreateFile(unittest.TestCase):
-    def test_create_file():
+    def test_create_task_file():
         """
         Test helper function for creating a file
         """
         
-        file = file_saver.create_file(file_data)
+        file = file_saver.create_task_file(file_data)
         assert os.path.exists(os.path.join(file, 'T1.py'))
