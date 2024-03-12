@@ -27,9 +27,9 @@ class Routes:
             self.token = get_signed_in_user().password
             return cf
         except Exception as e:
-            raise CliError('config load failed, ' + str(e))
+            raise CliError("Config load failed. " + str(e))
 
-        
+    @error_handler
     def make_request(self, endpoint: str, method: str = "GET", params: dict = None):
         """
         Make a request to the API
@@ -49,9 +49,8 @@ class Routes:
             )
             return res.json()
 
-        except requests.exceptions.RequestException as e:
-            print(e)
-            raise RequestError("Request failed" + str(e))
+        except Exception as e:
+            raise CliError("Request failed. " + str(e))
 
     def validate_token(self) -> dict:
         """

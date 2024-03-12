@@ -18,7 +18,7 @@ def error_handler(func):
             # You can add more actions here, like sending an email notification or printing the error to console
             # For simplicity, I'm just re-raising the error here
             # raise
-            print (e)
+            print ("\033[91m {}\033[00m".format(e))
     return wrapper
 
 
