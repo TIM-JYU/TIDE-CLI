@@ -9,8 +9,12 @@ def save_token(token, username):
     :param username: The username to save the token for
     """
     try:
-        kr.delete_password("TIDE", username)
+        credentials = kr.get_credential("TIDE", None)
+        if credentials:
+            # Remove the old token if it exists to avoid duplicates
+            kr.delete_password("TIDE", credentials.username)
         kr.set_password("TIDE", username, token)
+
     except Exception as e:
         return f"Error saving token: {e}"
 
@@ -39,4 +43,17 @@ def get_signed_in_user() -> str or None:
         return kr.get_credential("TIDE", None)
     except Exception as e:
         print(f"Error getting signed in user: {e}")
+        return None
+
+
+def delete_token(username):
+    """
+    Delete the token from the keyring for the user
+    when log out is called
+    """
+    try:
+        kr.delete_password("TIDE", username)
+        return f"Token for {username} deleted successfully"
+    except Exception as e:
+        print(f"Error deleting token: {e} for username {username}")
         return None

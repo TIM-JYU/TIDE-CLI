@@ -1,5 +1,5 @@
 from tidecli.api.oauth_login import authenticate
-from tidecli.api.routes import validate_token
+from tidecli.api.routes import Routes
 from tidecli.utils.handle_token import get_signed_in_user
 
 
@@ -14,15 +14,22 @@ def login_details():
     # If the username exist in credential manager then return the token validity
     if user_login:
 
-        token_validity_time = validate_token(user_login.password)
+        token_validity_time = Routes().validate_token(token=user_login.password)
 
         # If the token is expired then return the message
         # TODO: confirm that token time cannot go negative or below 0:00:00
         if token_validity_time.get("validityTime") == "0:00:00":
             if authenticate():
-                return "Login successful! You can now close the browser."
+                return "Login successful!"
             else:
                 return "Login failed. Please try again."
 
         # If the token is not expired then return the token validity time
         return "Token is still valid for " + token_validity_time.get("validityTime")
+
+    # If the username does not exist in credential manager then return the login link
+    else:
+        if authenticate():
+            return "Login successful!"
+        else:
+            return "Login failed. Please try again."
