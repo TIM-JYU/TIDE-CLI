@@ -112,7 +112,7 @@ class Routes:
         endpoint = self.cf["OAuthConfig"]["tasks_by_doc_id_endpoint"]
         return self.make_request(endpoint=endpoint, params={"doc_id": doc_id})
 
-    def get_task_by_ideTask_id(
+    def get_task_by_ide_task_id(
         self,
         ide_task_id: str,
         demo_path: str = None,

@@ -1,6 +1,6 @@
 import os
 
-from tidecli.api.routes import get_user_task_by_taskId
+from tidecli.api.routes import Routes
 
 
 # def create_task_file(course, task):
@@ -29,16 +29,25 @@ def create_folders(course_data, user_location):
             print(f"Folders created for {full_path}")
 
 
-# Usage with test data
-course_data = [
-    {'course_name': 'Ohjelmointikurssi1',
-     'course_id': 58,
-     'course_path': '/view/courses/ohjelmointikurssi1/ohjelmointikurssi1',
-     'demo_paths': [{'path': 'courses/ohjelmointikurssi1/Demot/Demo1'},
-                    {'path': 'courses/ohjelmointikurssi1/Demot/Demo1'}]}]
+def check_path_validity():
+    """
+    Check if the input path is valid
+    """
+    while True:
+        user_path = input("Enter custom path where folder structure is created: ")
+        if os.path.exists(user_path) and os.access(user_path, os.W_OK):
+            return user_path
+        else:
+            print(f"Invalid path or insufficient permissions for {user_path} \n Try again.")
 
-# User choice for custom location
-user_location = input("Enter the custom location where you want to create the folder structure: ")
+
+routes = Routes()
+
+# Get course data
+course_data = routes.get_ide_courses()
+
+# Users choice for custom path
+user_path = check_path_validity()
 
 
-create_folders(course_data, user_location)
+create_folders(course_data, user_path)

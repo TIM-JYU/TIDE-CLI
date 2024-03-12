@@ -1,7 +1,6 @@
 import click
 
-from tidecli.api.oauth_login import authenticate
-from tidecli.api.routes import get_user_task_by_taskId
+from tidecli.utils.handle_token import delete_token
 from tidecli.utils.login_handler import login_details
 
 
@@ -20,9 +19,14 @@ def login():
 
 @tim_ide.command()
 def logout():
-    """User logout"""
+    """
+    Logs out the user and deletes the token from the keyring
 
-    click.echo("Logout successful.")
+    Usage:
+    [OPTIONS] USERNAME
+    """
+
+    click.echo(delete_token())
 
 
 @tim_ide.command()
@@ -59,7 +63,7 @@ def pull(course, task=None):
     """
     # Do something
     if task:
-        click.echo(get_user_task_by_taskId(task_id="Ohjelmointi2:T1", doc_id=43))
+        click.echo(f"Pulled task {task} for course {course}")
     else:
         click.echo(f"Pulled course {course}")
 
