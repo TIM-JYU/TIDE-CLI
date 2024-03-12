@@ -1,7 +1,7 @@
 import click
 
 from tidecli.api.oauth_login import authenticate
-from tidecli.api.routes import get_user_task_by_taskId
+from tidecli.api.routes import Routes
 from tidecli.utils.login_handler import login_details
 from tidecli.utils.handle_token import delete_token
 
@@ -66,7 +66,9 @@ def pull(course, task=None):
     """
     # Do something
     if task:
-        click.echo(get_user_task_by_taskId(task_id="Ohjelmointi2:T1", doc_id=43))
+        click.echo(
+            Routes().get_user_task_by_taskId(task_id="Ohjelmointi2:T1", doc_id=43)
+        )
     else:
         click.echo(f"Pulled course {course}")
 
