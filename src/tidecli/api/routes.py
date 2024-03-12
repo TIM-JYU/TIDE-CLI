@@ -23,6 +23,10 @@ class Routes:
         try:
             cf.read(config_path)
             self.base_url = cf["OAuthConfig"]["base_url"]
+            token = get_signed_in_user()
+            if token is None:
+                raise ConfigError("User not logged in")
+            # TODO: Better error handling
             self.token = get_signed_in_user().password
             return cf
         except Exception as e:

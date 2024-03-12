@@ -1,5 +1,6 @@
 import click
 
+from tidecli.api.routes import Routes
 from tidecli.utils.handle_token import delete_token
 from tidecli.utils.login_handler import login_details
 
@@ -30,22 +31,12 @@ def logout():
 
 
 @tim_ide.command()
-@click.argument("course", required=False)
-def list(course=None):
+def courses():
     """
-    Lists user courses. If course is provided, it will list the course tasks.
-
-    Usage:
-    [OPTIONS] [COURSE]
-
-    Options:
-    COURSE  Course name (not required)
+    Lists user courses.
     """
 
-    if course:
-        click.echo(f"Listed tasks for course {course}")
-    else:
-        click.echo("Listed all courses")
+    click.echo(Routes().get_ide_courses())
 
 
 @tim_ide.command()
