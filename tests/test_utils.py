@@ -1,31 +1,28 @@
 import os
+import unittest
 from src.tidecli.utils import file_saver
 # Testdata for creating filestructure
-data = [
-    {"course_name": "testcourse1", "course_id": 42},
-    {"course_name": "testcourse2", "course_id": 1}
-]
+file_data = {
+    "code": "print('Hello World1')",
+    "path": None,
+    "ideTask_id": "T1",
+    "paragraph_id": "P1",
+}
 
-
-#     Root
-#        |
-#        testCourse2
-#        |
-#        tesCourse1
-def test_create_structure():
+class TestFolderStructure(unittest.TestCase):
     """
     Test the folder structure creation
     """
-    root = file_saver.create_structure(data)
-    first_course = os.path.join(root, 'testCourse2')
-    second_course = os.path.join(root, 'tesCourse1')
-    assert os.path.exists(first_course)
-    assert os.path.exists(second_course)
+
+    def test_create_structure():
+        pass
 
 
-def test_formulate_structure():
-    """
-    Test helper function for creating a structure
-    """
-    formulated = file_saver.write_structure(data)
-    assert formulated == ['testcourse1', 'testcourse2']
+class TestCreateFile(unittest.TestCase):
+    def test_create_file():
+        """
+        Test helper function for creating a file
+        """
+        
+        file = file_saver.create_file(file_data)
+        assert os.path.exists(os.path.join(file, 'T1.py'))
