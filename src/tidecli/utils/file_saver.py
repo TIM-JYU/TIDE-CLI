@@ -34,20 +34,28 @@ def check_path_validity():
     Check if the input path is valid
     """
     while True:
-        user_path = input("Enter custom path where folder structure is created: ")
-        if os.path.exists(user_path) and os.access(user_path, os.W_OK):
-            return user_path
+        user_selected_path = input("Enter custom path where folder structure is created: ")
+        if os.path.exists(user_selected_path) and os.access(user_selected_path, os.W_OK):
+            return user_selected_path
+        if user_selected_path.lower() in ["q", "quit"]:
+            exit()
+        if user_selected_path.lower() in ["pwd", "current"]:
+            print(f"Current working directory: {os.getcwd()}")
         else:
-            print(f"Invalid path or insufficient permissions for {user_path} \n Try again.")
+            print(f"Invalid path or insufficient permissions for {user_selected_path} \nTry again.\n"
+                  f"Enter 'q' to quit.\n"
+                  f"Enter 'pwd' to print current working directory.")
+    # TODO: exit loop if user enters 'q' or 'quit'
+    # TODO: print current working directory
 
 
 routes = Routes()
 
 # Get course data
-course_data = routes.get_ide_courses()
+user_course_data = routes.get_ide_courses()
 
 # Users choice for custom path
 user_path = check_path_validity()
 
 
-create_folders(course_data, user_path)
+create_folders(user_course_data, user_path)
