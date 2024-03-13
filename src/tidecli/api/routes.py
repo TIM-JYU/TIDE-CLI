@@ -135,6 +135,31 @@ class Routes:
             },
         )
 
+    def submit_task(
+        self,
+        task_data: str,
+        task_id: str,
+        doc_id: int,
+    ):
+        """
+        Submit the task by task id, document id and paragraph id
+        :param task_data: Task data
+        :param task_id: Task id
+        :param doc_id: Demo document id
+        return: JSON response of tasks
+        """
+
+        endpoint = self.cf["OAuthConfig"]["submit_task_endpoint"]
+        task_id_ext = str(doc_id) + "." + task_id
+
+        return self.make_request(
+            endpoint=endpoint,
+            params={
+                "task_data": task_data,
+                "task_id_ext": task_id_ext,
+            },
+        )
+
 
 # TODO: Add error handling
 class ConfigError(Exception):
