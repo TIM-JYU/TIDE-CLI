@@ -45,8 +45,6 @@ def check_path_validity():
             print(f"Invalid path or insufficient permissions for {user_selected_path} \nTry again.\n"
                   f"Enter 'q' to quit.\n"
                   f"Enter 'pwd' to print current working directory.")
-    # TODO: exit loop if user enters 'q' or 'quit'
-    # TODO: print current working directory
 
 
 routes = Routes()
