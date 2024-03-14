@@ -72,7 +72,7 @@ def check_path_validity():
         if user_selected_path.lower() in ["pwd", "current"]:
             print(f"Current working directory: {os.getcwd()}")
         else:
-            print(f"Invalid path or insufficient permissions for {user_selected_path} \nTry again."
+            print(f"Invalid path or insufficient permissions for {user_selected_path} \nTry again.\n"
                   f"Enter 'q' to quit.\n"
                   f"Enter 'pwd' to print current working directory.")
 
