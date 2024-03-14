@@ -16,11 +16,21 @@ def create_task_files(task_data, file_path):
     task_data_str = str(task_data)
 
     # Check if the file already exists
+    overwrite = ""
     if os.path.exists(full_file_path):
-        print(f"File already exists: {full_file_path} \nFile not created.")
-        return
-    # TODO: käyttäjälle mahdollisuus valita haluaako ylikirjoittaa olemassa olevan tiedoston
+        while overwrite.lower() not in ["y", "n"]:
+            overwrite = input(f"File already exists: {full_file_path} \nDo you want to overwrite the file? (y/n): ")
+            if overwrite.lower() == "y":
+                with open(full_file_path, "w") as file:
+                    file.write(task_data_str)
+                    print(f"File overwritten: {full_file_path}")
+            elif overwrite.lower() == "n":
+                print(f"File {file_name} not overwritten.")
+            else:
+                print("Invalid input. Please enter 'y' or 'n'.")
 
+    if overwrite == "n":
+        return
     # Write task data to file
     with open(full_file_path, "w") as file:
         file.write(task_data_str)
