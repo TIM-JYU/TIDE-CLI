@@ -101,3 +101,4 @@ user_course_data = routes.get_ide_courses()
 user_path = check_path_validity()
 
 create_folders(user_course_data, user_path)
+
