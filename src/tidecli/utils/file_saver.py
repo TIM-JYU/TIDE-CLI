@@ -1,5 +1,5 @@
 import os
-
+import json
 from tidecli.api.routes import Routes
 
 
@@ -9,11 +9,11 @@ def create_task_files(task_data, file_path):
     """
     # TODO: Tiedoston luonti useammalle tehtävälle
     # TODO: file_name oikeasta datasta
-    file_name = "testing.txt"
+    file_name = "metadata.json"
     full_file_path = os.path.join(file_path, file_name)
 
     # task_data string conversion
-    task_data_str = str(task_data)
+    task_data = json.dumps(task_data, indent=4)
 
     # Check if the file already exists
     overwrite = ""
@@ -22,7 +22,7 @@ def create_task_files(task_data, file_path):
             overwrite = input(f"File already exists: {full_file_path} \nDo you want to overwrite the file? (y/n): ")
             if overwrite.lower() == "y":
                 with open(full_file_path, "w") as file:
-                    file.write(task_data_str)
+                    file.write(task_data)
                     print(f"File overwritten: {full_file_path}")
             elif overwrite.lower() == "n":
                 print(f"File {file_name} not overwritten.")
@@ -33,24 +33,29 @@ def create_task_files(task_data, file_path):
         return
     # Write task data to file
     with open(full_file_path, "w") as file:
-        file.write(task_data_str)
+        file.write(task_data)
 
 
 def create_folders(course_data, user_location):
     """
     Creates folder structure for task/demo paths in course data.
     """
+    test_task_data = Routes().get_task_by_ide_task_id(ide_task_id="Tehtävä1", doc_path="courses/ohjelmointikurssi1"
+                                                                                       "/Demot/Demo1")
+    if not test_task_data:
+        print("No task data found for the given ide_task_id.")
+        return
 
-    test_task_data = [{'ide_files': {'code': "print('Hello world!')",
-                                     'path': 'main.py'},
-                       'task_info': {'header': 'Hello world!',
-                                     'stem': 'Kirjoita viesti maailmalle',
-                                     'answer_count': None,
-                                     'type': 'py'},
-                       'task_id': '60.pythontesti',
-                       'document_id': 60,
-                       'paragraph_id': 'Xelt2CQGvUwL',
-                       'ide_task_id': 'Tehtävä1'}]
+       # [{'ide_files': {'code': "print('Hello world!')",
+       #                              'path': 'main.py'},
+       #                'task_info': {'header': 'Hello world!',
+       #                              'stem': 'Kirjoita viesti maailmalle',
+       #                              'answer_count': None,
+       #                              'type': 'py'},
+       #                'task_id': '60.pythontesti',
+       #                'document_id': 60,
+       #                'paragraph_id': 'Xelt2CQGvUwL',
+       #                'ide_task_id': 'Tehtävä1'}]
 
     for course in course_data:
         course_name = course.get("course_name")
