@@ -5,8 +5,8 @@ from src.tidecli.utils import file_saver
 file_data = {
     "code": "print('Hello World1')",
     "path": "main.py",
-    "ideTask_id": "T1",
-    "paragraph_id": "P1",
+    "ide_task_id": "T1",
+    "paragraph_id": "123",
 }
 
 
