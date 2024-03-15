@@ -306,7 +306,7 @@ class TestGetTasks(unittest.TestCase):
             )
             assert res == self.mock_response.json.return_value
 
-    def test_get_task_by_ideTask_id(self):
+    def test_get_task_by_ide_task_id(self):
 
         self.mock_response.json.return_value = {
             "Demo1": [
@@ -332,7 +332,7 @@ class TestGetTasks(unittest.TestCase):
         }
 
         with self.patch:
-            res = self.routes.get_task_by_ideTask_id(
+            res = self.routes.get_task_by_ide_task_id(
                 demo_path="kurssit/tie/Ohjelmointi2/Demo1", ide_task_id="T1"
             )
             assert res == self.mock_response.json.return_value
