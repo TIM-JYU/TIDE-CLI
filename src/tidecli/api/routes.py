@@ -24,6 +24,10 @@ class Routes:
         try:
             cf.read(config_path)
             self.base_url = cf["OAuthConfig"]["base_url"]
+            token = get_signed_in_user()
+            if token is None:
+                raise ConfigError("User not logged in")
+            # TODO: Better error handling
             self.token = get_signed_in_user().password
             return cf
         except Exception as e:
@@ -112,15 +116,15 @@ class Routes:
         endpoint = self.cf["OAuthConfig"]["tasks_by_doc_id_endpoint"]
         return self.make_request(endpoint=endpoint, params={"doc_id": doc_id})
 
-    def get_task_by_ideTask_id(
+    def get_task_by_ide_task_id(
         self,
         ide_task_id: str,
-        demo_path: str = None,
+        doc_path: str = None,
         doc_id: int = None,
     ):
         """
         Get the tasks by ideTask id and demo document path or id
-        :param demo_path: Demo document path
+        :param doc_path: Demo document path
         :param ide_task_id: ideTask id
         :param doc_id: Demo document id
         return: JSON response of tasks
@@ -130,7 +134,7 @@ class Routes:
             endpoint=endpoint,
             params={
                 "doc_id": doc_id,
-                "demo_path": demo_path,
+                "doc_path": doc_path,
                 "ide_task_id": ide_task_id,
             },
         )
