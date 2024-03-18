@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 from tidecli.api.routes import Routes
 
@@ -36,6 +37,36 @@ def create_task_files(task_data, file_path):
         file.write(task_data)
 
 
+def create_task_file(file_name: str, file_content: str, file_path: str, overwrite=False):
+    """
+    Creates files of tasks in the given path.
+    :param file_name: Name with extension
+    :param file_content: Contents for file
+    :param file_path: Full path to folder to create file
+    :param overwrite: Flag if overwrite
+
+    """
+    # TODO: Tiedoston luonti useammalle tehtävälle
+    full_file_path = os.path.join(file_path, file_name)
+
+    # By default, writemode is CREATE
+    # If path exists already, write mode is WRITE (overwrites)
+    writemode = 'x'
+    if os.path.exists(full_file_path):
+        if not overwrite:
+            # Raise SystemExit with code 1
+            exit(1)
+
+        writemode = 'w'
+
+    # Write the file with desired writemode, CREATE or WRITE
+    with open(full_file_path, writemode) as file:
+        file.write(file_content)
+        file.close()
+
+    return
+
+    
 def create_folders(course_data, user_location):
     """
     Creates folder structure for task/demo paths in course data.
@@ -92,10 +123,10 @@ def check_path_validity():
                   f"Enter 'pwd' to print current working directory.")
 
 
-routes = Routes()
+# routes = Routes()
 
 # Get course data
-user_course_data = routes.get_ide_courses()
+# user_course_data = routes.get_ide_courses()
 
 # Users choice for custom path
-user_path = check_path_validity()
+# user_path = check_path_validity()

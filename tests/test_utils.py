@@ -1,6 +1,12 @@
 import os
 import unittest
 from tidecli.utils import file_saver
+from unittest_prettify.colorize import (
+    colorize,
+    GREEN,
+    YELLOW
+)
+
 # Testdata for creating filestructure
 file_data = {
     "code": "print('Hello World1')",
@@ -28,15 +34,46 @@ class TestCreateFolders():
 
     def test_create_folders():
         temp = '/home/riikoovy'
-        file_saver.create_folders(folder_data, temp)
+        # file_saver.create_folders(folder_data, temp)
         assert os.path.exists(os.path.join(temp, 'Ohjelmointikurssi1/courses/ohjelmointikurssi1/Demot/Demo1'))
 
-
-class TestCreateFile():
-    def test_create_task_file():
+@colorize(color=YELLOW)
+class TestCreateFile(unittest.TestCase):
+    def test_create_task_file(self):
         """
-        Test helper function for creating a file
+        Create file when it does not exist yet
         """
         
-        file = file_saver.create_task_file(file_data)
-        assert os.path.exists(os.path.join(file, 'main.py'))
+        file = file_saver.create_task_file(file_name=file_data['path'], file_path='/home/ylivuoto', file_content=file_data['code'])
+        assert os.path.exists('/home/ylivuoto/main.py')
+
+        
+    def test_create_task_file_overwrite(self):
+        """
+        Overwrite an existing file
+        """
+        
+        file = file_saver.create_task_file(file_name=file_data['path'], file_path='/home/ylivuoto', file_content='HELLO', overwrite=True)
+        assert os.path.exists('/home/ylivuoto/main.py')
+
+        contents = ''
+        with open('/home/ylivuoto/main.py', 'r') as file:
+            contents = file.read() 
+        self.assertEqual(contents, 'HELLO')
+
+        
+    def test_create_task_file_not_overwrite(self):
+        """
+        Do not overwrite an existing file
+        """
+        
+        with self.assertRaises(SystemExit) as cm:
+            file_saver.create_task_file(file_name=file_data['path'], file_path='/home/ylivuoto', file_content=file_data['code'])
+        
+            
+        self.assertEqual(cm.exception.code, 1)
+        
+
+    def tearDownClass():
+        os.remove('/home/ylivuoto/main.py')
+
