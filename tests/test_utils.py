@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 import unittest
 from tidecli.utils import file_saver
 from unittest_prettify.colorize import (
@@ -14,11 +15,13 @@ from unittest_prettify.colorize import (
 file_data = [
     {
         "code": "print('Hello World1')",
-        "path": "main.py"
+        "path": "main.py",
+        "header": "Tehtävä 1"
     },
     {
         "code": "print('Hello Agora!')",
-        "path": "new.py"
+        "path": "new.py",
+        "header": "Tehtävä 1"
     }
 ]
 
@@ -149,7 +152,7 @@ metadata_single = [
 
 # Creating the test files to user home dir
 user_home = os.environ['HOME']
-test_path = os.path.join(user_home, 'Desktop', 'tideapp')
+test_path = os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi 1/Demo1')
 
 @colorize(color=YELLOW)
 class TestCreateFolders(unittest.TestCase):
@@ -229,4 +232,11 @@ class TestCreateFile(unittest.TestCase):
 @colorize(color=GREEN)
 class TestCreateFiles(unittest.TestCase):
     def test_create_files(self):
+        """
+        Create all files given in list to folder
+        """
         file_saver.create_files(files=file_data, folder_path=test_path)
+        
+    def tearDownClass():
+        shutil.rmtree(os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi 1'))
+ 

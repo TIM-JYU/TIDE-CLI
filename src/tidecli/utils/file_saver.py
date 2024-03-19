@@ -62,10 +62,13 @@ def create_files(files: list[dict]|dict, folder_path: str, overwrite=False):
     if isinstance(files, dict):
         create_file(files, folder_path=folder_path)
         return
+
+    os.makedirs(folder_path, exist_ok=overwrite)
     
     for item in files:
-        full_file_path = os.path.join(folder_path, item['path'])
+        full_file_path = os.path.join(folder_path, item['header'], item['path'])
 
+        os.makedirs(os.path.dirname(full_file_path), exist_ok=True)
         with open(full_file_path, 'x') as file:
             file.write(item['code'])
             file.close()
