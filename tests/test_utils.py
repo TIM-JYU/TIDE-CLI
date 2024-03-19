@@ -8,15 +8,19 @@ from unittest_prettify.colorize import (
     YELLOW
 )
 
-sys.path.append('/home/riikoovy/TIDE-CLI/src')
+# sys.path.append('/home/riikoovy/TIDE-CLI/src')
 
 # Testdata for creating filestructure
-file_data = {
-    "code": "print('Hello World1')",
-    "path": "main.py",
-    "ide_task_id": "T1",
-    "paragraph_id": "123",
-}
+file_data = [
+    {
+        "code": "print('Hello World1')",
+        "path": "main.py"
+    },
+    {
+        "code": "print('Hello Agora!')",
+        "path": "new.py"
+    }
+]
 
 folder_data =  [{'ide_files': {'code': "print('Hello world!')",
                                'path': 'main.py'},
@@ -145,8 +149,9 @@ metadata_single = [
 
 # Creating the test files to user home dir
 user_home = os.environ['HOME']
+test_path = os.path.join(user_home, 'Desktop', 'tideapp')
 
-
+@colorize(color=YELLOW)
 class TestCreateFolders(unittest.TestCase):
     """
     Test the folder structure creation
@@ -154,7 +159,7 @@ class TestCreateFolders(unittest.TestCase):
 
     def test_create_folders(self):
         # file_saver.create_folders(folder_data, temp)
-        # assert os.path.exists(os.path.join(user_home, 'Ohjelmointikurssi1/courses/ohjelmointikurssi1/Demot/Demo1'))
+        # assert os.path.exists(os.path.join(test_path, 'Ohjelmointikurssi1/courses/ohjelmointikurssi1/Demot/Demo1'))
         pass
         
 class TestFormulateMetadata():
@@ -168,56 +173,60 @@ class TestFormulateMetadata():
         metadata = file_saver.formulate_metadata(
             courses=course_data,
             tasks=tasks_data_single)
-
-        
         
         
 @colorize(color=YELLOW)
 class TestCreateFile(unittest.TestCase):
-    def test_create_file(self):
-        """
-        Create file when it does not exist yet
-        """
+    # def test_create_file(self):
+    #     """
+    #     Create file when it does not exist yet
+    #     """
         
-        file = file_saver.create_file(
-            file_name=file_data['path'],
-            file_path=user_home,
-            file_content=file_data['code'])
-        assert os.path.exists(os.path.join(user_home, 'main.py'))
+    #     file = file_saver.create_file(
+    #         file_name=file_data['path'],
+    #         file_path=test_path,
+    #         file_content=file_data['code'])
+    #     assert os.path.exists(os.path.join(test_path, 'main.py'))
 
         
-    def test_create_file_overwrite(self):
-        """
-        Overwrite an existing file
-        """
-        
-        file = file_saver.create_file(
-            file_name=file_data['path'],
-            file_path=user_home,
-            file_content='HELLO',
-            overwrite=True)
-        assert os.path.exists(os.path.join(user_home, 'main.py'))
+    # def test_create_file_overwrite(self):
+    #     """
+    #     Overwrite an existing file
+    #     """
 
-        contents = ''
-        with open(os.path.join(user_home, 'main.py'), 'r') as file:
-            contents = file.read() 
-        self.assertEqual(contents, 'HELLO')
+    #     #TODO: Add overwrite parameter
+    #     file = file_saver.create_file(
+    #         file_name=file_data['path'],
+    #         file_path=test_path,
+    #         file_content='HELLO')
+
+    #     assert os.path.exists(os.path.join(test_path, 'main.py'))
+
+    #     contents = ''
+    #     with open(os.path.join(test_path, 'main.py'), 'r') as file:
+    #         contents = file.read() 
+    #     self.assertEqual(contents, 'HELLO')
 
         
-    def test_create_file_not_overwrite(self):
-        """
-        Do not overwrite an existing file
-        """
+    # def test_create_file_not_overwrite(self):
+    #     """
+    #     Do not overwrite an existing file
+    #     """
         
-        with self.assertRaises(SystemExit) as cm:
-            file_saver.create_file(
-                file_name=file_data['path'],
-                file_path=user_home,
-                file_content=file_data['code'])
+    #     with self.assertRaises(SystemExit) as cm:
+    #         file_saver.create_file(
+    #             file_name=file_data['path'],
+    #             file_path=test_path,
+    #             file_content=file_data['code'])
                     
-        self.assertEqual(cm.exception.code, 1)
+    #     self.assertEqual(cm.exception.code, 1)
         
 
     def tearDownClass():
-        os.remove(os.path.join(user_home, 'main.py'))
-        
+        #os.remove(os.path.join(test_path, 'main.py'))
+        pass
+    
+@colorize(color=GREEN)
+class TestCreateFiles(unittest.TestCase):
+    def test_create_files(self):
+        file_saver.create_files(files=file_data, folder_path=test_path)

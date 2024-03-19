@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import shutil
 from tidecli.api.routes import Routes
 
 
@@ -37,17 +38,49 @@ def create_task_files(task_data, file_path):
         file.write(task_data)
 
 
-def create_file(file_name: str, file_content: str, file_path: str, overwrite=False):
+
+
+        
+def create_files(files: list[dict]|dict, folder_path: str, overwrite=False):
     """
     Creates files of tasks in the given path.
-    :param file_name: Name or list of names with file extension (.eg .py or .txt ...)
-    :param file_content: Contents for file
-    :param file_path: Full path to folder to create file
+    :param files: Dict or list of dicts. Contain name 
+    with file extension (.eg .py or .txt ...) and content
+    :param folder_path: Full path to folder to create file
     :param overwrite: Flag if overwrite
 
     """
-    # TODO: Tiedoston luonti useammalle tehtävälle
-    full_file_path = os.path.join(file_path, file_name)
+
+    if os.path.exists(folder_path):
+        if os.listdir(folder_path) != 0:
+            if not overwrite:
+                # Raise SystemExit with code 1
+                exit(1)
+            else:
+                shutil.rmtree(folder_path)
+
+    if isinstance(files, dict):
+        create_file(files, folder_path=folder_path)
+        return
+    
+    for item in files:
+        full_file_path = os.path.join(folder_path, item['path'])
+
+        with open(full_file_path, 'x') as file:
+            file.write(item['code'])
+            file.close()
+
+
+def create_file(item: dict, folder_path: str, overwrite=False):
+    """
+    Creates files of tasks in the given path.
+    :param item: 
+    :param folder_path: Full path to folder to create file
+    :param overwrite: Flag if overwrite
+
+    """
+    
+    full_file_path = os.path.join(file_path, item['name'])
 
     # By default, writemode is CREATE
     # If path exists already, write mode is WRITE (overwrites)
@@ -56,14 +89,15 @@ def create_file(file_name: str, file_content: str, file_path: str, overwrite=Fal
         if not overwrite:
             # Raise SystemExit with code 1
             exit(1)
-
+            
         writemode = 'w'
-
+            
     # Write the file with desired writemode, CREATE or WRITE
     with open(full_file_path, writemode) as file:
-        file.write(file_content)
+        file.write(item['content'])
         file.close()
-
+        
+            
 
 def formulate_metadata(courses: list, tasks: list):
     return [courses, tasks]
