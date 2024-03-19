@@ -37,10 +37,10 @@ def create_task_files(task_data, file_path):
         file.write(task_data)
 
 
-def create_task_file(file_name: str, file_content: str, file_path: str, overwrite=False):
+def create_file(file_name: str, file_content: str, file_path: str, overwrite=False):
     """
     Creates files of tasks in the given path.
-    :param file_name: Name with extension
+    :param file_name: Name or list of names with file extension (.eg .py or .txt ...)
     :param file_content: Contents for file
     :param file_path: Full path to folder to create file
     :param overwrite: Flag if overwrite
@@ -64,9 +64,11 @@ def create_task_file(file_name: str, file_content: str, file_path: str, overwrit
         file.write(file_content)
         file.close()
 
-    return
 
-    
+def formulate_metadata(courses: list, tasks: list):
+    return [courses, tasks]
+
+
 def create_folders(course_data, user_location):
     """
     Creates folder structure for task/demo paths in course data.
