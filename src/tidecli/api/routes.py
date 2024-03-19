@@ -2,7 +2,7 @@ import os
 
 import requests
 import configparser
-
+from tidecli.utils.error_logger import error_handler, CliError
 from tidecli.utils.handle_token import get_signed_in_user
 
 
@@ -12,6 +12,7 @@ class Routes:
         self.base_url = None
         self.cf = self.load_config()
 
+    @error_handler
     def load_config(self):
         """
         Load the token and base url/endpoint from the config file
@@ -23,12 +24,16 @@ class Routes:
         try:
             cf.read(config_path)
             self.base_url = cf["OAuthConfig"]["base_url"]
+            token = get_signed_in_user()
+            if token is None:
+                raise ConfigError("User not logged in")
+            # TODO: Better error handling
             self.token = get_signed_in_user().password
             return cf
         except Exception as e:
-            print(e)
-            raise ConfigError("Config file not found")
+            raise CliError("Config load failed. " + str(e))
 
+    @error_handler
     def make_request(self, endpoint: str, method: str = "GET", params: dict = None):
         """
         Make a request to the API
@@ -48,9 +53,8 @@ class Routes:
             )
             return res.json()
 
-        except requests.exceptions.RequestException as e:
-            print(e)
-            raise RequestError("Request failed" + str(e))
+        except Exception as e:
+            raise CliError("Request failed. " + str(e))
 
     def validate_token(self) -> dict:
         """
@@ -112,15 +116,15 @@ class Routes:
         endpoint = self.cf["OAuthConfig"]["tasks_by_doc_id_endpoint"]
         return self.make_request(endpoint=endpoint, params={"doc_id": doc_id})
 
-    def get_task_by_ideTask_id(
+    def get_task_by_ide_task_id(
         self,
         ide_task_id: str,
-        demo_path: str = None,
+        doc_path: str = None,
         doc_id: int = None,
     ):
         """
         Get the tasks by ideTask id and demo document path or id
-        :param demo_path: Demo document path
+        :param doc_path: Demo document path
         :param ide_task_id: ideTask id
         :param doc_id: Demo document id
         return: JSON response of tasks
@@ -130,10 +134,11 @@ class Routes:
             endpoint=endpoint,
             params={
                 "doc_id": doc_id,
-                "demo_path": demo_path,
+                "doc_path": doc_path,
                 "ide_task_id": ide_task_id,
             },
         )
+
 
     def submit_task(
         self,
@@ -159,20 +164,3 @@ class Routes:
                 "task_id_ext": task_id_ext,
             },
         )
-
-
-# TODO: Add error handling
-class ConfigError(Exception):
-    """
-    Exception raised for errors in the config file
-    """
-
-    pass
-
-
-class RequestError(Exception):
-    """
-    Exception raised for errors in the request
-    """
-
-    pass

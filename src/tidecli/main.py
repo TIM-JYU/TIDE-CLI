@@ -1,9 +1,8 @@
 import click
 
-from tidecli.api.oauth_login import authenticate
 from tidecli.api.routes import Routes
-from tidecli.utils.login_handler import login_details
 from tidecli.utils.handle_token import delete_token
+from tidecli.utils.login_handler import login_details
 
 
 @click.group()
@@ -20,57 +19,43 @@ def login():
 
 
 @tim_ide.command()
-@click.argument("username")
-def logout(username):
+def logout():
     """
     Logs out the user and deletes the token from the keyring
-
-    Usage:
-    [OPTIONS] USERNAME
     """
 
-    click.echo(delete_token(username))
+    click.echo(delete_token())
 
 
 @tim_ide.command()
-@click.argument("course", required=False)
-def list(course=None):
+def courses():
     """
-    Lists user courses. If course is provided, it will list the course tasks.
-
-    Usage:
-    [OPTIONS] [COURSE]
-
-    Options:
-    COURSE  Course name (not required)
+    Lists user courses.
     """
 
-    if course:
-        click.echo(f"Listed tasks for course {course}")
-    else:
-        click.echo("Listed all courses")
+    click.echo(Routes().get_ide_courses())
 
 
 @tim_ide.command()
-@click.argument("course")
-@click.option("--task", help="Specific task to pull")
-def pull(course, task=None):
+@click.argument("demo_path", type=str, required=True)
+def tasks(demo_path):
     """
-    Fetches course or task data
-
-    Usage:
-    [OPTIONS] COURSE
-
-    Options:
-    --task NAME (not required)
+    Hakee käyttäjän tehtävät valitusta hakemistopolusta.
     """
-    # Do something
-    if task:
-        click.echo(
-            Routes().get_user_task_by_taskId(task_id="Ohjelmointi2:T1", doc_id=43)
-        )
-    else:
-        click.echo(f"Pulled course {course}")
+
+    click.echo(Routes().get_tasks_by_doc_path(doc_path=demo_path))
+
+
+@tim_ide.command()
+@click.argument("ide_task_id", type=str, required=True)
+@click.argument("demo_path", type=str, required=True)
+def task(ide_task_id, demo_path):
+    print(ide_task_id, demo_path)
+    """
+    Tallentaa valitun tehtävän hakemistopolkuun.
+    """
+
+    click.echo(Routes().get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path))
 
 
 @tim_ide.command()
