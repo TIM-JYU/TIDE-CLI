@@ -4,6 +4,7 @@ import os
 import requests
 
 from tidecli.models import SubmitData
+from tidecli.models.TimFeedback import TimFeedback
 from tidecli.utils.error_logger import error_handler, CliError
 from tidecli.utils.handle_token import get_signed_in_user
 
@@ -152,9 +153,9 @@ class Routes:
         """
 
         endpoint = self.cf["OAuthConfig"]["submit_task_endpoint"]
-
-        return self.make_request(
+        response = self.make_request(
             endpoint=endpoint,
-            method="POST",
             params=task_file.submit_json()
         )
+
+        return TimFeedback(**response.get("result"))

@@ -5,8 +5,16 @@ class TaskFile(BaseModel):
     """
     Model for single code file
     """
-    code: str
+    content: str
     path: str
+    source: str = "editor"
+
+    def to_json(self):
+        return {
+            "content": self.content,
+            "path": self.path,
+            "source": self.source
+        }
 
 
 class TaskData(BaseModel):
