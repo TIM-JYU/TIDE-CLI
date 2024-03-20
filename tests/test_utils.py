@@ -3,10 +3,12 @@ import sys
 import shutil
 import unittest
 from tidecli.utils import file_saver
+from tidecli.models.TaskData import TaskData
 from unittest_prettify.colorize import (
     colorize,
     GREEN,
-    YELLOW
+    YELLOW,
+    MAGENTA
 )
 
 # sys.path.append('/home/riikoovy/TIDE-CLI/src')
@@ -149,6 +151,21 @@ metadata_single = [
         ]
     }
 ]
+
+validated_task_data = {
+    "header": "Testitehtävä",
+    "stem": "Testistemmi",
+    "type":  "py",
+    "task_id":  "60.Testitehtävä",
+    "par_id":  "XX",
+    "doc_id":  "60",
+    "ide_task_id": "testi_tehtävä",
+    "task_files": [{
+            "content": "print(Hello!)",
+            "path": "testi.py",
+            "source": ""
+        }]
+}
 
 # Creating the test files to user home dir
 user_home = os.environ['HOME']
@@ -299,5 +316,17 @@ class TestCreateFiles(unittest.TestCase):
         
     def tearDownClass():
         shutil.rmtree(os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi 1'))
-        pass
+
         
+@colorize(color=MAGENTA)
+class TestCreateDemoTask(unittest.TestCase):
+    def test_create_demo_task(self):
+        """
+        Create a single demo task structure into folder
+        """
+        
+        data = TaskData(**validated_task_data)
+        file_saver.create_demo_task(task_data=data)
+
+    def tearDownClass():
+        shutil.rmtree(os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi'))

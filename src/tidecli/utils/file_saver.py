@@ -3,6 +3,8 @@ import sys
 import json
 import shutil
 from tidecli.api.routes import Routes
+from tidecli.models.TaskData import TaskData
+from tidecli.models.Course import Course
 
 
 def create_task_files(task_data, file_path):
@@ -38,8 +40,64 @@ def create_task_files(task_data, file_path):
         file.write(task_data)
 
 
+def create_metadata(courses: list[Course]):
+    """
+    Creates a metadata.json for each course
+    """
+
+    # TODO: tee metadata kaikkien kurssien kaikista tehtävistä
+    metadata = []
+    for course in courses:
+        item = {
+            "name": course.name,
+            "id": course.id,
+            "path": course.path,
+            "demos":[]
+        }
+
+        for demo in course.demo_paths:
+            #tasks = Routes.get_tasks_by_doc_path(doc_path=demo)
+            pass
+
+        metadata.append(item)
+    print(metadata)
+            
+
+def create_demo_strucure(courses: list[Course], overwrite=False):
+    """
+    This creates a whole folder and filestructure
+
+    :param tasks: List of tasks validated to TaskData
+    :param tasks_demo_path: The path from course object, tells where to create tasks
+    """
+
+    # TODO: luo demotehtävien perusteella tiedostorakenne
+    for course in courses:
+        # create_files(files=task.task_files, folder_path=tasks_demo_path, overwrite=overwrite)
+        pass
 
 
+def create_demo_task(task_data: TaskData):
+    """
+    Creates a single demo
+    :param task_data: Validated task data
+    
+    """
+    # TODO: ehkä pitäsi vaan luoda kaikki demot kerralla
+
+    files = []
+    for task in task_data.task_files:
+        item = {
+            "code": task.content,
+            "path": task.path,
+            "header": task_data.header
+        }
+
+        files.append(item)
+        
+        folder_path = os.path.join(os.environ['HOME'], 'Desktop', 'Ohjelmointikurssi/Demo')
+    create_files(files=files, folder_path=folder_path)
+    
         
 def create_files(files: list[dict]|dict, folder_path: str, overwrite=False):
     """
@@ -59,6 +117,7 @@ def create_files(files: list[dict]|dict, folder_path: str, overwrite=False):
         if os.listdir(folder_path) != 0:
             if not overwrite:
                 # Raise SystemExit with code 1
+                #TODO: käsittele ylikirjoitus kunnolla, sekä yhden että monen tiedoston tapauksessa
                 print("Ei ylikirjoiteta, tämä on käsiteltävä erikseen.")
                 exit(1)
             else:
