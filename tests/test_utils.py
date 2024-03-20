@@ -161,6 +161,9 @@ class TestCreateFolders(unittest.TestCase):
     """
 
     def test_create_folders(self):
+        """
+        Create folder structure
+        """
         # file_saver.create_folders(folder_data, temp)
         # assert os.path.exists(os.path.join(test_path, 'Ohjelmointikurssi1/courses/ohjelmointikurssi1/Demot/Demo1'))
         pass
@@ -235,8 +238,66 @@ class TestCreateFiles(unittest.TestCase):
         """
         Create all files given in list to folder
         """
-        file_saver.create_files(files=file_data, folder_path=test_path)
+        file_saver.create_files(
+            files=file_data,
+            folder_path=test_path)
+
+        assert os.path.exists(os.path.join(test_path,'Tehtävä 1', 'main.py'))
+        assert os.path.exists(os.path.join(test_path,'Tehtävä 1', 'new.py'))
+
+    def test_overwrite_files(self):
+        """
+        Overwrite all files given in list in folder
+        """
+        changed_file_data = [{
+            "code": "print('Changed!')",
+            "path": "main.py",
+            "header": "Tehtävä 1"
+        },
+        {
+            "code": "print('Also changed!')",
+            "path": "new.py",
+            "header": "Tehtävä 1"
+        }]
+        
+        file_saver.create_files(
+            files=changed_file_data,
+            folder_path=test_path,
+            overwrite=True)
+
+        contents = ''
+        with open(os.path.join(test_path,'Tehtävä 1', 'main.py'), 'r') as file:
+            contents = file.read()
+            file.close()
+            self.assertEqual(contents, 'print(\'Changed!\')')
+
+        with open(os.path.join(test_path,'Tehtävä 1', 'new.py'), 'r') as file:
+            contents = file.read()
+            file.close()
+            self.assertEqual(contents, 'print(\'Also changed!\')')
+
+
+    def test_single_create_files(self):
+        """
+        Create single file  to folder
+        """
+        single_file_data = {
+            "code": "print('Single!')",
+            "path": "single.py",
+            "header": "Tehtävä 1"
+        }
+        
+        file_saver.create_files(
+            files=single_file_data,
+            folder_path=test_path,
+            overwrite=True)
+
+        assert os.path.exists(os.path.join(test_path,'Tehtävä 1', 'single.py'))
+        assert os.path.exists(os.path.join(test_path,'Tehtävä 1', 'main.py'))
+        assert os.path.exists(os.path.join(test_path,'Tehtävä 1', 'new.py'))
+
         
     def tearDownClass():
         shutil.rmtree(os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi 1'))
- 
+        pass
+        

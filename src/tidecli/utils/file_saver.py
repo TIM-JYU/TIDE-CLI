@@ -44,24 +44,26 @@ def create_task_files(task_data, file_path):
 def create_files(files: list[dict]|dict, folder_path: str, overwrite=False):
     """
     Creates files of tasks in the given path.
-    :param files: Dict or list of dicts. Contain name 
-    with file extension (.eg .py or .txt ...) and content
-    :param folder_path: Full path to folder to create file
+
+    :param files: Dict or list of dicts. Contain name with file extension (.eg .py or .txt ...) and content
+    :param folder_path: Demo path to folder to create taskfolder and file
     :param overwrite: Flag if overwrite
 
     """
 
     if os.path.exists(folder_path):
+        if isinstance(files, dict):
+            create_file(files, folder_path=folder_path, overwrite=overwrite)
+            return
+        
         if os.listdir(folder_path) != 0:
             if not overwrite:
                 # Raise SystemExit with code 1
+                print("Ei ylikirjoiteta, tämä on käsiteltävä erikseen.")
                 exit(1)
             else:
                 shutil.rmtree(folder_path)
 
-    if isinstance(files, dict):
-        create_file(files, folder_path=folder_path)
-        return
 
     os.makedirs(folder_path, exist_ok=overwrite)
     
@@ -77,14 +79,13 @@ def create_files(files: list[dict]|dict, folder_path: str, overwrite=False):
 def create_file(item: dict, folder_path: str, overwrite=False):
     """
     Creates files of tasks in the given path.
-    :param item: 
-    :param folder_path: Full path to folder to create file
+    :param item: Single dict, contains file data
+    :param folder_path: Path to folder to create task folder and file 
     :param overwrite: Flag if overwrite
 
     """
     
-    full_file_path = os.path.join(file_path, item['name'])
-
+    full_file_path = os.path.join(folder_path, item['header'], item['path'])
     # By default, writemode is CREATE
     # If path exists already, write mode is WRITE (overwrites)
     writemode = 'x'
@@ -95,9 +96,10 @@ def create_file(item: dict, folder_path: str, overwrite=False):
             
         writemode = 'w'
             
+    #os.makedirs(os.path.dirname(full_file_path), exist_ok=True)
     # Write the file with desired writemode, CREATE or WRITE
-    with open(full_file_path, writemode) as file:
-        file.write(item['content'])
+    with open(full_file_path, 'x') as file:
+        file.write(item['code'])
         file.close()
         
             
