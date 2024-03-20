@@ -92,9 +92,9 @@ def push(course, task):
 
     t2 = SubmitData(code_files=code_files, task_id="Tehtava3", doc_id=60, code_language="cc")
 
-    # submit_object = Routes().submit_task(t)
+    submit_object = Routes().submit_task(t)
 
-    submit_object = Routes().submit_task(t2)
+    # submit_object = Routes().submit_task(t2)
 
     click.echo(submit_object.console_output())
 
