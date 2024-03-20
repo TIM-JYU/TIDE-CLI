@@ -1,7 +1,10 @@
+import configparser
 import os
 
 import requests
-import configparser
+
+from tidecli.models import SubmitData
+from tidecli.models.TimFeedback import TimFeedback
 from tidecli.utils.error_logger import error_handler, CliError
 from tidecli.utils.handle_token import get_signed_in_user
 
@@ -26,7 +29,7 @@ class Routes:
             self.base_url = cf["OAuthConfig"]["base_url"]
             token = get_signed_in_user()
             if token is None:
-                raise ConfigError("User not logged in")
+                raise CliError("User not logged in")
             # TODO: Better error handling
             self.token = get_signed_in_user().password
             return cf
@@ -117,10 +120,10 @@ class Routes:
         return self.make_request(endpoint=endpoint, params={"doc_id": doc_id})
 
     def get_task_by_ide_task_id(
-        self,
-        ide_task_id: str,
-        doc_path: str = None,
-        doc_id: int = None,
+            self,
+            ide_task_id: str,
+            doc_path: str = None,
+            doc_id: int = None,
     ):
         """
         Get the tasks by ideTask id and demo document path or id
@@ -138,3 +141,21 @@ class Routes:
                 "ide_task_id": ide_task_id,
             },
         )
+
+    def submit_task(
+            self,
+            task_file: SubmitData,
+    ):
+        """
+        Submit the task by task id, document id and paragraph id
+        :param task_file: Task data
+        return: JSON response of tasks
+        """
+
+        endpoint = self.cf["OAuthConfig"]["submit_task_endpoint"]
+        response = self.make_request(
+            endpoint=endpoint,
+            params=task_file.submit_json()
+        )
+
+        return TimFeedback(**response.get("result"))

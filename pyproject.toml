@@ -16,6 +16,7 @@ click = "^8.1.7"
 python-dotenv = "^1.0.1"
 keyring = "^24.3.1"
 unittest-prettify = "^1.0.post4"
+pydantic = "^2.6.4"
 
 [tool.poetry.group.test]
 optional = true

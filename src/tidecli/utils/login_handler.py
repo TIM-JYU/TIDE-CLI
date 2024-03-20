@@ -16,13 +16,12 @@ def login_details():
 
         token_validity_time = Routes().validate_token()
 
-        # If the token is expired then return the message
-        # TODO: confirm that token time cannot go negative or below 0:00:00
-        if token_validity_time.get("validityTime") == "0:00:00":
+        # If the token is expired or returns error message TODO: test this
+        if token_validity_time.get("error"):
             if authenticate():
                 return "Login successful!"
             else:
-                return "Login failed. Please try again."
+                return "Login failed. Please try again." + token_validity_time.get("error")
 
         # If the token is not expired then return the token validity time
         return "Token is still valid for " + token_validity_time.get("validityTime")
