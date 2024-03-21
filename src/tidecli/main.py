@@ -2,6 +2,7 @@ import random
 
 import click
 
+from tidecli.utils.file_saver import create_metadata, create_demo_task
 from tidecli.api.routes import Routes
 from tidecli.models.Course import Course
 from tidecli.models.SubmitData import SubmitData
@@ -63,6 +64,7 @@ def task(ide_task_id, demo_path):
     """
     data = Routes().get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path)
     td = TaskData(**data)
+    create_demo_task(td)
     click.echo(td.header + " was saved")  # Just an example
 
 
