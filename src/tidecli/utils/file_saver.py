@@ -118,7 +118,7 @@ def create_files(files: list[dict]|dict, folder_path: str, overwrite=False):
             if not overwrite:
                 # Raise SystemExit with code 1
                 #TODO: käsittele ylikirjoitus kunnolla, sekä yhden että monen tiedoston tapauksessa
-                print("Ei ylikirjoiteta, tämä on käsiteltävä erikseen.")
+                print("TODO: Ei ylikirjoiteta, tämä on käsiteltävä erikseen.")
                 exit(1)
             else:
                 shutil.rmtree(folder_path)

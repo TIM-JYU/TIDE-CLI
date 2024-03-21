@@ -52,7 +52,7 @@ def tasks(demo_path):
     data = Routes().get_tasks_by_doc_path(doc_path=demo_path)
     tasks = [TaskData(**task) for task in data]
     for task in tasks:
-        click.echo(task.header)
+        click.echo(task.header + ", " + task.ide_task_id)
 
 
 @tim_ide.command()
@@ -63,6 +63,12 @@ def task(ide_task_id, demo_path):
     Tallentaa valitun tehtävän hakemistopolkuun.
     """
     data = Routes().get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path)
+
+    # TODO: korjaa tarkistukset ja virheenkäsittely pydanticille
+    if not data:
+        click.echo("No file saved, maybe wrong id?")
+        return
+        
     td = TaskData(**data)
     create_demo_task(td)
     click.echo(td.header + " was saved")  # Just an example
