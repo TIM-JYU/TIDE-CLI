@@ -2,7 +2,8 @@ import random
 
 import click
 
-from tidecli.utils.file_saver import create_metadata, create_demo_task
+from tidecli.models.TimFeedback import TimFeedback
+from tidecli.utils.file_saver import create_demo_task
 from tidecli.api.routes import Routes
 from tidecli.models.Course import Course
 from tidecli.models.SubmitData import SubmitData
@@ -38,6 +39,12 @@ def courses():
     Lists user courses.
     """
     data = Routes().get_ide_courses()
+
+    if not data:
+        # TODO: With no courses found, should we print an error message from TIM? 404 in this case
+        click.echo("No courses found")
+        return
+
     all_courses = [Course(**course) for course in data]
     for course in all_courses:
         click.echo(course.pretty_print())
@@ -50,6 +57,11 @@ def tasks(demo_path):
     Hakee käyttäjän tehtävät valitusta hakemistopolusta.
     """
     data = Routes().get_tasks_by_doc_path(doc_path=demo_path)
+
+    if "error" in data:
+        click.echo(data["error"])
+        return
+
     tasks = [TaskData(**task) for task in data]
     for task in tasks:
         click.echo(task.header + ", " + task.ide_task_id)
@@ -64,13 +76,12 @@ def task(ide_task_id, demo_path):
     """
     data = Routes().get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path)
 
-    # TODO: korjaa tarkistukset ja virheenkäsittely pydanticille
-    if not data:
-        click.echo("No file saved, maybe wrong id?")
+    if "error" in data:
+        click.echo(data["error"])
         return
         
     td = TaskData(**data)
-    create_demo_task(td)
+    # create_demo_task(td) TODO: some error here
     click.echo(td.header + " was saved")  # Just an example
 
 
@@ -101,10 +112,16 @@ def push(course, task):
     t2 = SubmitData(code_files=code_files, task_id="Tehtava3", doc_id=60, code_language="cc")
 
     submit_object = Routes().submit_task(t)
-
     # submit_object = Routes().submit_task(t2)
 
-    click.echo(submit_object.console_output())
+    if "error" in submit_object:
+        click.echo(submit_object["error"])
+        return
+
+
+    validation = TimFeedback(**submit_object.get("result"))
+
+    click.echo(validation.console_output())
 
 
 if __name__ == "__main__":

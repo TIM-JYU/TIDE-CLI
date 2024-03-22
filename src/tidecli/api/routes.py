@@ -1,14 +1,15 @@
 import configparser
 import os
+from dataclasses import dataclass
 
 import requests
 
 from tidecli.models import SubmitData
-from tidecli.models.TimFeedback import TimFeedback
 from tidecli.utils.error_logger import error_handler, CliError
 from tidecli.utils.handle_token import get_signed_in_user
 
 
+@dataclass
 class Routes:
     def __init__(self):
         self.token = None
@@ -62,10 +63,10 @@ class Routes:
     def validate_token(self) -> dict:
         """
         Validate the token for the user
-        return: JSON response  of token time validity or TODO: This might not work as expected
+        return: JSON response  of token validity
         """
-        endpoint = self.cf["OAuthConfig"]["validate_token_endpoint"]
-        return self.make_request(endpoint=endpoint)
+        endpoint = self.cf["OAuthConfig"]["introspect_endpoint"]
+        return self.make_request(endpoint=endpoint, method="POST")
 
     def get_profile(self) -> dict:
         """
@@ -153,9 +154,7 @@ class Routes:
         """
 
         endpoint = self.cf["OAuthConfig"]["submit_task_endpoint"]
-        response = self.make_request(
+        return self.make_request(
             endpoint=endpoint,
             params=task_file.submit_json()
         )
-
-        return TimFeedback(**response.get("result"))

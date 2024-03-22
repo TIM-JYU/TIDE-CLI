@@ -1,3 +1,5 @@
+import datetime
+
 from tidecli.api.oauth_login import authenticate
 from tidecli.api.routes import Routes
 from tidecli.utils.handle_token import get_signed_in_user
@@ -24,7 +26,11 @@ def login_details():
                 return "Login failed. Please try again." + token_validity_time.get("error")
 
         # If the token is not expired then return the token validity time
-        return "Token is still valid for " + token_validity_time.get("validityTime")
+        expiration_time = token_validity_time.get("exp")
+        if expiration_time:
+            return "Token is still valid for " + str(datetime.timedelta(seconds=expiration_time))
+        else:
+            return "Token validity time not found"
 
     # If the username does not exist in credential manager then return the login link
     else:
