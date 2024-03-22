@@ -1,8 +1,14 @@
+"""
+Main module for the Tide CLI.
+
+This module contains the main command group for the Tide CLI.
+The whole CLI app may be located in different module.
+"""
 import random
 
 import click
 
-from tidecli.utils.file_saver import create_metadata, create_demo_task
+from tidecli.utils.file_saver import create_demo_task
 from tidecli.api.routes import Routes
 from tidecli.models.Course import Course
 from tidecli.models.SubmitData import SubmitData
@@ -13,30 +19,30 @@ from tidecli.utils.login_handler import login_details
 
 @click.group()
 def tim_ide():
+    """Tide CLI base command?."""
     pass
 
 
 @tim_ide.command()
 def login():
     """
-    Opens a login link.
+    Log in the user and saves the token to the keyring.
+
+    Functionality: Opens a browser window for the user to log in.
+
     """
     click.echo(login_details())
 
 
 @tim_ide.command()
 def logout():
-    """
-    Logs out the user and deletes the token from the keyring
-    """
+    """Log out the user and deletes the token from the keyring."""
     click.echo(delete_token())
 
 
 @tim_ide.command()
 def courses():
-    """
-    Lists user courses.
-    """
+    """List  all courses."""
     data = Routes().get_ide_courses()
     all_courses = [Course(**course) for course in data]
     for course in all_courses:
@@ -46,9 +52,7 @@ def courses():
 @tim_ide.command()
 @click.argument("demo_path", type=str, required=True)
 def tasks(demo_path):
-    """
-    Hakee käyttäjän tehtävät valitusta hakemistopolusta.
-    """
+    """Fetch tasks by doc path."""
     data = Routes().get_tasks_by_doc_path(doc_path=demo_path)
     tasks = [TaskData(**task) for task in data]
     for task in tasks:
@@ -59,19 +63,17 @@ def tasks(demo_path):
 @click.argument("ide_task_id", type=str, required=True)
 @click.argument("demo_path", type=str, required=True)
 def task(ide_task_id, demo_path):
-    """
-    Tallentaa valitun tehtävän hakemistopolkuun.
-    """
+    """Save task by ide_task_id and doc path."""
     data = Routes().get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path)
 
     # TODO: korjaa tarkistukset ja virheenkäsittely pydanticille
     if not data:
         click.echo("No file saved, maybe wrong id?")
         return
-        
+
     td = TaskData(**data)
     create_demo_task(td)
-    click.echo(td.header + " was saved")  # Just an example
+    click.echo(td.header + " was saved")
 
 
 @tim_ide.command()
@@ -79,7 +81,7 @@ def task(ide_task_id, demo_path):
 @click.argument("task", type=str, required=True)
 def push(course, task):
     """
-    Submits course or task data
+    Submit course or task data.
 
     Usage:
     [OPTIONS] COURSE
@@ -87,7 +89,6 @@ def push(course, task):
     Options:
     --task NAME (not required)
     """
-
     rand = random.randint(0, 10000)  # Just an example for generating different asnwers
 
     code_file = TaskFile(content=f"print('hello worlds! x {rand}')", path="main.py")  # TaskFile for single file
