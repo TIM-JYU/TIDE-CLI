@@ -1,5 +1,6 @@
+"""Module for creating file structures for tasks and demos."""
+
 import os
-import sys
 import json
 import shutil
 from tidecli.api.routes import Routes
@@ -9,7 +10,10 @@ from tidecli.models.Course import Course
 
 def create_task_files(task_data, file_path):
     """
-    Creates files of tasks in the given path.
+    Create files of tasks in the given path.
+
+    :param task_data: TaskData object
+    :param file_path: Path to folder to create task folder and file
     """
     # TODO: Tiedoston luonti useammalle tehtävälle
     # TODO: file_name oikeasta datasta
@@ -42,9 +46,10 @@ def create_task_files(task_data, file_path):
 
 def create_metadata(courses: list[Course]):
     """
-    Creates a metadata.json for each course
-    """
+    Create a metadata.json for each course.
 
+    :param courses: List of courses
+    """
     # TODO: tee metadata kaikkien kurssien kaikista tehtävistä
     metadata = []
     for course in courses:
@@ -52,36 +57,36 @@ def create_metadata(courses: list[Course]):
             "name": course.name,
             "id": course.id,
             "path": course.path,
-            "demos":[]
+            "demos": []
         }
 
         for demo in course.demo_paths:
-            #tasks = Routes.get_tasks_by_doc_path(doc_path=demo)
+            # tasks = Routes.get_tasks_by_doc_path(doc_path=demo)
             pass
 
         metadata.append(item)
-    print(metadata)
-            
+        print(metadata)
+
 
 def create_demo_strucure(courses: list[Course], overwrite=False):
     """
-    This creates a whole folder and filestructure
+    Create a whole folder and filestructure.
 
     :param tasks: List of tasks validated to TaskData
     :param tasks_demo_path: The path from course object, tells where to create tasks
     """
-
     # TODO: luo demotehtävien perusteella tiedostorakenne
     for course in courses:
         # create_files(files=task.task_files, folder_path=tasks_demo_path, overwrite=overwrite)
         pass
 
 
-def create_demo_task(task_data: TaskData):
+def create_demo_task(task_data: TaskData, course_name: str, demo_path: str):
     """
-    Creates a single demo
+    Create a single demo.
+
     :param task_data: Validated task data
-    
+
     """
     # TODO: ehkä pitäsi vaan luoda kaikki demot kerralla
 
@@ -90,103 +95,132 @@ def create_demo_task(task_data: TaskData):
         item = {
             "code": task.content,
             "path": task.path,
-            "header": task_data.header
         }
 
         files.append(item)
-        
-        folder_path = os.path.join(os.environ['HOME'], 'Desktop', 'Ohjelmointikurssi/Demo')
-    create_files(files=files, folder_path=folder_path)
-    
-        
-def create_files(files: list[dict]|dict, folder_path: str, overwrite=False):
+
+    demo_folder = demo_path.split("/")[-1]
+    folder_path = os.path.join(os.environ['HOME'], 'Desktop', course_name, demo_folder, task_data.header)
+    create_files(files=files, folder_path=folder_path, demo_path=demo_path, overwrite=False)
+    write_metadata(folder_path, task_data.ide_task_id, demo_path=demo_path)
+
+
+def create_files(files: list[dict] | dict, folder_path: str, demo_path: str, overwrite=False):
     """
-    Creates files of tasks in the given path.
+    Create files of tasks in the given path.
 
     :param files: Dict or list of dicts. Contain name with file extension (.eg .py or .txt ...) and content
     :param folder_path: Demo path to folder to create taskfolder and file
+    :param demo_path: Path to excercises in TIM
     :param overwrite: Flag if overwrite
 
     """
-
     if os.path.exists(folder_path):
         if isinstance(files, dict):
             create_file(files, folder_path=folder_path, overwrite=overwrite)
             return
-        
+
         if os.listdir(folder_path) != 0:
             if not overwrite:
                 # Raise SystemExit with code 1
-                #TODO: käsittele ylikirjoitus kunnolla, sekä yhden että monen tiedoston tapauksessa
+                # TODO: käsittele ylikirjoitus kunnolla, sekä yhden että monen tiedoston tapauksessa
                 print("TODO: Ei ylikirjoiteta, tämä on käsiteltävä erikseen.")
                 exit(1)
             else:
                 shutil.rmtree(folder_path)
 
-
     os.makedirs(folder_path, exist_ok=overwrite)
-    
-    for item in files:
-        full_file_path = os.path.join(folder_path, item['header'], item['path'])
 
+    for item in files:
+        full_file_path = os.path.join(folder_path, item['path'])
         os.makedirs(os.path.dirname(full_file_path), exist_ok=True)
         with open(full_file_path, 'x') as file:
             file.write(item['code'])
             file.close()
 
 
+def write_metadata(folder_path: str, ide_task_id: str, demo_path: str):
+    """
+    Write metadata.json to the given folder path.
+
+    :param folder_path: Path to folder
+    :param file_path: Path of the file
+
+    """
+    metadata = {
+        "item": ide_task_id,
+        "demo_path": demo_path
+    }
+
+    metadata_path = os.path.join(folder_path, "metadata.json")
+    writemode = "w"
+    if os.path.exists(metadata_path):
+        writemode = "x"
+    with open(os.path.join(metadata_path), writemode) as file:
+        content = json.dumps(metadata, indent=4, ensure_ascii=False)
+        file.write(content)
+        file.close()
+
+
 def create_file(item: dict, folder_path: str, overwrite=False):
     """
-    Creates files of tasks in the given path.
+    Create files of tasks in the given path.
+
     :param item: Single dict, contains file data
-    :param folder_path: Path to folder to create task folder and file 
+    :param folder_path: Path to folder to create task folder and file
     :param overwrite: Flag if overwrite
 
     """
-    
-    full_file_path = os.path.join(folder_path, item['header'], item['path'])
+    full_file_path = os.path.join(folder_path, item['path'])
     # By default, writemode is CREATE
     # If path exists already, write mode is WRITE (overwrites)
-    writemode = 'x'
     if os.path.exists(full_file_path):
         if not overwrite:
             # Raise SystemExit with code 1
             exit(1)
-            
-        writemode = 'w'
-            
-    #os.makedirs(os.path.dirname(full_file_path), exist_ok=True)
+
+    # os.makedirs(os.path.dirname(full_file_path), exist_ok=True)
     # Write the file with desired writemode, CREATE or WRITE
     with open(full_file_path, 'x') as file:
         file.write(item['code'])
         file.close()
-        
-            
+
 
 def formulate_metadata(courses: list, tasks: list):
+    """
+    Create metadata for courses and tasks.
+
+    One metadata file for each course. JSON format.
+    :param courses: List of courses
+    :param tasks: List of tasks
+    :return: List of courses and tasks
+    """
     return [courses, tasks]
 
 
 def create_folders(course_data, user_location):
     """
-    Creates folder structure for task/demo paths in course data.
+    Create folder structure for task/demo paths in course data.
+
+    :param course_data: List of courses
+
     """
     test_task_data = Routes().get_task_by_ide_task_id(ide_task_id="Tehtävä1", doc_path="courses/ohjelmointikurssi1"
-                                                                                       "/Demot/Demo1")
+                                                      "/Demot/Demo1")
     if not test_task_data:
         print("No task data found for the given ide_task_id.")
         return
 
-       # [{'ide_files': {'code': "print('Hello world!')",
-       #                              'path': 'main.py'},
-       #                'task_info': {'header': 'Hello world!',
-       #                              'stem': 'Kirjoita viesti maailmalle',
-       #                              'answer_count': None,
-       #                              'type': 'py'},
-       #                'task_id': '60.pythontesti',
-       #                'document_id': 60,
-       #                'paragraph_id': 'Xelt2CQGvUwL',
-       #                'ide_task_id': 'Tehtävä1'}]
+    # [{'ide_files': {'code': "print('Hello world!')",
+    #                              'path': 'main.py'},
+    #                'task_info': {'header': 'Hello world!',
+    #                              'stem': 'Kirjoita viesti maailmalle',
+    #                              'answer_count': None,
+    #                              'type': 'py'},
+    #                'task_id': '60.pythontesti',
+    #                'document_id': 60,
+    #                'paragraph_id': 'Xelt2CQGvUwL',
+    #                'ide_task_id': 'Tehtävä1'}]
 
     for course in course_data:
         course_name = course.get("course_name")
@@ -207,7 +241,10 @@ def create_folders(course_data, user_location):
 
 def check_path_validity():
     """
-    Check if the input path is valid
+    Check if the input path is valid.
+
+    :return: User selected path
+
     """
     while True:
         user_selected_path = input("Enter custom path where folder structure is created: ")
