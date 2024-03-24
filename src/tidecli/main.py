@@ -86,7 +86,7 @@ def create(ide_task_id, demo_path, all):
     else:
         # TODO: luo kaikkien harjoitusten kaikki tehtävät
         data = None
-    # TODO: korjaa tarkistukset ja virheenkäsittely pydanticille
+
     if not data:
         click.echo("No file saved, maybe wrong id?")
         return
