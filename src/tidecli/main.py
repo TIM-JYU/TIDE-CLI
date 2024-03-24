@@ -49,21 +49,33 @@ def courses():
         click.echo(course.pretty_print())
 
 
-@tim_ide.command()
+@click.group()
+def task():
+    """Task related commands
+
+    It is possible to list and create all tasks per excercise or just
+    create one task.
+
+    """
+    # TODO: printtaa esim. aiemmin noudetut taskit tms järkevää. Tai sitten ole printtaamatta
+    pass
+
+
+@task.command()
 @click.argument("demo_path", type=str, required=True)
-def tasks(demo_path):
+def list(demo_path):
     """Fetch tasks by doc path."""
     data = Routes().get_tasks_by_doc_path(doc_path=demo_path)
     tasks = [TaskData(**task) for task in data]
     for task in tasks:
         click.echo(task.header + ", " + task.ide_task_id)
 
-
-@tim_ide.command()
-@click.argument("ide_task_id", type=str, required=True)
+@task.command()
+@click.option("--task-id", type=str)
 @click.argument("demo_path", type=str, required=True)
-def task(ide_task_id, demo_path):
-    """Save task by ide_task_id and doc path."""
+def create(task_id, demo_path):
+    """Create all tasks or single if option given."""
+    ide_task_id = task_id
     data = Routes().get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path)
 
     # TODO: korjaa tarkistukset ja virheenkäsittely pydanticille
@@ -107,6 +119,8 @@ def push(course, task):
 
     click.echo(submit_object.console_output())
 
+
+tim_ide.add_command(task)
 
 if __name__ == "__main__":
     tim_ide()
