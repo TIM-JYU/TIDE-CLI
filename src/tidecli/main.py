@@ -70,22 +70,26 @@ def list(demo_path):
     for task in tasks:
         click.echo(task.header + ", " + task.ide_task_id)
 
-@task.command()
-@click.option("--task-id", type=str)
-@click.argument("demo_path", type=str, required=True)
-def create(task_id, demo_path):
-    """Create all tasks or single if option given."""
-    ide_task_id = task_id
-    data = Routes().get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path)
 
+@task.command()
+@click.option("--all", '-a', is_flag=True, default=False)
+@click.argument("demo_path", type=str, required=True)
+@click.argument("ide_task_id", type=str, required=False, default=None)
+def create(ide_task_id, demo_path, all):
+    """Create all tasks or single if option given."""
+    data = None
+    if not all:
+        data = Routes().get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path)
+        td = TaskData(**data)
+        create_demo_task(td)
+        click.echo(td.header + " was saved")
+    else:
+        # TODO: luo kaikkien harjoitusten kaikki tehtävät
+        data = None
     # TODO: korjaa tarkistukset ja virheenkäsittely pydanticille
     if not data:
         click.echo("No file saved, maybe wrong id?")
         return
-
-    td = TaskData(**data)
-    create_demo_task(td)
-    click.echo(td.header + " was saved")
 
 
 @tim_ide.command()
