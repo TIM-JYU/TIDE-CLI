@@ -71,7 +71,7 @@ def task():
 @click.argument("demo_path", type=str, required=True)
 def list(demo_path):
     """Fetch tasks by doc path."""
-    data = Routes().get_tasks_by_doc_path(doc_path=demo_path)
+    data = Routes().get_tasks_by_doc(doc_path=demo_path)
     tasks = [TaskData(**task) for task in data]
     for task in tasks:
         click.echo(task.header + ", " + task.ide_task_id)
