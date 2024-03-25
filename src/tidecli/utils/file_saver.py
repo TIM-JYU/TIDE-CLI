@@ -6,6 +6,7 @@ import shutil
 from tidecli.api.routes import Routes
 from tidecli.models.TaskData import TaskData
 from tidecli.models.Course import Course
+from pathlib import Path
 
 
 def create_task_files(task_data, file_path):
@@ -18,15 +19,24 @@ def create_task_files(task_data, file_path):
     # TODO: Tiedoston luonti useammalle tehtävälle
     # TODO: file_name oikeasta datasta
     file_name = "metadata.json"
+
+
     full_file_path = os.path.join(file_path, file_name)
+
+    # TODO: Pathlib käyttöön ->
+    # full_file_path = file_path / file_name
+    # if full_file_path.exists():
 
     # task_data string conversion
     task_data = json.dumps(task_data, indent=4)
 
     # Check if the file already exists
     overwrite = ""
+
     if os.path.exists(full_file_path):
         while overwrite.lower() not in ["y", "n"]:
+
+            # TODO: Käsittele ylikirjoitus click.promtilla?
             overwrite = input(f"File already exists: {full_file_path} \nDo you want to overwrite the file? (y/n): ")
             if overwrite.lower() == "y":
                 with open(full_file_path, "w") as file:

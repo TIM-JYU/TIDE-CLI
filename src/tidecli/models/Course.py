@@ -8,8 +8,8 @@ class Course(BaseModel):
     name: str
     id: int
     path: str
-    demo_paths: list[str]
+    task_paths: list[str]
 
     def pretty_print(self):
-        demos = "\n".join(self.demo_paths)
-        return f"Course:\n{self.name}\nPath:\n{self.path}\nDemo paths:\n{demos}\n"
+        task_paths = "\n".join(self.task_paths)
+        return f"Course:\n{self.name}\nPath:\n{self.path}\nDemo paths:\n{task_paths}\n"
