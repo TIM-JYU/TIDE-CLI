@@ -114,6 +114,7 @@ def create_demo_task(task_data: TaskData, course_name: str, demo_path: str):
         files.append(item)
 
     demo_folder = demo_path.split("/")[-1]
+    # TODO: muuta toimimaan käyttäjän antamalla polulla
     folder_path = os.path.join(os.environ['HOME'], 'Desktop', course_name, demo_folder, task_data.header)
     create_files(files=files, folder_path=folder_path, demo_path=demo_path, overwrite=False)
     write_metadata(folder_path, task_data.ide_task_id, demo_path=demo_path)

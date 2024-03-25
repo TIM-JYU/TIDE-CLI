@@ -360,10 +360,13 @@ class TestCreateDemoTasks(unittest.TestCase):
     def test_create_demo_tasks(self):
         """
         Create all demo tasks
+
+        All tasks are created in specified folder under
+        a excercise folder
         """
         course = {
             "name": "Ohjelmointikurssi Testi",
-            "demo_path": [
+            "demo_paths": [
                 "courses/ohjelmointikurssi1/Demot/Demo1"
             ]
         }
