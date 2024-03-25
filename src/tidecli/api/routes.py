@@ -1,42 +1,19 @@
-import configparser
-import os
+from dataclasses import dataclass
 
 import requests
 
 from tidecli.models import SubmitData
-from tidecli.models.TimFeedback import TimFeedback
+from tidecli.tide_config import *
 from tidecli.utils.error_logger import error_handler, CliError
 from tidecli.utils.handle_token import get_signed_in_user
 
 
+@error_handler
+@dataclass
 class Routes:
-    def __init__(self):
-        self.token = None
-        self.base_url = None
-        self.cf = self.load_config()
 
-    @error_handler
-    def load_config(self):
-        """
-        Load the token and base url/endpoint from the config file
-        """
-        config_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "../config.ini")
-        )
-        cf = configparser.ConfigParser()
-        try:
-            cf.read(config_path)
-            self.base_url = cf["OAuthConfig"]["base_url"]
-            token = get_signed_in_user()
-            if token is None:
-                raise CliError("User not logged in")
-            # TODO: Better error handling
-            self.token = get_signed_in_user().password
-            return cf
-        except Exception as e:
-            raise CliError("Config load failed. " + str(e))
+    token: str = get_signed_in_user().password if get_signed_in_user() else None
 
-    @error_handler
     def make_request(self, endpoint: str, method: str = "GET", params: dict = None):
         """
         Make a request to the API
@@ -48,9 +25,12 @@ class Routes:
         """
 
         try:
+            if not self.token:
+                raise CliError("User not logged in")
+
             res = requests.request(
                 method,
-                f"{self.base_url}{endpoint}",
+                f"{BASE_URL}{endpoint}",
                 headers={"Authorization": f"Bearer {self.token}"},
                 json=params,
             )
@@ -62,62 +42,49 @@ class Routes:
     def validate_token(self) -> dict:
         """
         Validate the token for the user
-        return: JSON response  of token time validity or TODO: This might not work as expected
+        return: JSON response  of token validity
         """
-        endpoint = self.cf["OAuthConfig"]["validate_token_endpoint"]
-        return self.make_request(endpoint=endpoint)
+        return self.make_request(endpoint=INTROSPECT_ENDPOINT, method="POST")
 
     def get_profile(self) -> dict:
         """
         Get the user profile
         return: JSON response  of user profile
         """
-        endpoint = self.cf["OAuthConfig"]["profile_endpoint"]
-        return self.make_request(endpoint=endpoint)
+        return self.make_request(endpoint=PROFILE_ENDPOINT)
 
     def get_ide_courses(self):
         """
         Get the logged in user courses that are in user bookmarks and have ideCourse tag
         return: JSON response of course name and course path, course id and paths for demo documents
         """
-        endpoint = self.cf["OAuthConfig"]["ide-courses_endpoint"]
-        return self.make_request(endpoint=endpoint)
+        return self.make_request(endpoint=IDE_COURSES_ENDPOINT)
 
-    def get_demos_by_doc_id(self, doc_id: int):
+    def task_folders_by_doc(self, doc_path: str = None, doc_id: int = None):
         """
-        Get the demos that are listed in ideDocuments tag in document tags by document id
-        :param doc_id: document id
+        Get the course task folders by document path or document id
+        :param doc_path: Course main document path (starting page), e.g. "courses/ohjelmointikurssi1/ohjelmointikurssi1"
+        :param doc_id: Course main document id
         return: JSON response of demos
         """
-        endpoint = self.cf["OAuthConfig"]["demos_by_doc_id_endpoint"]
-        return self.make_request(endpoint=endpoint, params={"doc_id": doc_id})
 
-    def get_demos_by_doc_path(self, doc_path: str):
-        """
-        Get the demos that are listed in ideDocuments tag in document tags by course name
-        :param doc_path: Course main document path
-        return: JSON response of demos
-        """
-        endpoint = self.cf["OAuthConfig"]["demos_by_doc_path_endpoint"]
-        return self.make_request(endpoint=endpoint, params={"doc_path": doc_path})
+        if doc_path is None and doc_id is None:
+            raise CliError("doc_path or doc_id must be provided")
 
-    def get_tasks_by_doc_path(self, doc_path: str):
+        return self.make_request(endpoint=TASK_FOLDERS_BY_DOC_ENDPOINT, params={"doc_path": doc_path, "doc_id": doc_id})
+
+    def get_tasks_by_doc(self, doc_path: str = None, doc_id: int = None):
         """
-        Get the tasks by demo document path
-        :param doc_path: Demo document path
+        Get the tasks by document path or document id
+        :param doc_path: Tasks folder path
+        :param doc_id: Document id
         return: JSON response of tasks
         """
-        endpoint = self.cf["OAuthConfig"]["tasks_by_doc_path_endpoint"]
-        return self.make_request(endpoint=endpoint, params={"doc_path": doc_path})
 
-    def get_tasks_by_doc_id(self, doc_id: int):
-        """
-        Get the tasks by demo document id
-        :param doc_id: Demo document id
-        return: JSON response of tasks
-        """
-        endpoint = self.cf["OAuthConfig"]["tasks_by_doc_id_endpoint"]
-        return self.make_request(endpoint=endpoint, params={"doc_id": doc_id})
+        if doc_path is None and doc_id is None:
+            raise CliError("doc_path or doc_id must be provided")
+
+        return self.make_request(endpoint=TASKS_BY_DOC_ENDPOINT, params={"doc_path": doc_path, "doc_id": doc_id})
 
     def get_task_by_ide_task_id(
             self,
@@ -132,9 +99,9 @@ class Routes:
         :param doc_id: Demo document id
         return: JSON response of tasks
         """
-        endpoint = self.cf["OAuthConfig"]["task_by_ide_task_id_endpoint"]
+
         return self.make_request(
-            endpoint=endpoint,
+            endpoint=TASK_BY_IDE_TASK_ID_ENDPOINT,
             params={
                 "doc_id": doc_id,
                 "doc_path": doc_path,
@@ -144,18 +111,15 @@ class Routes:
 
     def submit_task(
             self,
-            task_file: SubmitData,
+            task_files: SubmitData,
     ):
         """
         Submit the task by task id, document id and paragraph id
-        :param task_file: Task data
+        :param task_files: Task/s data
         return: JSON response of tasks
         """
 
-        endpoint = self.cf["OAuthConfig"]["submit_task_endpoint"]
-        response = self.make_request(
-            endpoint=endpoint,
-            params=task_file.submit_json()
+        return self.make_request(
+            endpoint=SUBMIT_TASK_ENDPOINT,
+            params=task_files.submit_json()
         )
-
-        return TimFeedback(**response.get("result"))
