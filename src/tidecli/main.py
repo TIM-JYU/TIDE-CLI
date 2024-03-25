@@ -72,6 +72,11 @@ def task():
 def list(demo_path):
     """Fetch tasks by doc path."""
     data = Routes().get_tasks_by_doc(doc_path=demo_path)
+
+    if "error" in data:
+        click.echo(data["error"])
+        return
+
     tasks = [TaskData(**task) for task in data]
     for task in tasks:
         click.echo(task.header + ", " + task.ide_task_id)
@@ -85,7 +90,7 @@ def create(ide_task_id, demo_path, all):
     """Create all tasks or single if option given."""
     data = None
     if not all:
-        data = Routes().get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path)
+        data = Routes().get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path, doc_id=60)
         
         # TODO: katso että ttarkistukset toimii kunnolla
         if not data:
