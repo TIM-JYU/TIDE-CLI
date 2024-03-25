@@ -1,12 +1,12 @@
 import unittest
-
-from tidecli.api.routes import Routes
 from unittest.mock import patch, MagicMock
 
-# TODO: Saman luokan alle kaikki -> refaktoroi esimerkit yhteen
+from tidecli.api.routes import *
+from tidecli.models.SubmitData import SubmitData
+from tidecli.models.TaskData import TaskFile
 
 
-class TestAuthentication(unittest.TestCase):
+class TestRoutes(unittest.TestCase):
     def setUp(self):
         self.routes = Routes()
         self.mock_response = MagicMock()
@@ -19,327 +19,253 @@ class TestAuthentication(unittest.TestCase):
         """
         TDD-unit test model for the route to get user profile
         """
-        user = MagicMock()
-        user.id = 1
-        user.email = "test@t.fi"
-        user.last_name = "Testinen"
-        user.given_name = "Teppo"
-        user.real_name = "Teppo Testinen"
-        user.name = "test"
         self.mock_response.json.return_value = {
-            "id": user.id,
-            "emails": [
-                {
-                    "email": user.email,
-                    "verified": True,
-                }
-            ],
-            "last_name": user.last_name,
-            "given_name": user.given_name,
-            "real_name": user.real_name,
-            "username": user.name,
+            'emails': [
+                {'email': 't1@test.com',
+                 'verified': True}],
+            'given_name': 'Testfirstname',
+            'id': 2,
+            'last_name': 'Testlastname',
+            'real_name': 'Tester',
+            'username': 'test'
         }
 
         with self.patch:
             res = self.routes.get_profile()
             assert res == self.mock_response.json.return_value
 
-    def test_validate_new_token(self):
+    def test_validate_token(self):
         """
-        TDD-unit test model for the route to validate new token
+        TDD-unit test model for the route to validate valid token
         """
-        self.mock_response.json.return_value = {"validityTime": "10 days, 0:00:00"}
-
-        return_value = {"validityTime": "10 days, 0:00:00"}
+        self.mock_response.json.return_value = {
+            'active': True,
+            'aud': 'oauth2_tide',
+            'client_id': 'oauth2_tide',
+            'exp': 864000,
+            'iat': 123123,
+            'scope': 'profile user_tasks user_courses',
+            'token_type': 'Bearer',
+            'username': 'test'
+        }
 
         with self.patch:
             res = self.routes.validate_token()
-            assert res == return_value
+            assert res == self.mock_response.json.return_value
 
     def test_validate_token_with_expired_time(self):
         """
         TDD-unit test model for the route to validate token which time has expired
         """
-        self.mock_response.json.return_value = {"validityTime": "0:00:00"}
 
-        return_value = {"validityTime": "0:00:00"}
+        # TODO: Confirm this when introspect endpoint is implemented correctly
+        self.mock_response.json.return_value = {
+            'active': False,
+            'aud': 'oauth2_tide',
+            'client_id': 'oauth2_tide',
+            'exp': 0,
+            'iat': 123123,
+            'scope': 'profile user_tasks user_courses',
+            'token_type': 'Bearer',
+            'username': 'test'
+        }
 
         with self.patch:
             res = self.routes.validate_token()
-            assert res == return_value
+            assert res == self.mock_response.json.return_value
 
-
-class TestGetCourse(unittest.TestCase):
-    def setUp(self):
-        self.routes = Routes()
-        self.mock_response = MagicMock()
-        self.patch = patch(
-            "tidecli.api.routes.requests.request",
-            return_value=self.mock_response,
-        )
-
-    def test_get_ideTask_courses(self):
+    def test_get_user_ide_courses(self):
         """
-        TDD-unit test model for the route, gets all courses user has bookmarked and have ideDocument tag.
+        TDD-unit test model for the route, gets all courses user has bookmarked and have ideDocument tag with task paths
         """
         self.mock_response.json.return_value = [
             {
-                "course_name": "Ohjelmointi 1",
-                "course_path": "/view/courses/ohjelmointi1",
-                "document_id": "1",
-            },
-            {
-                "course_name": "Testikurssi 5",
-                "course_path": "/view/courses/testikurssi5",
-                "document_id": "5",
-            },
+                'id': 58,
+                'name': 'Ohjelmointikurssi1',
+                'path': '/view/courses/ohjelmointikurssi1/ohjelmointikurssi1',
+                'task_paths': ['courses/ohjelmointikurssi1/Demot/Demo1',
+                               'courses/ohjelmointikurssi1/Demot/Demo2']
+            }
         ]
 
         with self.patch:
             res = self.routes.get_ide_courses()
             assert res == self.mock_response.json.return_value
 
-
-class TestGetDemos(unittest.TestCase):
-
-    def setUp(self):
-        self.routes = Routes()
-        self.mock_response = MagicMock()
-        self.patch = patch(
-            "tidecli.api.routes.requests.request",
-            return_value=self.mock_response,
-        )
-
-    def test_get_demos_by_doc_id(self):
+    def test_task_folders_by_doc(self):
         """
         TDD-unit test model for the route
         """
 
         # This should return the list of documents in the course with parameter defined in document tag:
         # ideDocuments:
-        #   - path: "kurssit/tie/Ohjelmointi2/Demo1
-        #   - path: "kurssit/tie/Ohjelmointi2/Demo2
-        #   - path: "kurssit/tie/Ohjelmointi2/Demo3
-        #   - path: "kurssit/tie/Ohjelmointi2/Demo4
-        #   - path: "kurssit/tie/Ohjelmointi2/Demo5
+        #   - path: "kurssit/tie/Ohjelmointi2/DemDemo1"
 
-        self.mock_response.json.return_value = {
-            "Ohjelmointi2": [
-                {
-                    "name": "Demo1",
-                    "path": "kurssit/tie/Ohjelmointi2/Demo1",
-                    "doc_id": 1,
-                },
-                {
-                    "name": "Demo2",
-                    "path": "kurssit/tie/Ohjelmointi2/Demo2",
-                    "doc_id": 2,
-                },
-                {
-                    "name": "Demo3",
-                    "path": "kurssit/tie/Ohjelmointi2/Demo3",
-                    "doc_id": 3,
-                },
-            ]
-        }
+        self.mock_response.json.return_value = [
+            'kurssit/tie/Ohjelmointi2/Demot/Demo1',
+            'kurssit/tie/Ohjelmointi2/Demot/Demo2']
 
+        # Test with doc_id
         with self.patch:
-            res = self.routes.get_demos_by_doc_id(doc_id=1)
+            res = self.routes.task_folders_by_doc(doc_id=1)
             assert res == self.mock_response.json.return_value
 
-    def test_get_demos_by_course_name(self):
-        """
-        TDD-unit test model for the route
-        """
-
-        self.mock_response.json.return_value = {
-            "Ohjelmointi2": [
-                {
-                    "name": "Demo1",
-                    "path": "kurssit/tie/Ohjelmointi2/Demo1",
-                    "doc_id": 1,
-                },
-                {
-                    "name": "Demo2",
-                    "path": "kurssit/tie/Ohjelmointi2/Demo2",
-                    "doc_id": 2,
-                },
-                {
-                    "name": "Demo3",
-                    "path": "kurssit/tie/Ohjelmointi2/Demo3",
-                    "doc_id": 3,
-                },
-            ]
-        }
-
+        # Test with doc_path
         with self.patch:
-            res = self.routes.get_demos_by_doc_path(doc_path="Ohjelmointi2")
+            res = self.routes.task_folders_by_doc(doc_path="kurssit/tie/Ohjelmointi2/Ohjelmointi2")
             assert res == self.mock_response.json.return_value
 
-
-class TestGetTasks(unittest.TestCase):
-    def setUp(self):
-        self.routes = Routes()
-        self.mock_response = MagicMock()
-        self.patch = patch(
-            "tidecli.api.routes.requests.request",
-            return_value=self.mock_response,
-        )
-
-    def test_get_tasks_by_demo_doc_id(self):
+    def test_get_tasks_by_doc(self):
         """
-        TDD-unit test model for the route to get tasks by demo doc id
+        TDD-unit test model for the route to get tasks by task document path or document id
         """
 
-        self.mock_response.json.return_value = {
-            "Demo1": [
-                # One code file per task, file saved to root of the demo
-                {
-                    "task_info": {
-                        "header": "Tehtävä 1",
-                        "stem": "Kirjoita ohjelma, joka tulostaa 'Hello World' konsoliin",
-                        "type": "py",
-                        "answer_count": 1,
-                        "task_id": 1,
-                    },
-                    "code_files": [
-                        {
-                            "code": "print('Hello World1')",
-                            "path": None,
-                            "ideTask_id": "T1",
-                            "paragraph_id": "P1",
-                        },
-                    ],
-                }
-            ],
-            "Demo2": [
-                # Multiple code files per task files listed with "files:"-tag and saved according to the path
-                {
-                    "task_info": {
-                        "header": "Tehtävä 1",
-                        "stem": "Kirjoita ohjelma joka hakee muuttujan toisesta tiedostosta",
-                        "type": ".py",  # Not sure how to get this
-                        "answer_count": 1,
-                    },
-                    "code_files": [
-                        {
-                            "code": "print('Hello World1')",
-                            "path": "/main.py",
-                            "ideTask_id": "T1",
-                            "paragraph_id": "P1",
-                        },
-                        {
-                            "code": "print('Hello Worlds2')",
-                            "path": "/main2.py",
-                            "ideTask_id": "T2",
-                            "paragraph_id": "P2",
-                        },
-                    ],
-                }
-            ],
-            "Demo3": [
-                # Multiple code files with same ideTask id. Files saved by language specific structure. In this case
-                # the files should be saved to the folder Demo3/demo.d3/
-                {
-                    "task_info": {
-                        "header": "Tehtävä 1",
-                        "stem": "Write two programs that print 'Hello World' to the console and are in the same java "
-                        "package",
-                        "type": "java",
-                        "answer_count": 0,
-                        "task_id": 1,
-                    },
-                    "code_files": [
-                        {
-                            "code": "package demo.d3\npublic class Testi {\n\tpublic static void main(String[] args)"
-                            '{\nSystem.out.println("Hello World!");\n\t}\n}',
-                            "path": None,
-                            "ideTask_id": "T1",
-                            "paragraph_id": "P1",
-                        },
-                        {
-                            "code": "package demo.d3\npublic class Testi2 {\n\tpublic static void main(String[] args)"
-                            '{\nSystem.out.println("Hello World!");\n\t}\n}',
-                            "path": None,
-                            "ideTask_id": "T1",
-                            "paragraph_id": "P1",
-                        },
-                    ],
-                }
-            ],
-        }
+        self.mock_response.json.return_value = [
+            # One code file per task
+            {
+                "task_files": [
+                    {
+                        "content": "print('Hello world!')",
+                        "path": "main.py"
+                    }
+                ],
+                "header": "Tehtävä 1",
+                "stem": "Kirjoita viesti maailmalle",
+                "type": "py",
+                "task_id": "pythontesti",
+                "doc_id": 60,
+                "par_id": "Xelt2CQGvUwL",
+                "ide_task_id": "Tehtävä1"
+            },
 
+            # Multiple code files per task files listed with "files:"-tag and saved according to the path
+            {
+                "task_files": [
+                    {
+                        "content": "#include <stdio.h>\n#include \"add.h\"\n\nint main() {\n  printf(\"%d\", add(1, 2));\n  return 0;\n}\n",
+                        "path": "main.cc"
+                    },
+                    {
+                        "content": "\nint add(int a, int b) {\n  return 0;\n}\n",
+                        "path": "add.cc"
+                    },
+                    {
+                        "content": "\nint add(int a, int b);",
+                        "path": "add.h"
+                    }
+                ],
+                "header": "Tehtävä 2",
+                "stem": "md:\nKorjaa `add.cc`:ssa oleva `add`-funktio niin, että se summaa\nluvut `a` ja `b`.",
+                "type": "cc",
+                "task_id": "Tehtava3",
+                "doc_id": 60,
+                "par_id": "RDDZdgS1GwDR",
+                "ide_task_id": "Tehtävä2"
+            },
+
+            # TODO: Multiple code files with same ideTask id. Files saved by language specific structure.
+        ]
+
+        # Test with doc_id
         with self.patch:
-            res = self.routes.get_tasks_by_doc_id(doc_id=1)
+            res = self.routes.get_tasks_by_doc(doc_id=1)
             assert res == self.mock_response.json.return_value
 
-    def test_get_tasks_by_demo_doc_path(self):
-        """
-        TDD-unit test model for the route to get tasks by demo doc path
-        """
-
-        self.mock_response.json.return_value = {
-            "Demo1": [
-                # One code file per task, file saved to root of the demo
-                {
-                    "task_info": {
-                        "header": "Tehtävä 1",
-                        "stem": "Kirjoita ohjelma, joka tulostaa 'Hello World' konsoliin",
-                        "type": "py",
-                        "answer_count": 1,
-                        "task_id": 1,
-                    },
-                    "code_files": [
-                        {
-                            "code": "print('Hello World1')",
-                            "path": None,
-                            "ideTask_id": "T1",
-                            "paragraph_id": "P1",
-                        },
-                    ],
-                }
-            ],
-        }
-        with self.patch:
-            res = self.routes.get_tasks_by_doc_path(
-                doc_path="kurssit/tie/Ohjelmointi2/Demo1"
+        # Test with doc_path
+        with (self.patch):
+            res = self.routes.get_tasks_by_doc(
+                doc_path="kurssit/tie/Ohjelmointi2/Demot/Demo1"
             )
             assert res == self.mock_response.json.return_value
 
     def test_get_task_by_ide_task_id(self):
-
+        """
+        TDD-unit test model for the route to get tasks by ideTask id and demo document path or document id
+        """
         self.mock_response.json.return_value = {
-            "Demo1": [
-                # One code file per task, file saved to root of the demo
-                {
-                    "task_info": {
-                        "header": "Tehtävä 1",
-                        "stem": "Kirjoita ohjelma, joka tulostaa 'Hello World' konsoliin",
-                        "type": "py",
-                        "answer_count": 1,
-                        "task_id": 1,
-                    },
-                    "code_files": [
-                        {
-                            "code": "print('Hello World1')",
-                            "path": None,
-                            "ideTask_id": "T1",
-                            "paragraph_id": "P1",
-                        },
-                    ],
-                }
+            'doc_id': 60,
+            'header': 'Tehtävä 5',
+            'ide_task_id': 'Tehtävä5',
+            'par_id': 'pukg3h0uynFa',
+            'stem': 'Hello World -ohjelma tulostaa näytölle tekstin "Hello World".\n',
+            'task_files': [
+                {'content': 'System.Console.WriteLine("Hello World");', 'path': 'main.cs'}
             ],
+            'task_id': 'tehtava5',
+            'type': 'cs'
         }
 
+        # Test with doc_path
         with self.patch:
             res = self.routes.get_task_by_ide_task_id(
-                demo_path="kurssit/tie/Ohjelmointi2/Demo1", ide_task_id="T1"
+                doc_path="kurssit/tie/Ohjelmointi2/Demo1", ide_task_id="T1"
             )
             assert res == self.mock_response.json.return_value
 
-
-class TestSubmitTask(unittest.TestCase):
+        # Test with doc_id
+        with self.patch:
+            res = self.routes.get_task_by_ide_task_id(
+                doc_id=2, ide_task_id="T1"
+            )
+            assert res == self.mock_response.json.return_value
 
     def test_submit_task_by_id(self):
-        # TODO: Submit task by id
-        pass
+        """
+        TDD-unit test model for the route to submit task by task id, document id and paragraph id
+
+        """
+
+        code_file = TaskFile(content=f"print('hello world!)", path="main.py")  # TaskFile for single file
+
+        code_files = [
+            TaskFile(
+                content="#include <stdio.h>\n#include \"add.h\"\n\nint main() {\nprintf(\"%d\", add(1, 2));\nreturn 1;\n}\n",
+                path="main.cc"),
+            TaskFile(content="int add(int a, int b) {\nreturn 0;\n}\n", path="add.cc"),
+            TaskFile(content="int add(int a, int b);", path="add.h")
+        ]
+
+        # Submitdata for single file
+        t = SubmitData(code_files=code_file, task_id="Tehtava1", doc_id=60, code_language="py")
+
+        # Submitdata for multiple files
+        t2 = SubmitData(code_files=code_files, task_id="Tehtava2", doc_id=60, code_language="cc")
+
+        self.mock_response.json.return_value = {
+            'plugin': None,
+            'result':
+                {
+                    'savedNew': 81,
+                    'valid': True,
+                    'web': {
+                        'console': 'hello world!\n',
+                        'error': '',
+                        'language': None,
+                        'pwd': '',
+                        'runtime': '  0.640   0.616\n\nRun time:\nreal\t0m0.034s\nuser\t0m0.023s\nsys\t0m0.011s\n'
+                    }
+                }
+        }
+
+        with self.patch:
+            res = self.routes.submit_task(task_files=t)
+            assert res == self.mock_response.json.return_value
+
+        self.mock_response.json.return_value = {
+            'plugin': None,
+            'result': {
+                'savedNew': 81,
+                'valid': True,
+                'web': {
+                    'console': 'Feedback for the task\n',
+                    'error': '',
+                    'pwd': '',
+                    'language': None,
+                    'runtime': '  0.640   0.616\n\nRun time:\nreal\t0m0.034s\nuser\t0m0.023s\nsys\t0m0.011s\n'
+                },
+            },
+        }
+
+        with self.patch:
+            res = self.routes.submit_task(task_files=t2)
+            assert res == self.mock_response.json.return_value

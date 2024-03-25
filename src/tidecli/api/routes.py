@@ -63,7 +63,7 @@ class Routes:
     def task_folders_by_doc(self, doc_path: str = None, doc_id: int = None):
         """
         Get the course task folders by document path or document id
-        :param doc_path: Course main document path
+        :param doc_path: Course main document path (starting page), e.g. "courses/ohjelmointikurssi1/ohjelmointikurssi1"
         :param doc_id: Course main document id
         return: JSON response of demos
         """
@@ -111,15 +111,15 @@ class Routes:
 
     def submit_task(
             self,
-            task_file: SubmitData,
+            task_files: SubmitData,
     ):
         """
         Submit the task by task id, document id and paragraph id
-        :param task_file: Task data
+        :param task_files: Task/s data
         return: JSON response of tasks
         """
 
         return self.make_request(
             endpoint=SUBMIT_TASK_ENDPOINT,
-            params=task_file.submit_json()
+            params=task_files.submit_json()
         )
