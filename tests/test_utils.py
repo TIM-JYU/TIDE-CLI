@@ -353,3 +353,26 @@ class TestCreateDemoTask(unittest.TestCase):
 
     def tearDownClass():
         shutil.rmtree(os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi'))
+
+
+@colorize(color=MAGENTA)
+class TestCreateDemoTasks(unittest.TestCase):
+    def test_create_demo_tasks(self):
+        """
+        Create all demo tasks
+
+        All tasks are created in specified folder under
+        a excercise folder
+        """
+        course = {
+            "name": "Ohjelmointikurssi Testi",
+            "demo_paths": [
+                "courses/ohjelmointikurssi1/Demot/Demo1"
+            ]
+        }
+
+        file_saver.create_demo_tasks(course)
+        assert os.path.exists(os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi', 'Demo1', 'Testitehtävä', 'metadata.json'))
+
+    def tearDownClass():
+        shutil.rmtree(os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi'))

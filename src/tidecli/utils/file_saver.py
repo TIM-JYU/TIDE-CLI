@@ -91,11 +91,25 @@ def create_demo_strucure(courses: list[Course], overwrite=False):
         pass
 
 
+def create_demo_tasks(course: Course):
+    """
+    Create all tasks in excercise.
+
+    :param tasks: all tasks in
+    """
+    for demo_path in course.demo_paths:
+        tasks = Routes.get_tasks_by_doc_path(demo_path)
+        for task in tasks:
+            create_demo_task(task_data=task, course_name=course.name, demo_path=demo_path)
+
+
 def create_demo_task(task_data: TaskData, course_name: str, demo_path: str):
     """
-    Create a single demo.
+    Create a single task.
 
     :param task_data: Validated task data
+    :param course_name: course name
+    :param demo_path: path to demo in TIM
 
     """
     # TODO: ehkä pitäsi vaan luoda kaikki demot kerralla
@@ -110,6 +124,8 @@ def create_demo_task(task_data: TaskData, course_name: str, demo_path: str):
         files.append(item)
 
     demo_folder = demo_path.split("/")[-1]
+
+    # TODO: muuta toimimaan käyttäjän antamalla polulla
     folder_path = os.path.join(os.environ['HOME'], 'Desktop', course_name, demo_folder, task_data.header)
     create_files(files=files, folder_path=folder_path, demo_path=demo_path, overwrite=False)
     write_metadata(folder_path, task_data.ide_task_id, demo_path=demo_path)
