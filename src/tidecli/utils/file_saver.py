@@ -5,6 +5,7 @@ import json
 import shutil
 from tidecli.api.routes import Routes
 from tidecli.models.TaskData import TaskData
+from tidecli.models.TaskMetadata import TaskMetadata
 from tidecli.models.Course import Course
 from pathlib import Path
 
@@ -20,8 +21,7 @@ def create_task_files(task_data, file_path):
     # TODO: file_name oikeasta datasta
     file_name = "metadata.json"
 
-
-    full_file_path = os.path.join(file_path, file_name)
+    full_file_path = str(Path(file_path).joinpath(file_name))
 
     # TODO: Pathlib käyttöön ->
     # full_file_path = file_path / file_name
@@ -123,12 +123,22 @@ def create_demo_task(task_data: TaskData, course_name: str, demo_path: str):
 
         files.append(item)
 
+    code_language = task_data.type
     demo_folder = demo_path.split("/")[-1]
-
     # TODO: muuta toimimaan käyttäjän antamalla polulla
-    folder_path = os.path.join(os.environ['HOME'], 'Desktop', course_name, demo_folder, task_data.header)
-    create_files(files=files, folder_path=folder_path, demo_path=demo_path, overwrite=False)
-    write_metadata(folder_path, task_data.ide_task_id, demo_path=demo_path)
+    user_folder = Path.home()
+    folder_path = str(Path.home().joinpath('Desktop', course_name, demo_folder, task_data.header))
+
+    create_files(files=files,
+                 folder_path=folder_path,
+                 demo_path=demo_path,
+                 overwrite=False)
+    
+    write_metadata(folder_path,
+                   task_data.task_id,
+                   demo_path=demo_path,
+                   doc_id=task_data.doc_id,
+                   code_language=code_language)
 
 
 def create_files(files: list[dict] | dict, folder_path: str, demo_path: str, overwrite=False):
@@ -158,32 +168,37 @@ def create_files(files: list[dict] | dict, folder_path: str, demo_path: str, ove
     os.makedirs(folder_path, exist_ok=overwrite)
 
     for item in files:
-        full_file_path = os.path.join(folder_path, item['path'])
+        full_file_path = str(Path(folder_path).joinpath(item['path']))
         os.makedirs(os.path.dirname(full_file_path), exist_ok=True)
         with open(full_file_path, 'x') as file:
             file.write(item['code'])
             file.close()
 
 
-def write_metadata(folder_path: str, ide_task_id: str, demo_path: str):
+def write_metadata(folder_path: str, task_id: str, demo_path: str, doc_id: int, code_language: str):
     """
     Write metadata.json to the given folder path.
 
-    :param folder_path: Path to folder
-    :param file_path: Path of the file
-
+    :param folder_path: Path to folder to create metadata.json
+    :param task_id: Task id
+    :param demo_path: Path to excercises in TIM
+    :param doc_id: Document id
+    :param code_language: Language of the code
     """
     metadata = {
-        "item": ide_task_id,
-        "demo_path": demo_path
+        "task_id": task_id,
+        "demo_path": demo_path,
+        "doc_id": doc_id,
+        "code_language": code_language
     }
 
-    metadata_path = os.path.join(folder_path, "metadata.json")
+    valid_metadata = TaskMetadata(**metadata)
+    metadata_path = str(Path(folder_path).joinpath("metadata.json"))
     writemode = "w"
     if os.path.exists(metadata_path):
         writemode = "x"
-    with open(os.path.join(metadata_path), writemode) as file:
-        content = json.dumps(metadata, indent=4, ensure_ascii=False)
+    with open(metadata_path, writemode) as file:
+        content = valid_metadata.pretty_print()
         file.write(content)
         file.close()
 
@@ -197,7 +212,7 @@ def create_file(item: dict, folder_path: str, overwrite=False):
     :param overwrite: Flag if overwrite
 
     """
-    full_file_path = os.path.join(folder_path, item['path'])
+    full_file_path = str(Path(folder_path).joinpath(item['path']))
     # By default, writemode is CREATE
     # If path exists already, write mode is WRITE (overwrites)
     if os.path.exists(full_file_path):
@@ -254,7 +269,7 @@ def create_folders(course_data, user_location):
 
         for i, demo in enumerate(demo_paths):
             demo_path = demo.get("path")
-            full_path = os.path.join(user_location, course_name, demo_path)
+            full_path = str(Path(user_location, course_name, demo_path))
 
             # Creates directory and parent directories if they don't exist
             os.makedirs(full_path, exist_ok=True)
