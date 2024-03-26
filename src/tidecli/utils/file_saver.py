@@ -301,10 +301,36 @@ def check_path_validity():
                   f"Enter 'pwd' to print current working directory.")
 
 
-# routes = Routes()
+def get_task_file_data(file_path: str):
+    """
+    Get file data from the given path.
 
-# Get course data
-# user_course_data = routes.get_ide_courses()
+    :return: File data
+    """
+    if not os.path.exists(file_path):
+        print(f"File not found in {file_path}")
+        return
 
-# Users choice for custom path
-# user_path = check_path_validity()
+    with open(file_path, "r") as file:
+        file_data = file.read()
+        file.close()
+
+    return file_data
+
+
+def get_metadata(path: str):
+    """
+    Get metadata from the given path.
+
+    :return: Metadata
+    """
+    metadata_path = os.path.join(path, "metadata.json")
+    if not os.path.exists(metadata_path):
+        print(f"Metadata not found in {path}")
+        return
+
+    with open(metadata_path, "r") as file:
+        metadata = json.load(file)
+        file.close()
+
+    return metadata
