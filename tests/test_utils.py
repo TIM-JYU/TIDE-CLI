@@ -249,6 +249,7 @@ class TestCreateFile(unittest.TestCase):
 
 @colorize(color=GREEN)
 class TestCreateFiles(unittest.TestCase):
+    """Test the creation of multiple files to folder."""
     def test_create_files(self):
         """
         Create all files given in list to folder
@@ -265,7 +266,7 @@ class TestCreateFiles(unittest.TestCase):
 
     def test_overwrite_files(self):
         """
-        Overwrite all files given in list in folder
+        Overwrite all files given in list in folder.
         """
         changed_file_data = [{
             "code": "print('Changed!')",
@@ -327,12 +328,15 @@ class TestCreateMetadata(unittest.TestCase):
         """
         metadata_path = os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi', 'Demo1', 'Testitehtävä')
         os.makedirs(metadata_path)
-        file_saver.write_metadata(metadata_path, 'Tehtävä1', 'courses/ohjelmointikurssi1/Demot/Demo1')
+        file_saver.write_metadata(metadata_path, '#tehtävä', 'courses/ohjelmointikurssi1/Demot/Demo1', 60, '.py')
 
         with open(os.path.join(metadata_path, 'metadata.json'), 'r') as file:
             contents = file.read()
             self.assertEqual(
-                contents, '{\n    "item": "Tehtävä1",\n    "demo_path": "courses/ohjelmointikurssi1/Demot/Demo1"\n}')
+                contents, '{\n    "task_id": "#tehtävä",\n'
+                '    "demo_path": "courses/ohjelmointikurssi1/Demot/Demo1",\n'
+                '    "doc_id": 60,\n'
+                '    "code_language": ".py"\n}')
 
         assert os.path.exists(os.path.join(metadata_path, 'metadata.json'))
 
@@ -356,8 +360,8 @@ class TestCreateDemoTask(unittest.TestCase):
 
 
 @colorize(color=MAGENTA)
-class TestCreateDemoTasks(unittest.TestCase):
-    def test_create_demo_tasks(self):
+class TestCreateDemoTasks():
+    def test_create_demo_tasks():
         """
         Create all demo tasks
 

@@ -5,6 +5,7 @@ import json
 import shutil
 from tidecli.api.routes import Routes
 from tidecli.models.TaskData import TaskData
+from tidecli.models.TaskMetadata import TaskMetadata
 from tidecli.models.Course import Course
 from pathlib import Path
 
@@ -122,13 +123,22 @@ def create_demo_task(task_data: TaskData, course_name: str, demo_path: str):
 
         files.append(item)
 
+    code_language = task_data.type
     demo_folder = demo_path.split("/")[-1]
-
     # TODO: muuta toimimaan käyttäjän antamalla polulla
     user_folder = Path.home()
     folder_path = str(Path.home().joinpath('Desktop', course_name, demo_folder, task_data.header))
-    create_files(files=files, folder_path=folder_path, demo_path=demo_path, overwrite=False)
-    write_metadata(folder_path, task_data.ide_task_id, demo_path=demo_path)
+
+    create_files(files=files,
+                 folder_path=folder_path,
+                 demo_path=demo_path,
+                 overwrite=False)
+    
+    write_metadata(folder_path,
+                   task_data.task_id,
+                   demo_path=demo_path,
+                   doc_id=task_data.doc_id,
+                   code_language=code_language)
 
 
 def create_files(files: list[dict] | dict, folder_path: str, demo_path: str, overwrite=False):
@@ -165,7 +175,7 @@ def create_files(files: list[dict] | dict, folder_path: str, demo_path: str, ove
             file.close()
 
 
-def write_metadata(folder_path: str, ide_task_id: str, demo_path: str):
+def write_metadata(folder_path: str, task_id: str, demo_path: str, doc_id: int, code_language: str):
     """
     Write metadata.json to the given folder path.
 
@@ -174,16 +184,19 @@ def write_metadata(folder_path: str, ide_task_id: str, demo_path: str):
 
     """
     metadata = {
-        "item": ide_task_id,
-        "demo_path": demo_path
+        "task_id": task_id,
+        "demo_path": demo_path,
+        "doc_id": doc_id,
+        "code_language": code_language
     }
 
+    valid_metadata = TaskMetadata(**metadata)
     metadata_path = str(Path(folder_path).joinpath("metadata.json"))
     writemode = "w"
     if os.path.exists(metadata_path):
         writemode = "x"
     with open(metadata_path, writemode) as file:
-        content = json.dumps(metadata, indent=4, ensure_ascii=False)
+        content = valid_metadata.pretty_print()
         file.write(content)
         file.close()
 
