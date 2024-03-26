@@ -54,10 +54,9 @@ def courses():
         click.echo(course.pretty_print())
 
 
-
 @click.group()
 def task():
-    """Task related commands
+    """Task related commands.
 
     It is possible to list and create all tasks per excercise or just
     create one task.
@@ -83,31 +82,31 @@ def list(demo_path):
 
 
 @task.command()
-@click.option("--all", '-a', is_flag=True, default=False)
-@click.argument("demo_path", type=str, required=True)
-@click.argument("ide_task_id", type=str, required=False, default=None)
-def create(ide_task_id, demo_path, all):
+@click.option("--all", '-a', 'all', is_flag=True, default=False)
+@click.argument("demo_path", type=str)
+@click.argument("ide_task_id", type=str, default=None)
+def create(demo_path, ide_task_id, all):
     """Create all tasks or single if option given."""
     data = None
     if not all:
-        data = Routes().get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path, doc_id=60)
-        
+        data = Routes().get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path)
+
         # TODO: katso että ttarkistukset toimii kunnolla
         if not data:
             click.echo("No file saved, maybe wrong id?")
             return
-        
+
         if "error" in data:
             click.echo(data["error"])
             return
-        
+
         td = TaskData(**data)
-        create_demo_task(td)
+        create_demo_task(td, "Ohjelmointi 1", demo_path)
         click.echo(td.header + " was saved")
     else:
         # TODO: luo kaikkien harjoitusten kaikki tehtävät
         data = None
-        
+
 
 @tim_ide.command()
 @click.argument("course", type=str, required=True)
