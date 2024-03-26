@@ -6,7 +6,7 @@ class TaskFile(BaseModel):
     Model for single code file
     """
     content: str
-    path: str
+    path: str = None
     source: str = "editor"
 
     def to_json(self):
