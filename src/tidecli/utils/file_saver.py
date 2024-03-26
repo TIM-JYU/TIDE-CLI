@@ -179,9 +179,11 @@ def write_metadata(folder_path: str, task_id: str, demo_path: str, doc_id: int, 
     """
     Write metadata.json to the given folder path.
 
-    :param folder_path: Path to folder
-    :param file_path: Path of the file
-
+    :param folder_path: Path to folder to create metadata.json
+    :param task_id: Task id
+    :param demo_path: Path to excercises in TIM
+    :param doc_id: Document id
+    :param code_language: Language of the code
     """
     metadata = {
         "task_id": task_id,
