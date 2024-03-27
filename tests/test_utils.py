@@ -1,7 +1,7 @@
 import os
 import shutil
 import unittest
-from tidecli.utils import file_saver
+from tidecli.utils import file_handler
 from tidecli.models.TaskData import TaskData
 from unittest_prettify.colorize import (
     colorize,
@@ -169,84 +169,6 @@ user_home = os.environ['HOME']
 test_path = os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi 1/Demo1/Tehtävä 1')
 
 
-@colorize(color=YELLOW)
-class TestCreateFolders(unittest.TestCase):
-    """
-    Test the folder structure creation
-    """
-
-    def test_create_folders(self):
-        """
-        Create folder structure
-        """
-        # file_saver.create_folders(folder_data, temp)
-        # assert os.path.exists(os.path.join(test_path, 'Ohjelmointikurssi1/courses/ohjelmointikurssi1/Demot/Demo1'))
-        pass
-
-
-class TestFormulateMetadata():
-    """
-    Test if metadata is formulated correcly
-
-    Metadata should contain all the TIM related course and task data
-    """
-
-    def test_formulate_metadata():
-        # metadata = file_saver.formulate_metadata(
-        #     courses=course_data,
-        #     tasks=tasks_data_single)
-        pass
-
-
-@colorize(color=YELLOW)
-class TestCreateFile(unittest.TestCase):
-    # def test_create_file(self):
-    #     """
-    #     Create file when it does not exist yet
-    #     """
-
-    #     file = file_saver.create_file(
-    #         file_name=file_data['path'],
-    #         file_path=test_path,
-    #         file_content=file_data['code'])
-    #     assert os.path.exists(os.path.join(test_path, 'main.py'))
-
-    # def test_create_file_overwrite(self):
-    #     """
-    #     Overwrite an existing file
-    #     """
-
-    #     #TODO: Add overwrite parameter
-    #     file = file_saver.create_file(
-    #         file_name=file_data['path'],
-    #         file_path=test_path,
-    #         file_content='HELLO')
-
-    #     assert os.path.exists(os.path.join(test_path, 'main.py'))
-
-    #     contents = ''
-    #     with open(os.path.join(test_path, 'main.py'), 'r') as file:
-    #         contents = file.read()
-    #     self.assertEqual(contents, 'HELLO')
-
-    # def test_create_file_not_overwrite(self):
-    #     """
-    #     Do not overwrite an existing file
-    #     """
-
-    #     with self.assertRaises(SystemExit) as cm:
-    #         file_saver.create_file(
-    #             file_name=file_data['path'],
-    #             file_path=test_path,
-    #             file_content=file_data['code'])
-
-    #     self.assertEqual(cm.exception.code, 1)
-
-    def tearDownClass():
-        # os.remove(os.path.join(test_path, 'main.py'))
-        pass
-
-
 @colorize(color=GREEN)
 class TestCreateFiles(unittest.TestCase):
     """Test the creation of multiple files to folder."""
@@ -256,7 +178,7 @@ class TestCreateFiles(unittest.TestCase):
 
         Add metadata files to folder
         """
-        file_saver.create_files(
+        file_handler.create_files(
             files=file_data,
             folder_path=test_path,
             demo_path="courses/ohjelmointikurssi1/Demot/Demo1")
@@ -279,7 +201,7 @@ class TestCreateFiles(unittest.TestCase):
             "header": "Tehtävä 1"
         }]
 
-        file_saver.create_files(
+        file_handler.create_files(
             files=changed_file_data,
             folder_path=test_path,
             demo_path="courses/ohjelmointikurssi1/Demot/Demo1",
@@ -305,7 +227,7 @@ class TestCreateFiles(unittest.TestCase):
             "path": "single.py"
         }
 
-        file_saver.create_files(
+        file_handler.create_files(
             files=single_file_data,
             folder_path=test_path,
             demo_path="courses/ohjelmointikurssi1/Demot/Demo1",
@@ -328,7 +250,7 @@ class TestCreateMetadata(unittest.TestCase):
         """
         metadata_path = os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi', 'Demo1', 'Testitehtävä')
         os.makedirs(metadata_path)
-        file_saver.write_metadata(metadata_path, '#tehtävä', 'courses/ohjelmointikurssi1/Demot/Demo1', 60, '.py')
+        file_handler.write_metadata(metadata_path, '#tehtävä', 'courses/ohjelmointikurssi1/Demot/Demo1', 60, '.py')
 
         with open(os.path.join(metadata_path, 'metadata.json'), 'r') as file:
             contents = file.read()
@@ -352,7 +274,7 @@ class TestCreateDemoTask(unittest.TestCase):
         """
 
         data = TaskData(**validated_task_data)
-        file_saver.create_demo_task(data, 'Ohjelmointikurssi', 'courses/ohjelmointikurssi1/Demot/Demo1')
+        file_handler.create_demo_task(data, 'Ohjelmointikurssi', 'courses/ohjelmointikurssi1/Demot/Demo1')
         assert os.path.exists(os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi', 'Demo1', 'Testitehtävä', 'metadata.json'))
 
     def tearDownClass():
@@ -375,7 +297,7 @@ class TestCreateDemoTasks():
             ]
         }
 
-        file_saver.create_demo_tasks(course)
+        file_handler.create_demo_tasks(course)
         assert os.path.exists(os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi', 'Demo1', 'Testitehtävä', 'metadata.json'))
 
     def tearDownClass():

@@ -6,8 +6,8 @@ The whole CLI app may be located in different module.
 """
 import click
 from tidecli.models.TimFeedback import TimFeedback
-from tidecli.utils import file_saver
-from tidecli.utils.file_saver import create_demo_task
+from tidecli.utils import file_handler
+from tidecli.utils.file_handler import create_demo_task
 from tidecli.api.routes import Routes
 from tidecli.models.Course import Course
 from tidecli.models.SubmitData import SubmitData
@@ -117,9 +117,9 @@ def submit(path):
     """
 
     # Get task file data from the task folder
-    code_file = file_saver.get_task_file_data(path)
+    code_file = file_handler.get_task_file_data(path)
     # Get metadata from the task folder
-    meta_data = file_saver.get_metadata(path)
+    meta_data = file_handler.get_metadata(path)
 
     t = SubmitData(code_files=TaskFile(content=code_file, path=""),
                    task_id=meta_data["task_id"], doc_id=meta_data["doc_id"],
