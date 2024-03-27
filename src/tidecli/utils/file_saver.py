@@ -301,10 +301,39 @@ def check_path_validity():
                   f"Enter 'pwd' to print current working directory.")
 
 
-# routes = Routes()
+def get_task_file_data(file_path: str):
+    """
+    Get file data from the given path excluding .json files.
 
-# Get course data
-# user_course_data = routes.get_ide_courses()
+    :param file_path: Path to the directory containing the files.
+    :return: File data
+    """
+    files_in_dir = os.listdir(file_path)
 
-# Users choice for custom path
-# user_path = check_path_validity()
+    if not files_in_dir:
+        print(f"No files found in {file_path}")
+        return
+
+    for file_name in files_in_dir:
+        if os.path.isfile(os.path.join(file_path, file_name)) and not file_name.endswith('.json'):
+            with open(os.path.join(file_path, file_name), "r") as file:
+                file_data = file.read()
+                return file_data
+
+
+def get_metadata(path: str):
+    """
+    Get metadata from the given path.
+
+    :param path: Path to the directory containing the metadata.json file.
+    :return: Metadata
+    """
+    metadata_path = os.path.join(path, "metadata.json")
+    if not os.path.exists(metadata_path):
+        print(f"Metadata not found in {path}")
+        return
+
+    with open(metadata_path, "r") as file:
+        metadata = json.load(file)
+        file.close()
+    return metadata
