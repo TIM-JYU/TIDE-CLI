@@ -1,6 +1,7 @@
 """Module for creating file structures for tasks and demos."""
 
 import os
+import json
 import shutil
 from tidecli.api.routes import Routes
 from tidecli.models.TaskData import TaskData
@@ -181,4 +182,4 @@ def get_metadata(path: str):
         metadata = json.load(file)
         file.close()
     return metadata
-  
+
