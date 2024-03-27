@@ -127,7 +127,7 @@ def create_demo_task(task_data: TaskData, course_name: str, demo_path: str):
     demo_folder = demo_path.split("/")[-1]
     # TODO: muuta toimimaan käyttäjän antamalla polulla
     user_folder = Path.home()
-    folder_path = str(Path.home().joinpath('Desktop', course_name, demo_folder, task_data.header))
+    folder_path = str(user_folder.joinpath('Desktop', course_name, demo_folder, task_data.header))
 
     create_files(files=files,
                  folder_path=folder_path,
