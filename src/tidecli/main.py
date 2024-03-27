@@ -125,20 +125,7 @@ def submit(path):
                    task_id=meta_data["task_id"], doc_id=meta_data["doc_id"],
                    code_language=meta_data["code_language"])
 
-
-    ##code_files = [TaskFile(
-    ##    content="#include <stdio.h>\n#include \"add.h\"\n\nint main() {\nprintf(\"%d\", add(1, 2));\nreturn 1;\n}\n",
-    ##    path="main.cc"),
-    ##              TaskFile(content="int add(int a, int b) {\nreturn 0;\n}\n", path="add.cc"),
-    ##              TaskFile(content="int add(int a, int b);", path="add.h")]
-
-    ##t = SubmitData(code_files=code_file, task_id="pythontesti", doc_id=60,
-    ##               code_language="py")  # Submitdata for single file
-
-    ##t2 = SubmitData(code_files=code_files, task_id="Tehtava3", doc_id=60, code_language="cc")
-
     submit_object = Routes().submit_task(t)
-    ### submit_object = Routes().submit_task(t2)
 
     # TODO: Invalid path error handling
 
