@@ -4,9 +4,9 @@ Main module for the Tide CLI.
 This module contains the main command group for the Tide CLI.
 The whole CLI app may be located in different module.
 """
-import random
 import click
 from tidecli.models.TimFeedback import TimFeedback
+from tidecli.utils import file_saver
 from tidecli.utils.file_saver import create_demo_task
 from tidecli.api.routes import Routes
 from tidecli.models.Course import Course
@@ -109,34 +109,25 @@ def create(demo_path, ide_task_id, all):
 
 
 @tim_ide.command()
-@click.argument("course", type=str, required=True)
-@click.argument("task", type=str, required=True)
-def push(course, task):
+@click.argument("path", type=str, required=True)
+def submit(path):
     """
-    Submit course or task data.
-
-    Usage:
-    [OPTIONS] COURSE
-
-    Options:
-    --task NAME (not required)
+    Enter the path of the task folder to submit the task to TIM.
+    Path must be inserted in the following format: "/path/to/task/folder".
     """
-    rand = random.randint(0, 10000)  # Just an example for generating different asnwers
 
-    code_file = TaskFile(content=f"print('hello worlds! x {rand}')", path="main.py")  # TaskFile for single file
-    code_files = [TaskFile(
-        content="#include <stdio.h>\n#include \"add.h\"\n\nint main() {\nprintf(\"%d\", add(1, 2));\nreturn 1;\n}\n",
-        path="main.cc"),
-                  TaskFile(content="int add(int a, int b) {\nreturn 0;\n}\n", path="add.cc"),
-                  TaskFile(content="int add(int a, int b);", path="add.h")]
+    # Get task file data from the task folder
+    code_file = file_saver.get_task_file_data(path)
+    # Get metadata from the task folder
+    meta_data = file_saver.get_metadata(path)
 
-    t = SubmitData(code_files=code_file, task_id="pythontesti", doc_id=60,
-                   code_language="py")  # Submitdata for single file
-
-    t2 = SubmitData(code_files=code_files, task_id="Tehtava3", doc_id=60, code_language="cc")
+    t = SubmitData(code_files=TaskFile(content=code_file, path=""),
+                   task_id=meta_data["task_id"], doc_id=meta_data["doc_id"],
+                   code_language=meta_data["code_language"])
 
     submit_object = Routes().submit_task(t)
-    # submit_object = Routes().submit_task(t2)
+
+    # TODO: Invalid path error handling
 
     if "error" in submit_object:
         click.echo(submit_object["error"])
