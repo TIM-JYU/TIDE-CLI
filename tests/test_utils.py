@@ -1,7 +1,7 @@
 import os
 import shutil
 import unittest
-from tidecli.utils import file_saver
+from tidecli.utils import file_handler
 from tidecli.models.TaskData import TaskData
 from unittest_prettify.colorize import (
     colorize,
@@ -256,7 +256,7 @@ class TestCreateFiles(unittest.TestCase):
 
         Add metadata files to folder
         """
-        file_saver.create_files(
+        file_handler.create_files(
             files=file_data,
             folder_path=test_path,
             demo_path="courses/ohjelmointikurssi1/Demot/Demo1")
@@ -279,7 +279,7 @@ class TestCreateFiles(unittest.TestCase):
             "header": "Tehtävä 1"
         }]
 
-        file_saver.create_files(
+        file_handler.create_files(
             files=changed_file_data,
             folder_path=test_path,
             demo_path="courses/ohjelmointikurssi1/Demot/Demo1",
@@ -305,7 +305,7 @@ class TestCreateFiles(unittest.TestCase):
             "path": "single.py"
         }
 
-        file_saver.create_files(
+        file_handler.create_files(
             files=single_file_data,
             folder_path=test_path,
             demo_path="courses/ohjelmointikurssi1/Demot/Demo1",
@@ -328,7 +328,7 @@ class TestCreateMetadata(unittest.TestCase):
         """
         metadata_path = os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi', 'Demo1', 'Testitehtävä')
         os.makedirs(metadata_path)
-        file_saver.write_metadata(metadata_path, '#tehtävä', 'courses/ohjelmointikurssi1/Demot/Demo1', 60, '.py')
+        file_handler.write_metadata(metadata_path, '#tehtävä', 'courses/ohjelmointikurssi1/Demot/Demo1', 60, '.py')
 
         with open(os.path.join(metadata_path, 'metadata.json'), 'r') as file:
             contents = file.read()
@@ -352,7 +352,7 @@ class TestCreateDemoTask(unittest.TestCase):
         """
 
         data = TaskData(**validated_task_data)
-        file_saver.create_demo_task(data, 'Ohjelmointikurssi', 'courses/ohjelmointikurssi1/Demot/Demo1')
+        file_handler.create_demo_task(data, 'Ohjelmointikurssi', 'courses/ohjelmointikurssi1/Demot/Demo1')
         assert os.path.exists(os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi', 'Demo1', 'Testitehtävä', 'metadata.json'))
 
     def tearDownClass():
@@ -375,7 +375,7 @@ class TestCreateDemoTasks():
             ]
         }
 
-        file_saver.create_demo_tasks(course)
+        file_handler.create_demo_tasks(course)
         assert os.path.exists(os.path.join(user_home, 'Desktop', 'Ohjelmointikurssi', 'Demo1', 'Testitehtävä', 'metadata.json'))
 
     def tearDownClass():
