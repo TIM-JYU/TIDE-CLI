@@ -303,25 +303,29 @@ def check_path_validity():
 
 def get_task_file_data(file_path: str):
     """
-    Get file data from the given path.
+    Get file data from the given path excluding .json files.
 
+    :param file_path: Path to the directory containing the files.
     :return: File data
     """
-    if not os.path.exists(file_path):
-        print(f"File not found in {file_path}")
+    files_in_dir = os.listdir(file_path)
+
+    if not files_in_dir:
+        print(f"No files found in {file_path}")
         return
 
-    with open(file_path, "r") as file:
-        file_data = file.read()
-        file.close()
-
-    return file_data
+    for file_name in files_in_dir:
+        if os.path.isfile(os.path.join(file_path, file_name)) and not file_name.endswith('.json'):
+            with open(os.path.join(file_path, file_name), "r") as file:
+                file_data = file.read()
+                return file_data
 
 
 def get_metadata(path: str):
     """
     Get metadata from the given path.
 
+    :param path: Path to the directory containing the metadata.json file.
     :return: Metadata
     """
     metadata_path = os.path.join(path, "metadata.json")
@@ -332,5 +336,4 @@ def get_metadata(path: str):
     with open(metadata_path, "r") as file:
         metadata = json.load(file)
         file.close()
-
     return metadata
