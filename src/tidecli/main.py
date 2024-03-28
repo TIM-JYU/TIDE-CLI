@@ -4,10 +4,13 @@ Main module for the Tide CLI.
 This module contains the main command group for the Tide CLI.
 The whole CLI app may be located in different module.
 """
+import os
+from pathlib import Path
+
 import click
 from tidecli.models.TimFeedback import TimFeedback
 from tidecli.utils import file_handler
-from tidecli.utils.file_handler import create_demo_task
+from tidecli.utils.file_handler import create_demo_task, get_task_file_data, get_metadata
 from tidecli.api.routes import Routes
 from tidecli.models.Course import Course
 from tidecli.models.SubmitData import SubmitData
@@ -115,19 +118,29 @@ def submit(path):
     Enter the path of the task folder to submit the task to TIM.
     Path must be inserted in the following format: "/path/to/task/folder".
     """
+    path = Path(path)
+
+    if not path.exists():
+        click.echo("Invalid path")
+        return
 
     # Get task file data from the task folder
-    code_file = file_handler.get_task_file_data(path)
+    code_file = get_task_file_data(path)
+    if not code_file:
+        click.echo("Invalid task file")
+        return
+
     # Get metadata from the task folder
-    meta_data = file_handler.get_metadata(path)
+    meta_data = get_metadata(path)
+    if not meta_data:
+        click.echo("Invalid metadata file")
+        return
 
     t = SubmitData(code_files=TaskFile(content=code_file, path=""),
                    task_id=meta_data["task_id"], doc_id=meta_data["doc_id"],
                    code_language=meta_data["code_language"])
 
     submit_object = Routes().submit_task(t)
-
-    # TODO: Invalid path error handling
 
     if "error" in submit_object:
         click.echo(submit_object["error"])
