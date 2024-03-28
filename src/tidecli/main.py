@@ -86,9 +86,10 @@ def list(demo_path):
 
 @task.command()
 @click.option("--all", '-a', 'all', is_flag=True, default=False)
+@click.option("--force", '-f', 'force', is_flag=True, default=False)
 @click.argument("demo_path", type=str)
 @click.argument("ide_task_id", type=str, default=None)
-def create(demo_path, ide_task_id, all):
+def create(demo_path, ide_task_id, all, force):
     """Create all tasks or single if option given."""
     data = None
     if not all:
@@ -104,7 +105,7 @@ def create(demo_path, ide_task_id, all):
             return
 
         td = TaskData(**data)
-        create_demo_task(td, "Ohjelmointi 1", demo_path)
+        create_demo_task(td, "Ohjelmointi 1", demo_path, overwrite=force)
         click.echo(td.header + " was saved")
     else:
         # TODO: luo kaikkien harjoitusten kaikki tehtävät
