@@ -146,40 +146,39 @@ def create_file(item: dict, folder_path: str, overwrite=False):
         file.close()
 
 
-def get_task_file_data(file_path: str):
+def get_task_file_data(file_path: Path):
     """
     Get file data from the given path excluding .json files.
 
     :param file_path: Path to the directory containing the files.
     :return: File data
     """
-    files_in_dir = os.listdir(file_path)
+
+    files_in_dir = [f for f in file_path.iterdir() if f.is_file() and not f.suffix == '.json']
 
     if not files_in_dir:
         print(f"No files found in {file_path}")
         return
 
-    for file_name in files_in_dir:
-        if os.path.isfile(os.path.join(file_path, file_name)) and not file_name.endswith('.json'):
-            with open(os.path.join(file_path, file_name), "r") as file:
-                file_data = file.read()
-                return file_data
+    for file in files_in_dir:
+        with open(file, "r") as f:
+            file_data = f.read()
+            return file_data
 
 
-def get_metadata(path: str):
+def get_metadata(metadata_path: Path):
     """
     Get metadata from the given path.
 
-    :param path: Path to the directory containing the metadata.json file.
+    :param metadata_path: Path to the directory containing the metadata.json file.
     :return: Metadata
     """
-    metadata_path = os.path.join(path, "metadata.json")
-    if not os.path.exists(metadata_path):
-        print(f"Metadata not found in {path}")
+    metadata_path = metadata_path / "metadata.json"
+    if not metadata_path.exists():
+        print(f"Metadata not found in {metadata_path}")
         return
 
     with open(metadata_path, "r") as file:
         metadata = json.load(file)
-        file.close()
     return metadata
 
