@@ -14,21 +14,22 @@ def create_demo_tasks(course: Course):
     """
     Create all tasks in excercise.
 
-    :param tasks: all tasks in
+    :param course: Course object
     """
     for demo_path in course.demo_paths:
-        tasks = Routes.get_tasks_by_doc_path(demo_path)
+        tasks = Routes.get_tasks_by_doc(demo_path)
         for task in tasks:
-            create_demo_task(task_data=task, course_name=course.name, demo_path=demo_path)
+            create_demo_task(task_data=task, course_name=course.name, demo_path=demo_path, overwrite=False)
 
 
-def create_demo_task(task_data: TaskData, course_name: str, demo_path: str):
+def create_demo_task(task_data: TaskData, course_name: str, demo_path: str, overwrite: bool):
     """
     Create a single task.
 
     :param task_data: Validated task data
     :param course_name: course name
     :param demo_path: path to demo in TIM
+    :param overwrite: Flag if overwrite
 
     """
     # TODO: ehkä pitäsi vaan luoda kaikki demot kerralla
@@ -51,7 +52,7 @@ def create_demo_task(task_data: TaskData, course_name: str, demo_path: str):
     create_files(files=files,
                  folder_path=folder_path,
                  demo_path=demo_path,
-                 overwrite=False)
+                 overwrite=overwrite)
 
     write_metadata(folder_path,
                    task_data.task_id,
@@ -78,8 +79,8 @@ def create_files(files: list[dict] | dict, folder_path: str, demo_path: str, ove
         if os.listdir(folder_path) != 0:
             if not overwrite:
                 # Raise SystemExit with code 1
-                # TODO: käsittele ylikirjoitus kunnolla, sekä yhden että monen tiedoston tapauksessa
-                print("TODO: Ei ylikirjoiteta, tämä on käsiteltävä erikseen.")
+                print(f"Folder {folder_path} already exists\n\n"
+                      f"Give    main.py task create -f {demo_path} <ide_task_id>    to overwrite")
                 exit(1)
             else:
                 shutil.rmtree(folder_path)
@@ -181,4 +182,3 @@ def get_metadata(metadata_path: Path):
     with open(metadata_path, "r") as file:
         metadata = json.load(file)
     return metadata
-
