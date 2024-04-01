@@ -11,7 +11,7 @@ jobs:
       matrix:
         python-version: ["3.10"]
         poetry-version: ["1.7.1"]
-        os: [windows-latest] #, ubuntu-22.04, macos-latest]
+        os: [windows-latest, ubuntu-22.04] #, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -27,6 +27,6 @@ jobs:
       - name: Archive production artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-folder
+          name: dist-onefile-${{ matrix.os }}
           path: |
             dist
