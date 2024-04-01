@@ -106,7 +106,7 @@ def create(demo_path, ide_task_id, all, force):
 
         td = TaskData(**data)
         create_demo_task(td, "Ohjelmointi 1", demo_path, overwrite=force)
-        click.echo(td.header + " was saved")
+        click.echo(td.ide_task_id + " was saved")
     else:
         # TODO: luo kaikkien harjoitusten kaikki tehtävät
         data = None
