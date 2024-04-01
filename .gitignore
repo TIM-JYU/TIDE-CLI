@@ -4,3 +4,6 @@ poetry.lock
 .env
 __pycache__
 *.log
+*.spec
+/build/
+/dist/
