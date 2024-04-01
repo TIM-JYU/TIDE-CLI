@@ -21,11 +21,4 @@ jobs:
       - name: Python Poetry Action
         uses: abatilo/actions-poetry@v3.0.0
         run: poetry --help     
-      - name: Run image
-	uses: abatilo/actions-poetry@v2
-        with:
-          poetry-version: ${{ matrix.poetry-version }}
-      - name: Publish
-        run: poetry run build
-
            
