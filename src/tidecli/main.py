@@ -81,7 +81,7 @@ def list(demo_path):
 
     tasks = [TaskData(**task) for task in data]
     for task in tasks:
-        click.echo(task.header + ", " + task.ide_task_id)
+        click.echo(task.ide_task_id)
 
 
 @task.command()
