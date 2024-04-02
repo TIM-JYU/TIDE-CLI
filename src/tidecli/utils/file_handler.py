@@ -38,7 +38,7 @@ def create_demo_task(task_data: TaskData, course_name: str, demo_path: str, over
     for task in task_data.task_files:
         item = {
             "code": task.content,
-            "path": task.path,
+            "path": task.filename,
         }
 
         files.append(item)
