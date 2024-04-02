@@ -11,5 +11,12 @@ class Course(BaseModel):
     task_paths: list[str]
 
     def pretty_print(self):
-        task_paths = "\n".join(self.task_paths)
-        return f"Course:\n{self.name}\nPath:\n{self.path}\nDemo paths:\n{task_paths}\n"
+        """
+        Prints the course as readable string.
+
+        Return values with headings.
+        :return: Course as string, like Course: <name>, ID: <id>
+        """
+        delimiter = "\n    - "
+        task_paths = '{1}{0}'.format(delimiter.join(self.task_paths), delimiter)
+        return f"Course: {self.name}, ID: {self.id}\n{task_paths} \n"
