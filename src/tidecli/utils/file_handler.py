@@ -1,6 +1,5 @@
 """Module for creating file structures for tasks and demos."""
 
-import os
 import json
 import shutil
 from tidecli.api.routes import Routes
@@ -71,12 +70,13 @@ def create_files(files: list[dict] | dict, folder_path: str, demo_path: str, ove
     :param overwrite: Flag if overwrite
 
     """
-    if os.path.exists(folder_path):
+    folder = Path(folder_path)
+    if folder.exists():
         if isinstance(files, dict):
             create_file(files, folder_path=folder_path, overwrite=overwrite)
             return
 
-        if os.listdir(folder_path) != 0:
+        if list(folder.iterdir()):
             if not overwrite:
                 # Raise SystemExit with code 1
                 print(f"Folder {folder_path} already exists\n\n"
@@ -85,11 +85,11 @@ def create_files(files: list[dict] | dict, folder_path: str, demo_path: str, ove
             else:
                 shutil.rmtree(folder_path)
 
-    os.makedirs(folder_path, exist_ok=overwrite)
+    folder.mkdir(parents=True, exist_ok=overwrite)
 
     for item in files:
-        full_file_path = str(Path(folder_path).joinpath(item['path']))
-        os.makedirs(os.path.dirname(full_file_path), exist_ok=True)
+        full_file_path = Path(folder_path).joinpath(item['path'])
+        full_file_path.parent.mkdir(parents=True, exist_ok=True)
         with open(full_file_path, 'x') as file:
             file.write(item['code'])
             file.close()
@@ -113,9 +113,9 @@ def write_metadata(folder_path: str, task_id: str, demo_path: str, doc_id: int, 
     }
 
     valid_metadata = TaskMetadata(**metadata)
-    metadata_path = str(Path(folder_path).joinpath("metadata.json"))
+    metadata_path = Path(folder_path).joinpath("metadata.json")
     writemode = "w"
-    if os.path.exists(metadata_path):
+    if metadata_path.exists():
         writemode = "x"
     with open(metadata_path, writemode) as file:
         content = valid_metadata.pretty_print()
@@ -132,15 +132,14 @@ def create_file(item: dict, folder_path: str, overwrite=False):
     :param overwrite: Flag if overwrite
 
     """
-    full_file_path = str(Path(folder_path).joinpath(item['path']))
+    full_file_path = Path(folder_path).joinpath(item['path'])
     # By default, writemode is CREATE
     # If path exists already, write mode is WRITE (overwrites)
-    if os.path.exists(full_file_path):
+    if full_file_path.exists():
         if not overwrite:
             # Raise SystemExit with code 1
             exit(1)
 
-    # os.makedirs(os.path.dirname(full_file_path), exist_ok=True)
     # Write the file with desired writemode, CREATE or WRITE
     with open(full_file_path, 'x') as file:
         file.write(item['code'])
