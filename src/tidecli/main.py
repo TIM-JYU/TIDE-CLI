@@ -4,14 +4,12 @@ Main module for the Tide CLI.
 This module contains the main command group for the Tide CLI.
 The whole CLI app may be located in different module.
 """
-import os
 from pathlib import Path
 
 import click
 from tidecli.models.TimFeedback import TimFeedback
-from tidecli.utils import file_handler
 from tidecli.utils.file_handler import create_demo_task, get_task_file_data, get_metadata
-from tidecli.api.routes import Routes
+from tidecli.api.routes import get_ide_courses, get_tasks_by_doc, get_task_by_ide_task_id, submit_task
 from tidecli.models.Course import Course
 from tidecli.models.SubmitData import SubmitData
 from tidecli.models.TaskData import TaskData, TaskFile
@@ -45,15 +43,9 @@ def logout():
 @tim_ide.command()
 def courses():
     """List  all courses."""
-    data = Routes().get_ide_courses()
+    data = get_ide_courses()
 
-    if not data or "error" in data:
-        # TODO: With no courses found, should we print an error message from TIM? 404 in this case
-        click.echo("No courses found")
-        return
-
-    all_courses = [Course(**course) for course in data]
-    for course in all_courses:
+    for course in data:
         click.echo(course.pretty_print())
 
 
@@ -73,13 +65,8 @@ def task():
 @click.argument("demo_path", type=str, required=True)
 def list(demo_path):
     """Fetch tasks by doc path."""
-    data = Routes().get_tasks_by_doc(doc_path=demo_path)
+    tasks = get_tasks_by_doc(doc_path=demo_path)
 
-    if "error" in data:
-        click.echo(data["error"])
-        return
-
-    tasks = [TaskData(**task) for task in data]
     for task in tasks:
         click.echo(task.pretty_print())
 
@@ -91,25 +78,14 @@ def list(demo_path):
 @click.argument("ide_task_id", type=str, default=None)
 def create(demo_path, ide_task_id, all, force):
     """Create all tasks or single if option given."""
-    data = None
     if not all:
-        data = Routes().get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path)
+        task_data: TaskData = get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path)
 
-        # TODO: katso että ttarkistukset toimii kunnolla
-        if not data:
-            click.echo("No file saved, maybe wrong id?")
-            return
+        create_demo_task(task_data, "Ohjelmointi 1", demo_path, overwrite=force)
 
-        if "error" in data:
-            click.echo(data["error"])
-            return
-
-        td = TaskData(**data)
-        create_demo_task(td, "Ohjelmointi 1", demo_path, overwrite=force)
-        click.echo(td.ide_task_id + " was saved")
+        click.echo(task_data.ide_task_id + " was saved")
     else:
-        # TODO: luo kaikkien harjoitusten kaikki tehtävät
-        data = None
+        pass  # TODO: luo kaikkien harjoitusten kaikki tehtävät
 
 
 @tim_ide.command()
@@ -136,20 +112,13 @@ def submit(path):
     if not meta_data:
         click.echo("Invalid metadata file")
         return
-
     t = SubmitData(code_files=TaskFile(content=code_file, path=""),
                    task_id=meta_data["task_id"], doc_id=meta_data["doc_id"],
                    code_language=meta_data["code_language"])
 
-    submit_object = Routes().submit_task(t)
+    feedback = submit_task(t)
 
-    if "error" in submit_object:
-        click.echo(submit_object["error"])
-        return
-
-    validation = TimFeedback(**submit_object.get("result"))
-
-    click.echo(validation.console_output())
+    click.echo(feedback.console_output())
 
 
 tim_ide.add_command(task)

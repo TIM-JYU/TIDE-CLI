@@ -1,7 +1,11 @@
 import logging
 
+import click
+
 # Configure logger
-logging.basicConfig(filename='tide-cli.log', filemode='a', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='tide-cli.log', filemode='a', level=logging.ERROR,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 def error_handler(func):
     """
@@ -9,6 +13,7 @@ def error_handler(func):
     
     This is used as decorator @error_handler
     """
+
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -18,7 +23,8 @@ def error_handler(func):
             # You can add more actions here, like sending an email notification or printing the error to console
             # For simplicity, I'm just re-raising the error here
             # raise
-            print ("\033[91m {}\033[00m".format(e))
+            print("\033[91m {}\033[00m".format(e))
+
     return wrapper
 
 
@@ -27,6 +33,6 @@ class CliError(Exception):
     """
     Exception raised for errors
     """
+
     def __init__(self, message):
         super().__init__(message)
-

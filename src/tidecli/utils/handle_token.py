@@ -19,7 +19,7 @@ def save_token(token, username):
         return f"Error saving token: {e}"
 
 
-def get_token(username) -> str or None:
+def get_token(username) -> str | None:
     """
     Get the token from the keyring for the user
 
@@ -33,7 +33,7 @@ def get_token(username) -> str or None:
         return None
 
 
-def get_signed_in_user() -> str or None:
+def get_signed_in_user() -> str | None:
     """
     Get the signed in user from the keyring
 

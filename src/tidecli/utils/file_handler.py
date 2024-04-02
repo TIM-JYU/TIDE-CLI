@@ -2,7 +2,7 @@
 
 import json
 import shutil
-from tidecli.api.routes import Routes
+from tidecli.api.routes import get_tasks_by_doc
 from tidecli.models.TaskData import TaskData
 from tidecli.models.TaskMetadata import TaskMetadata
 from tidecli.models.Course import Course
@@ -16,7 +16,7 @@ def create_demo_tasks(course: Course):
     :param course: Course object
     """
     for demo_path in course.demo_paths:
-        tasks = Routes.get_tasks_by_doc(demo_path)
+        tasks = get_tasks_by_doc(demo_path)
         for task in tasks:
             create_demo_task(task_data=task, course_name=course.name, demo_path=demo_path, overwrite=False)
 
@@ -37,7 +37,7 @@ def create_demo_task(task_data: TaskData, course_name: str, demo_path: str, over
     for task in task_data.task_files:
         item = {
             "code": task.content,
-            "path": task.filename,
+            "path": task.file_name,
         }
 
         files.append(item)
