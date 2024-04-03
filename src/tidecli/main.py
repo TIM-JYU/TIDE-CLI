@@ -131,7 +131,9 @@ def submit(path):
     if len(codes) == 1:
         code_file = codes[0]
 
-    code_file = TaskFile(file_name=code_file[0].file_name, file_content=code_file[0].file_content)
+    code_file = TaskFile(
+        file_name=code_file[0].file_name, file_content=code_file[0].file_content
+    )
     # Get task file data from the task folder
 
     code_file = get_task_file_data(path, meta_data.task_files[0].file_name)
