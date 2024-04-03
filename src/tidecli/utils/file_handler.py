@@ -29,7 +29,7 @@ def create_task(
 
     # Sets path to current path or user given path
     if user_path:
-        user_folder = Path(user_path)
+        user_folder = Path.cwd().joinpath(user_path)
     else:
         user_folder = Path.cwd()
 
@@ -141,22 +141,6 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> str:
     """
 
     task_files = metadata.task_files
-    # codes = []
-
-    # for f in task_files:
-    #     if not f.file_name:
-    #        raise click.ClickException("Invalid task file")
-    #    codes.append(get_task_file_data(file_path, f.file_name))
-
-    # if len(codes) == 0:
-    #     raise click.ClickException("Invalid task file")
-
-    # if len(codes) == 1:
-    #     code_file = codes[0]
-
-    # code_file = TaskFile(
-    #     file_name=code_file[0].file_name, file_content=code_file[0].file_content)
-    # Get task file data from the task folder
 
     files_in_dir = [
         f for f in file_path.iterdir() if f.is_file() and not f.suffix == METADATA_NAME
@@ -169,14 +153,6 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> str:
                     f1.content = answer_file.read()
                     
     return task_files
-    # if not files_in_dir:
-    #     click.ClickException(f"No files found in {file_path}")
-
-    # for file in files_in_dir:
-    #     if file.name == filename:
-    #         with open(file, "r") as f:
-    #             file_data = f.read()
-    #             return file_data
 
 
 def get_metadata(metadata_path: Path) -> TaskData:

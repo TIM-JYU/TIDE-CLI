@@ -85,16 +85,17 @@ def list(demo_path):
 @task.command()
 @click.option("--all", "-a", "all", is_flag=True, default=False)
 @click.option("--force", "-f", "force", is_flag=True, default=False)
+@click.option("--dir", "-d", "dir", type=str, default=None)
 @click.argument("demo_path", type=str)
 @click.argument("ide_task_id", type=str, default=None)
-def create(demo_path, ide_task_id, all, force):
+def create(demo_path, ide_task_id, all, force, dir):
     """Create all tasks or single if option given."""
     if not all:
         task_data: TaskData = get_task_by_ide_task_id(
             ide_task_id=ide_task_id, doc_path=demo_path
         )
 
-        if create_task(task_data=task_data, overwrite=force):
+        if create_task(task_data=task_data, overwrite=force, user_path=dir):
             click.echo(task_data.ide_task_id + " was saved")
         else:
             click.echo("Task was not saved")
