@@ -4,12 +4,22 @@ Main module for the Tide CLI.
 This module contains the main command group for the Tide CLI.
 The whole CLI app may be located in different module.
 """
+
 from pathlib import Path
 
 import click
 from tidecli.models.TimFeedback import TimFeedback
-from tidecli.utils.file_handler import create_demo_task, get_task_file_data, get_metadata
-from tidecli.api.routes import get_ide_courses, get_tasks_by_doc, get_task_by_ide_task_id, submit_task
+from tidecli.utils.file_handler import (
+    create_task_set,
+    get_task_file_data,
+    get_metadata,
+)
+from tidecli.api.routes import (
+    get_ide_courses,
+    get_tasks_by_doc,
+    get_task_by_ide_task_id,
+    submit_task,
+)
 from tidecli.models.Course import Course
 from tidecli.models.SubmitData import SubmitData
 from tidecli.models.TaskData import TaskData, TaskFile
@@ -72,20 +82,26 @@ def list(demo_path):
 
 
 @task.command()
-@click.option("--all", '-a', 'all', is_flag=True, default=False)
-@click.option("--force", '-f', 'force', is_flag=True, default=False)
+@click.option("--all", "-a", "all", is_flag=True, default=False)
+@click.option("--force", "-f", "force", is_flag=True, default=False)
 @click.argument("demo_path", type=str)
 @click.argument("ide_task_id", type=str, default=None)
 def create(demo_path, ide_task_id, all, force):
     """Create all tasks or single if option given."""
     if not all:
-        task_data: TaskData = get_task_by_ide_task_id(ide_task_id=ide_task_id, doc_path=demo_path)
+        task_data: TaskData = get_task_by_ide_task_id(
+            ide_task_id=ide_task_id, doc_path=demo_path
+        )
 
-        create_demo_task(task_data, "Ohjelmointi 1", demo_path, overwrite=force)
+        if create_task_set(task_data=task_data, overwrite=force):
+            click.echo(task_data.ide_task_id + " was saved")
+        else:
+            click.echo("Task was not saved")
 
-        click.echo(task_data.ide_task_id + " was saved")
     else:
-        pass  # TODO: luo kaikkien harjoitusten kaikki tehtävät
+        task_datas = get_tasks_by_doc(doc_path=demo_path)
+        create_task_set(task_data=task_datas, overwrite=force)
+        click.echo("All tasks were saved")
 
 
 @tim_ide.command()
@@ -98,23 +114,40 @@ def submit(path):
     path = Path(path)
 
     if not path.exists():
-        click.echo("Invalid path")
-        return
+        raise click.ClickException("Invalid path")
 
+    meta_data = get_metadata(path)
+    task_files = meta_data.task_files
+    codes = []
+
+    for file in task_files:
+        if not file.file_name:
+            raise click.ClickException("Invalid task file")
+        codes.append(get_task_file_data(path, file.file_name))
+
+    if len(codes) == 0:
+        raise click.ClickException("Invalid task file")
+
+    if len(codes) == 1:
+        code_file = codes[0]
+
+    code_file = TaskFile(file_name=code_file[0].file_name, file_content=code_file[0].file_content)
     # Get task file data from the task folder
-    code_file = get_task_file_data(path)
+
+    code_file = get_task_file_data(path, meta_data.task_files[0].file_name)
+
     if not code_file:
-        click.echo("Invalid task file")
-        return
+        raise click.ClickException("Invalid task file")
 
     # Get metadata from the task folder
-    meta_data = get_metadata(path)
     if not meta_data:
-        click.echo("Invalid metadata file")
-        return
-    t = SubmitData(code_files=TaskFile(content=code_file, path=""),
-                   task_id=meta_data["task_id"], doc_id=meta_data["doc_id"],
-                   code_language=meta_data["code_language"])
+        raise click.ClickException("Invalid metadata")
+
+    # TODO: tämä kesken
+    t = SubmitData(
+        code_files=code_file.task_files,
+        code_language=meta_data.type,
+    )
 
     feedback = submit_task(t)
 
