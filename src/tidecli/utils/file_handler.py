@@ -75,6 +75,7 @@ def save_file(file: list[TaskFile], save_path: Path, overwrite=False) -> bool:
 
     save_path.mkdir(parents=True, exist_ok=overwrite)
 
+    # TODO: Tarkista tuleeko file_name oikein TIMistä
     for f in file:
         file_path = save_path.joinpath(f.file_name)
         if file_path.exists():
