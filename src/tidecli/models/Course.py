@@ -1,6 +1,15 @@
 from pydantic import BaseModel
 
 
+class CourseTask(BaseModel):
+    """
+    CourseTask model
+    """
+    name: str
+    doc_id: int
+    path: str
+
+
 class Course(BaseModel):
     """
     Course model
@@ -8,7 +17,7 @@ class Course(BaseModel):
     name: str
     id: int
     path: str
-    task_paths: list[str]
+    tasks: list[CourseTask]
 
     def pretty_print(self):
         """
@@ -17,6 +26,7 @@ class Course(BaseModel):
         Return values with headings.
         :return: Course as string, like Course: <name>, ID: <id>
         """
-        delimiter = "\n    - "
-        task_paths = '{1}{0}'.format(delimiter.join(self.task_paths), delimiter)
-        return f"Course: {self.name}, ID: {self.id}\n{task_paths} \n"
+        delimiter = "    - "
+        task_paths = [f"{delimiter}{task.name}, ID: {task.doc_id}, Path: {task.path}\n" for task in self.tasks]
+
+        return f"Course: {self.name}, ID: {self.id}\n{''.join(task_paths)}"

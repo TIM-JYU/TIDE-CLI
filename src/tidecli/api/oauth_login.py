@@ -11,7 +11,7 @@ from tidecli.tide_config import *
 from tidecli.utils.handle_token import save_token
 
 
-def create_s256_code_challenge(code_verifier: str):
+def create_s256_code_challenge(code_verifier: str) -> str:
     data = hashlib.sha256(code_verifier.encode("ascii")).digest()
     return base64.urlsafe_b64encode(data).rstrip(b"=").decode("utf-8")
 
@@ -50,7 +50,7 @@ class OAuthAuthenticator:
             This class is used to handle the callback from the authentication server.
             """
 
-            def do_GET(self):
+            def do_GET(self) -> None:
 
                 # To access the variables from the outer function
                 nonlocal login_successful

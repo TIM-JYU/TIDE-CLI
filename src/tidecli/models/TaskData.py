@@ -5,15 +5,20 @@ class TaskFile(BaseModel):
     """Model for single code file."""
 
     content: str
-    filename: str = None
+    file_name: str = ""
     source: str = "editor"
+    # TODO: With multiple file returns these should be probably given per file
+    # user_input: str | None = ""
+    # user_args: str | None = ""
 
     def to_json(self):
         """Convert to JSON."""
         return {
             "content": self.content,
-            "path": self.filename,
-            "source": self.source
+            "file_name": self.file_name,
+            "source": self.source,
+            # "user_input": self.user_input,
+            # "user_args": self.user_args,
         }
 
 
@@ -37,4 +42,7 @@ class TaskData(BaseModel):
         :return: Task data as string like Task: <header>, ID: <ide_task_id>
 
         """
-        return f"Taskname: {self.header}, ID: {self.ide_task_id}"
+        if self.header is not None:
+            return f"Taskname: {self.header}, ID: {self.ide_task_id}"
+        else:
+            return f"ID: {self.ide_task_id}"

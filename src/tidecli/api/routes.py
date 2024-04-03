@@ -1,125 +1,165 @@
-from dataclasses import dataclass
-
+import click
 import requests
 
 from tidecli.models import SubmitData
+from tidecli.models.Course import Course
+from tidecli.models.TaskData import TaskData
+from tidecli.models.TimFeedback import TimFeedback
 from tidecli.tide_config import *
-from tidecli.utils.error_logger import error_handler, CliError
 from tidecli.utils.handle_token import get_signed_in_user
 
 
-@error_handler
-@dataclass
-class Routes:
+def make_request(
+    endpoint: str, method: str = "GET", params: dict[str, str] | None = None
+):
+    """
+    Make a request to the API
 
-    token: str = get_signed_in_user().password if get_signed_in_user() else None
+    :param endpoint: API endpoint
+    :param method: HTTP method
+    :param params: data to send
+    return: JSON response
+    """
 
-    def make_request(self, endpoint: str, method: str = "GET", params: dict = None):
-        """
-        Make a request to the API
+    try:
+        token: str = get_signed_in_user().password if get_signed_in_user() else None
 
-        :param endpoint: API endpoint
-        :param method: HTTP method
-        :param params: data to send
-        return: JSON response
-        """
+        if not token:
+            raise click.ClickException("User not logged in")
 
-        try:
-            if not self.token:
-                raise CliError("User not logged in")
-
-            res = requests.request(
-                method,
-                f"{BASE_URL}{endpoint}",
-                headers={"Authorization": f"Bearer {self.token}"},
-                json=params,
-            )
-            return res.json()
-
-        except Exception as e:
-            raise CliError("Request failed. " + str(e))
-
-    def validate_token(self) -> dict:
-        """
-        Validate the token for the user
-        return: JSON response  of token validity
-        """
-        return self.make_request(endpoint=INTROSPECT_ENDPOINT, method="POST")
-
-    def get_profile(self) -> dict:
-        """
-        Get the user profile
-        return: JSON response  of user profile
-        """
-        return self.make_request(endpoint=PROFILE_ENDPOINT)
-
-    def get_ide_courses(self):
-        """
-        Get the logged in user courses that are in user bookmarks and have ideCourse tag
-        return: JSON response of course name and course path, course id and paths for demo documents
-        """
-        return self.make_request(endpoint=IDE_COURSES_ENDPOINT)
-
-    def task_folders_by_doc(self, doc_path: str = None, doc_id: int = None):
-        """
-        Get the course task folders by document path or document id
-        :param doc_path: Course main document path (starting page), e.g. "courses/ohjelmointikurssi1/ohjelmointikurssi1"
-        :param doc_id: Course main document id
-        return: JSON response of demos
-        """
-
-        if doc_path is None and doc_id is None:
-            raise CliError("doc_path or doc_id must be provided")
-
-        return self.make_request(endpoint=TASK_FOLDERS_BY_DOC_ENDPOINT, params={"doc_path": doc_path, "doc_id": doc_id})
-
-    def get_tasks_by_doc(self, doc_path: str = None, doc_id: int = None):
-        """
-        Get the tasks by document path or document id
-        :param doc_path: Tasks folder path
-        :param doc_id: Document id
-        return: JSON response of tasks
-        """
-
-        if doc_path is None and doc_id is None:
-            raise CliError("doc_path or doc_id must be provided")
-
-        return self.make_request(endpoint=TASKS_BY_DOC_ENDPOINT, params={"doc_path": doc_path, "doc_id": doc_id})
-
-    def get_task_by_ide_task_id(
-            self,
-            ide_task_id: str,
-            doc_path: str = None,
-            doc_id: int = None,
-    ):
-        """
-        Get the tasks by ideTask id and demo document path or id
-        :param doc_path: Demo document path
-        :param ide_task_id: ideTask id
-        :param doc_id: Demo document id
-        return: JSON response of tasks
-        """
-
-        return self.make_request(
-            endpoint=TASK_BY_IDE_TASK_ID_ENDPOINT,
-            params={
-                "doc_id": doc_id,
-                "doc_path": doc_path,
-                "ide_task_id": ide_task_id,
-            },
+        res = requests.request(
+            method,
+            f"{BASE_URL}{endpoint}",
+            headers={"Authorization": f"Bearer {token}"},
+            json=params,
         )
+        return res.json()
 
-    def submit_task(
-            self,
-            task_files: SubmitData,
-    ):
-        """
-        Submit the task by task id, document id and paragraph id
-        :param task_files: Task/s data
-        return: JSON response of tasks
-        """
+    except Exception as e:
+        raise click.ClickException("Request failed. " + str(e))
 
-        return self.make_request(
-            endpoint=SUBMIT_TASK_ENDPOINT,
-            params=task_files.submit_json()
-        )
+
+def validate_token() -> dict:
+    """
+    Validate the token for the user
+    return: JSON response  of token validity
+    """
+    return make_request(endpoint=INTROSPECT_ENDPOINT, method="POST")
+
+
+def get_profile() -> dict:
+    """
+    Get the user profile
+    return: JSON response  of user profile
+    """
+    return make_request(endpoint=PROFILE_ENDPOINT)
+
+
+def get_ide_courses() -> list[Course]:
+    """
+    Get the logged in user courses that are in user bookmarks and have ideCourse tag
+    return: JSON response of course name and course path, course id and paths for demo documents
+    """
+    res = make_request(endpoint=IDE_COURSES_ENDPOINT)
+
+    if "error" in res:
+        raise click.ClickException(res["error"])
+
+    all_courses = [Course(**course) for course in res]
+
+    return all_courses
+
+
+def task_folders_by_doc(doc_path: str | None = None, doc_id: int | None = None):
+    """
+    TODO: Is this needed? Not typed yet
+    Get the course task folders by document path or document id
+    :param doc_path: Course main document path (starting page), e.g. "courses/ohjelmointikurssi1/ohjelmointikurssi1"
+    :param doc_id: Course main document id
+    return: JSON response of demos
+    """
+
+    if doc_path is None and doc_id is None:
+        raise click.ClickException("doc_path or doc_id must be provided")
+
+    res = make_request(
+        endpoint=TASK_FOLDERS_BY_DOC_ENDPOINT,
+        params={"doc_path": doc_path, "doc_id": doc_id},
+    )
+
+    if "error" in res:
+        raise click.ClickException(res["error"])
+
+    return res
+
+
+def get_tasks_by_doc(
+    doc_path: str | None = None, doc_id: int | None = None
+) -> list[TaskData]:
+    """
+    Get the tasks by document path or document id
+    :param doc_path: Tasks folder path
+    :param doc_id: Document id
+    return: JSON response of tasks
+    """
+
+    if doc_path is None and doc_id is None:
+        raise click.ClickException("doc_path or doc_id must be provided")
+
+    res = make_request(
+        endpoint=TASKS_BY_DOC_ENDPOINT, params={"doc_path": doc_path, "doc_id": doc_id}
+    )
+
+    if "error" in res:
+        raise click.ClickException(res["error"])
+
+    tasks = [TaskData(**task) for task in res]
+
+    return tasks
+
+
+def get_task_by_ide_task_id(
+    ide_task_id: str,
+    doc_path: str | None = None,
+    doc_id: int | None = None,
+) -> TaskData:
+    """
+    Get the tasks by ideTask id and demo document path or id
+    :param doc_path: Demo document path
+    :param ide_task_id: ideTask id
+    :param doc_id: Demo document id
+    return: JSON response of tasks
+    """
+
+    res = make_request(
+        endpoint=TASK_BY_IDE_TASK_ID_ENDPOINT,
+        params={
+            "doc_id": doc_id,
+            "doc_path": doc_path,
+            "ide_task_id": ide_task_id,
+        },
+    )
+
+    if "error" in res:
+        raise click.ClickException(res["error"])
+
+    return TaskData(**res)
+
+
+def submit_task(
+    task_files: SubmitData,
+) -> TimFeedback:
+    """
+    Submit the task by task id, document id and paragraph id
+    :param task_files: Task/s data
+    return: JSON response of tasks
+    """
+
+    res = make_request(
+        endpoint=SUBMIT_TASK_ENDPOINT, method="PUT", params=task_files.submit_json()
+    )
+
+    if "error" in res:
+        raise click.ClickException(res["error"])
+
+    return TimFeedback(**res.get("result"))

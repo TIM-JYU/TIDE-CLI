@@ -6,6 +6,7 @@ import PyInstaller.__main__
 HERE = Path(__file__).parent.absolute()
 PATH_TO_MAIN = str(HERE / "main.py")
 
+
 def install():
     """
     Helper for build binaries.
