@@ -250,7 +250,7 @@ class TestCreateDemoTask(unittest.TestCase):
         """
 
         data = TaskData(**validated_task_data)
-        file_handler.create_task_set(
+        file_handler.create_task(
             data, "Ohjelmointikurssi", "courses/ohjelmointikurssi1/Demot/Demo1"
         )
         assert os.path.exists(

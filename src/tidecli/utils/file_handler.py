@@ -10,7 +10,8 @@ from tidecli.models.TaskData import TaskData, TaskFile
 METADATA_NAME = ".timdata"
 
 
-def create_task_set(
+
+def create_task(
     task_data: TaskData | list[TaskData], overwrite: bool, user_path: str | None = None
 ) -> bool:
     """
@@ -22,10 +23,9 @@ def create_task_set(
 
     return: True if task is created, False if not
     """
-
     if isinstance(task_data, list):
         for task in task_data:
-            create_task_set(task_data=task, overwrite=overwrite, user_path=user_path)
+            create_task(task_data=task, overwrite=overwrite, user_path=user_path)
 
     # Sets path to current path or user given path
     if user_path:
@@ -131,7 +131,7 @@ def create_file(item: dict, folder_path: Path, overwrite=False):
         file.close()
 
 
-def get_task_file_data(file_path: Path, filename: str) -> str:
+def get_task_file_data(file_path: Path, metadata: TaskData) -> str:
     """
     Get file data from the given path excluding .json files.
 
@@ -139,18 +139,43 @@ def get_task_file_data(file_path: Path, filename: str) -> str:
     :return: File data
     """
 
+    task_files = metadata.task_files
+    # codes = []
+
+    # for f in task_files:
+    #     if not f.file_name:
+    #        raise click.ClickException("Invalid task file")
+    #    codes.append(get_task_file_data(file_path, f.file_name))
+
+    # if len(codes) == 0:
+    #     raise click.ClickException("Invalid task file")
+
+    # if len(codes) == 1:
+    #     code_file = codes[0]
+
+    # code_file = TaskFile(
+    #     file_name=code_file[0].file_name, file_content=code_file[0].file_content)
+    # Get task file data from the task folder
+
     files_in_dir = [
         f for f in file_path.iterdir() if f.is_file() and not f.suffix == METADATA_NAME
     ]
 
-    if not files_in_dir:
-        click.ClickException(f"No files found in {file_path}")
+    for f1 in task_files:
+        for f2 in files_in_dir:
+            if f1.file_name == f2.name:
+                with open(f2, "r") as answer_file:
+                    f1.content = answer_file.read()
+                    
+    return task_files
+    # if not files_in_dir:
+    #     click.ClickException(f"No files found in {file_path}")
 
-    for file in files_in_dir:
-        if file.name == filename:
-            with open(file, "r") as f:
-                file_data = f.read()
-                return file_data
+    # for file in files_in_dir:
+    #     if file.name == filename:
+    #         with open(file, "r") as f:
+    #             file_data = f.read()
+    #             return file_data
 
 
 def get_metadata(metadata_path: Path) -> TaskData:

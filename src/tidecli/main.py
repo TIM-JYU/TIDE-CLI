@@ -10,7 +10,7 @@ from pathlib import Path
 import click
 from tidecli.models.TimFeedback import TimFeedback
 from tidecli.utils.file_handler import (
-    create_task_set,
+    create_task,
     get_task_file_data,
     get_metadata,
 )
@@ -77,6 +77,7 @@ def list(demo_path):
     """Fetch tasks by doc path."""
     tasks = get_tasks_by_doc(doc_path=demo_path)
 
+    # TODO: heittää erroria TIMistä C++ kurssin tehtäviä hakiessa
     for task in tasks:
         click.echo(task.pretty_print())
 
@@ -93,14 +94,14 @@ def create(demo_path, ide_task_id, all, force):
             ide_task_id=ide_task_id, doc_path=demo_path
         )
 
-        if create_task_set(task_data=task_data, overwrite=force):
+        if create_task(task_data=task_data, overwrite=force):
             click.echo(task_data.ide_task_id + " was saved")
         else:
             click.echo("Task was not saved")
 
     else:
         task_datas = get_tasks_by_doc(doc_path=demo_path)
-        create_task_set(task_data=task_datas, overwrite=force)
+        create_task(task_data=task_datas, overwrite=force)
         click.echo("All tasks were saved")
 
 
@@ -116,39 +117,19 @@ def submit(path):
     if not path.exists():
         raise click.ClickException("Invalid path")
 
-    meta_data = get_metadata(path)
-    task_files = meta_data.task_files
-    codes = []
+    metadata = get_metadata(path)
+    answer_files = get_task_file_data(path, metadata) # meta_data.task_files[0].file_name)
 
-    for file in task_files:
-        if not file.file_name:
-            raise click.ClickException("Invalid task file")
-        codes.append(get_task_file_data(path, file.file_name))
-
-    if len(codes) == 0:
-        raise click.ClickException("Invalid task file")
-
-    if len(codes) == 1:
-        code_file = codes[0]
-
-    code_file = TaskFile(
-        file_name=code_file[0].file_name, file_content=code_file[0].file_content
-    )
-    # Get task file data from the task folder
-
-    code_file = get_task_file_data(path, meta_data.task_files[0].file_name)
-
-    if not code_file:
+    if not answer_files:
         raise click.ClickException("Invalid task file")
 
     # Get metadata from the task folder
-    if not meta_data:
+    if not metadata:
         raise click.ClickException("Invalid metadata")
 
-    # TODO: tämä kesken
     t = SubmitData(
-        code_files=code_file.task_files,
-        code_language=meta_data.type,
+        code_files=answer_files,
+        code_language=metadata.type,
     )
 
     feedback = submit_task(t)
