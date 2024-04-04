@@ -96,6 +96,8 @@ def create(demo_path, ide_task_id, all, force, dir):
         for task in tasks:
             if create_task(task_data=task, overwrite=force, user_path=dir):
                 click.echo(f"{task.ide_task_id} was saved")
+            else:
+                click.echo(f"{task.ide_task_id} was not saved")
 
     elif ide_task_id:
         # Create a single task
@@ -104,6 +106,8 @@ def create(demo_path, ide_task_id, all, force, dir):
         )
         if create_task(task_data=task_data, overwrite=force, user_path=dir):
             click.echo(f"{task_data.ide_task_id} was saved")
+        else:
+            click.echo(f"{task_data.ide_task_id} was not saved")
 
     else:
         click.echo("Please provide either --all or an ide_task_id.")
