@@ -107,7 +107,8 @@ def get_task_by_ide_task_id(
     :param doc_id: Demo document id
     return: JSON response of tasks
     """
-
+    # TODO: muuta funktio toimimaan pelkällä
+    # idllä tai pathilla. Ei tarvita molempia
     res = make_request(
         endpoint=TASK_BY_IDE_TASK_ID_ENDPOINT,
         params={
