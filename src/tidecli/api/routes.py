@@ -70,29 +70,6 @@ def get_ide_courses() -> list[Course]:
     return all_courses
 
 
-def task_folders_by_doc(doc_path: str | None = None, doc_id: int | None = None):
-    """
-    TODO: Is this needed? Not typed yet
-    Get the course task folders by document path or document id
-    :param doc_path: Course main document path (starting page), e.g. "courses/ohjelmointikurssi1/ohjelmointikurssi1"
-    :param doc_id: Course main document id
-    return: JSON response of demos
-    """
-
-    if doc_path is None and doc_id is None:
-        raise click.ClickException("doc_path or doc_id must be provided")
-
-    res = make_request(
-        endpoint=TASK_FOLDERS_BY_DOC_ENDPOINT,
-        params={"doc_path": doc_path, "doc_id": doc_id},
-    )
-
-    if "error" in res:
-        raise click.ClickException(res["error"])
-
-    return res
-
-
 def get_tasks_by_doc(
     doc_path: str | None = None, doc_id: int | None = None
 ) -> list[TaskData]:
