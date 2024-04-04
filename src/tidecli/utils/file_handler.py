@@ -1,14 +1,12 @@
 """Module for creating file structures for tasks and demos."""
 
 import json
-from pathlib import Path
-
 import click.exceptions
-
+from pathlib import Path
+from tidecli.models.Course import Course
+from tidecli.api.routes import get_tasks_by_doc
 from tidecli.models.TaskData import TaskData, TaskFile
-
 METADATA_NAME = ".timdata"
-
 
 
 def create_task(
@@ -34,9 +32,7 @@ def create_task(
         user_folder = Path.cwd()
 
     end = Path(task_data.ide_task_id)
-
     end_path = Path(Path(task_data.path).parts[-1])
-
     end_path = end_path.joinpath(end)
 
     # Add course path to create task path

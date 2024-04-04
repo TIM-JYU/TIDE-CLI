@@ -5,10 +5,10 @@ This module contains the main command group for the Tide CLI.
 The whole CLI app may be located in different module.
 """
 
+
 from pathlib import Path
 
 import click
-from tidecli.models.TimFeedback import TimFeedback
 from tidecli.utils.file_handler import (
     create_task,
     get_task_file_data,
@@ -22,6 +22,7 @@ from tidecli.api.routes import (
 )
 from tidecli.models.Course import Course
 from tidecli.models.SubmitData import SubmitData
+from tidecli.models.TimFeedback import TimFeedback
 from tidecli.models.TaskData import TaskData, TaskFile
 from tidecli.utils.handle_token import delete_token
 from tidecli.utils.login_handler import login_details
@@ -77,7 +78,6 @@ def list(demo_path):
     """Fetch tasks by doc path."""
     tasks = get_tasks_by_doc(doc_path=demo_path)
 
-    # TODO: heittää erroria TIMistä C++ kurssin tehtäviä hakiessa
     for task in tasks:
         click.echo(task.pretty_print())
 
@@ -119,7 +119,7 @@ def submit(path):
         raise click.ClickException("Invalid path")
 
     metadata = get_metadata(path)
-    answer_files = get_task_file_data(path, metadata) # meta_data.task_files[0].file_name)
+    answer_files = get_task_file_data(path, metadata)
 
     if not answer_files:
         raise click.ClickException("Invalid task file")
@@ -134,7 +134,6 @@ def submit(path):
     )
 
     feedback = submit_task(t)
-
     click.echo(feedback.console_output())
 
 
