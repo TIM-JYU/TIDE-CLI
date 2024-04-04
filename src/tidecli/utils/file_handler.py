@@ -81,7 +81,7 @@ def save_file(file: list[TaskFile], save_path: Path, overwrite=False) -> bool:
                     f"Give    main.py task create -f {save_path} <ide_task_id>    to overwrite"
                 )
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(file_path, "w") as file:
+        with open(file_path, "w", encoding="utf-8") as file:
             file.write(f.content)
             file.close()
 
@@ -98,7 +98,7 @@ def write_metadata(folder_path: Path, metadata: TaskData) -> bool:
     write_mode = "w"
     if metadata_path.exists():
         write_mode = "w"
-    with open(metadata_path, write_mode) as file:
+    with open(metadata_path, write_mode, encoding="utf-8") as file:
         content = metadata.model_dump_json()
         file.write(content)
         file.close()
@@ -123,7 +123,7 @@ def create_file(item: dict, folder_path: Path, overwrite=False):
             click.ClickException(f"Folder {folder_path} already exists")
 
     # Write the file with desired writemode, CREATE or WRITE
-    with open(folder_path, "x") as file:
+    with open(folder_path, "x", encoding="utf-8") as file:
         file.write(item["code"])
         file.close()
 
@@ -132,6 +132,7 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> str:
     """
     Get file data from the given path excluding .json files.
 
+    :param metadata: TaskData object
     :param file_path: Path to the directory containing the files.
     :return: File data
     """
@@ -145,7 +146,7 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> str:
     for f1 in task_files:
         for f2 in files_in_dir:
             if f1.file_name == f2.name:
-                with open(f2, "r") as answer_file:
+                with open(f2, "r", encoding="utf-8") as answer_file:
                     f1.content = answer_file.read()
                     
     return task_files
@@ -164,7 +165,7 @@ def get_metadata(metadata_path: Path) -> TaskData:
     if not metadata_path.exists():
         raise click.ClickException(f"Metadata not found in {metadata_path}")
     try:
-        with open(metadata_path, "r") as file:
+        with open(metadata_path, "r", encoding="utf-8") as file:
             metadata = json.load(file)
             return TaskData(**metadata)
     except Exception as e:
