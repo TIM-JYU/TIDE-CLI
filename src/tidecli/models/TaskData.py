@@ -4,35 +4,35 @@ from pydantic import BaseModel
 class TaskFile(BaseModel):
     """Model for single code file."""
 
+    task_id_ext: str
     content: str
     file_name: str = ""
     source: str = "editor"
-    # TODO: With multiple file returns these should be probably given per file
-    # user_input: str | None = ""
-    # user_args: str | None = ""
+    user_input: str = ""
+    user_args: str = ""
 
     def to_json(self):
         """Convert to JSON."""
         return {
+            "task_id_ext": self.task_id_ext,
             "content": self.content,
             "file_name": self.file_name,
             "source": self.source,
-            # "user_input": self.user_input,
-            # "user_args": self.user_args,
+            "user_input": self.user_input,
+            "user_args": self.user_args,
         }
 
 
 class TaskData(BaseModel):
     """Model for task data."""
 
-    header: str | None = None
-    stem: str | None = None
+    path: str
     type: str
-    task_id: str
-    par_id: str
     doc_id: int
     ide_task_id: str
     task_files: list[TaskFile]
+    stem: str | None = None
+    header: str | None = None
 
     def pretty_print(self):
         """
