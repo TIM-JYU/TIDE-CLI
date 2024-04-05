@@ -38,6 +38,21 @@ def create_task(
     # Add course path to create task path
     user_folder = user_folder.joinpath(end_path)
 
+    # Fix for tasks that have file_name without suffix
+    for f in task_data.task_files:
+        path = Path(f.file_name)
+        suffix = path.suffix
+
+        if suffix != "":
+            continue
+
+        file_type = task_data.run_type
+        if file_type == "c++" or file_type == "cpp":
+            f.file_name = f.file_name + ".cpp"
+
+        if file_type == "cc":
+            f.file_name = f.file_name + ".c"
+
     saved = save_file(
         file=task_data.task_files, save_path=user_folder, overwrite=overwrite
     )

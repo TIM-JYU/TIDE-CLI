@@ -136,7 +136,7 @@ def submit(path):
 
     t = SubmitData(
         code_files=answer_files,
-        code_language=metadata.type,
+        code_language=metadata.run_type,
     )
 
     feedback = submit_task(t)

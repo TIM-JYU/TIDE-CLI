@@ -1,3 +1,5 @@
+import re
+
 from pydantic import BaseModel
 
 
@@ -23,6 +25,9 @@ class TaskFile(BaseModel):
         }
 
 
+_task_type_split_re = re.compile(r"[/,; ]")
+
+
 class TaskData(BaseModel):
     """Model for task data."""
 
@@ -33,6 +38,11 @@ class TaskData(BaseModel):
     task_files: list[TaskFile]
     stem: str | None = None
     header: str | None = None
+
+    @property
+    def run_type(self) -> str:
+        """Returns run type eg. cc from cc/input/comtest"""
+        return _task_type_split_re.split(self.type)[0]
 
     def pretty_print(self):
         """
