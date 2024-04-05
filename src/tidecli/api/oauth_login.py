@@ -1,13 +1,24 @@
 import base64
 from dataclasses import dataclass
 import hashlib
+
+import click
 import requests
 import webbrowser
 import urllib.parse
 import secrets
 import http.server
 
-from tidecli.tide_config import *
+from tidecli.tide_config import (
+    CLIENT_ID,
+    REDIRECT_URI,
+    SCOPE,
+    BASE_URL,
+    AUTH_ENDPOINT,
+    TOKEN_ENDPOINT,
+    PROFILE_ENDPOINT,
+    PORT,
+)
 from tidecli.utils.handle_token import save_token
 
 
@@ -60,12 +71,13 @@ class OAuthAuthenticator:
 
                 # Handles the case where the user denied the authorization / closed the browser
                 if "error" in query:
-                    print(f"Authorization denied by user: {query['error'][0]}")
                     self.send_error(403, "Authorization denied by user")
-                    return
 
                 # Temporary code, which is used to obtain the API key
-                code = query.get("code")[0]
+                if "code" in query:
+                    code = query.get("code")[0]
+                else:
+                    self.send_error(403, "Api key not found in the response.")
 
                 token_params = {
                     "client_id": CLIENT_ID,

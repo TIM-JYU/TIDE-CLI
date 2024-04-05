@@ -5,10 +5,12 @@ This module contains the main command group for the Tide CLI.
 The whole CLI app may be located in different module.
 """
 
-
 from pathlib import Path
 
 import click
+
+from tidecli.models.submit_data import SubmitData
+from tidecli.models.task_data import TaskData
 from tidecli.utils.file_handler import (
     create_task,
     get_task_file_data,
@@ -20,10 +22,7 @@ from tidecli.api.routes import (
     get_task_by_ide_task_id,
     submit_task,
 )
-from tidecli.models.Course import Course
-from tidecli.models.SubmitData import SubmitData
-from tidecli.models.TimFeedback import TimFeedback
-from tidecli.models.TaskData import TaskData, TaskFile
+
 from tidecli.utils.handle_token import delete_token
 from tidecli.utils.login_handler import login_details
 

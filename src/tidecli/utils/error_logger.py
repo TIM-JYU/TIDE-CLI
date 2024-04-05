@@ -3,14 +3,18 @@ import logging
 import click
 
 # Configure logger
-logging.basicConfig(filename='tide-cli.log', filemode='a', level=logging.ERROR,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    filename="tide-cli.log",
+    filemode="a",
+    level=logging.ERROR,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+)
 
 
 def error_handler(func):
     """
     Generic error handler
-    
+
     This is used as decorator @error_handler
     """
 

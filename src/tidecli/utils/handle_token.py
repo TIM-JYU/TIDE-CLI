@@ -1,4 +1,5 @@
 import keyring as kr
+from keyring.credentials import Credential
 
 
 def save_token(token, username):
@@ -33,7 +34,7 @@ def get_token(username) -> str | None:
         return None
 
 
-def get_signed_in_user() -> str | None:
+def get_signed_in_user() -> Credential | None:
     """
     Get the signed in user from the keyring
 

@@ -13,6 +13,7 @@ class TimFeedback(BaseModel):
     """
     Model for feedback response after submitting a task
     """
+
     savedNew: int | None
     valid: bool
     web: WebData | None
@@ -26,6 +27,13 @@ class TimFeedback(BaseModel):
             return self.web.error
 
         if self.savedNew:
-            return "Saved answer successfully.\n" + "Stats for nerds:\n" + self.web.runtime + "\n" + "Console feedback:\n" + self.web.console
+            return (
+                "Saved answer successfully.\n"
+                + "Stats for nerds:\n"
+                + self.web.runtime
+                + "\n"
+                + "Console feedback:\n"
+                + self.web.console
+            )
         else:
             return "Answer was the same as the previous one."

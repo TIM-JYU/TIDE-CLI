@@ -23,13 +23,19 @@ def login_details():
             if authenticate():
                 return "Login successful!"
             else:
-                return "Login failed. Please try again." + token_validity_time.get("error")
+                return "Login failed. Please try again." + token_validity_time.get(
+                    "error"
+                )
 
         # If the token is not expired then return the token validity time
         expiration_time = token_validity_time.get("exp")
         if expiration_time:
-            return ("Logged in as " + user_login.username +
-                    "\nToken is still valid for " + str(datetime.timedelta(seconds=expiration_time)))
+            return (
+                "Logged in as "
+                + user_login.username
+                + "\nToken is still valid for "
+                + str(datetime.timedelta(seconds=expiration_time))
+            )
         else:
             return "Token validity time not found"
 
