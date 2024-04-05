@@ -30,6 +30,21 @@ pytest = "^8.0.0"
 mypy = "^1.9.0"
 black = {extras = ["d"], version = "^24.3.0"}
 
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = false
+disallow_untyped_calls = true
+namespace_packages = true
+
+
+[[tool.mypy.overrides]]
+module = [
+    "requests",
+    "PyInstaller.__main__",
+    "PyInstaller"
+]
+ignore_missing_imports = true
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
