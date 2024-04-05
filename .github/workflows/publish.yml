@@ -1,9 +1,10 @@
 name: PUBLISH
 on:
   push:
-    branches: ['main']
-
-
+    # branches: ['main', 'update-publish-workflow']
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+      
 jobs:
   publish:
     strategy:
@@ -13,26 +14,67 @@ jobs:
         poetry-version: ["1.7.1"]
         os: [windows-latest, ubuntu-22.04, macos-latest]
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+      
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          fetch-depth: 0
       - name: Python Poetry Action
         uses: abatilo/actions-poetry@v3.0.0
       - name: Install dependencies
         run: poetry lock &&  poetry install
       - name: Publish CLI tool
         run: poetry run build
+      - name: Rename artifact
+        shell: bash
+        run: |
+          mv dist/main dist/tide
       - name: Archive production artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-onefile-${{ matrix.os }}
+          name: tide-${{ matrix.os }}
           path: |
             dist
-      - name: Release with Notes
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+
+  collect:
+    runs-on: ubuntu-latest
+    needs:
+      - publish
+
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
         with:
-          files: |
-            dist/*tide -> dist/${{ matrix.os }}-tide
+          path: artifacts
+
+      - name: List artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+            ls artifacts
+
+      - name: Create zips
+        run: |
+          mkdir dist
+          cd artifacts
+          for dir in *
+          do
+            (cd ${dir}; zip -r ../../dist/${dir}.zip *)
+          done
+          ls ../dist
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release create --title "Release ${{ github.ref_name }}" ${{ github.ref_name }} dist/*
