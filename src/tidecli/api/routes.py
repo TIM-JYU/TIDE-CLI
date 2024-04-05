@@ -12,6 +12,7 @@ from tidecli.tide_config import (
     IDE_COURSES_ENDPOINT,
     TASK_BY_IDE_TASK_ID_ENDPOINT,
     SUBMIT_TASK_ENDPOINT,
+    TASKS_BY_DOC_ENDPOINT,
 )
 from tidecli.utils.handle_token import get_signed_in_user
 
@@ -91,7 +92,7 @@ def get_tasks_by_doc(
         raise click.ClickException("doc_path or doc_id must be provided")
 
     res = make_request(
-        endpoint=TASK_BY_IDE_TASK_ID_ENDPOINT,
+        endpoint=TASKS_BY_DOC_ENDPOINT,
         params={"doc_path": doc_path, "doc_id": doc_id},
     )
 

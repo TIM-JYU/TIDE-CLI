@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+import re
 
 from tidecli.models.task_data import TaskFile
 
@@ -14,6 +15,7 @@ class SubmitData(BaseModel):
     def submit_json(self):
         if isinstance(self.code_files, TaskFile):
             self.code_files = [self.code_files]
+
         return {
             "code_files": [file.to_json() for file in self.code_files],
             "code_language": self.code_language,
