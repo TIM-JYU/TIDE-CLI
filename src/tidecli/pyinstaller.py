@@ -13,8 +13,10 @@ def install():
 
     Used by poetry.
     """
-    PyInstaller.__main__.run([
-        PATH_TO_MAIN,
-        '--onefile'
-        # other pyinstaller options... 
-    ])
+    PyInstaller.__main__.run(
+        [
+            PATH_TO_MAIN,
+            "--onefile",
+            # other pyinstaller options...
+        ]
+    )

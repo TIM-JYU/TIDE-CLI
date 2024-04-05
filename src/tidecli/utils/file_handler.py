@@ -3,9 +3,9 @@
 import json
 import click.exceptions
 from pathlib import Path
-from tidecli.models.Course import Course
-from tidecli.api.routes import get_tasks_by_doc
-from tidecli.models.TaskData import TaskData, TaskFile
+
+from tidecli.models.task_data import TaskData, TaskFile
+
 METADATA_NAME = ".timdata"
 
 
@@ -148,7 +148,7 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> str:
             if f1.file_name == f2.name:
                 with open(f2, "r", encoding="utf-8") as answer_file:
                     f1.content = answer_file.read()
-                    
+
     return task_files
 
 

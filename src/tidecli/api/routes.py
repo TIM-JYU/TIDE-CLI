@@ -1,11 +1,18 @@
 import click
 import requests
 
-from tidecli.models import SubmitData
-from tidecli.models.Course import Course
-from tidecli.models.TaskData import TaskData
-from tidecli.models.TimFeedback import TimFeedback
-from tidecli.tide_config import *
+from tidecli.models.course import Course
+from tidecli.models.submit_data import SubmitData
+from tidecli.models.task_data import TaskData
+from tidecli.models.tim_feedback import TimFeedback
+from tidecli.tide_config import (
+    BASE_URL,
+    INTROSPECT_ENDPOINT,
+    PROFILE_ENDPOINT,
+    IDE_COURSES_ENDPOINT,
+    TASK_BY_IDE_TASK_ID_ENDPOINT,
+    SUBMIT_TASK_ENDPOINT,
+)
 from tidecli.utils.handle_token import get_signed_in_user
 
 
@@ -84,7 +91,8 @@ def get_tasks_by_doc(
         raise click.ClickException("doc_path or doc_id must be provided")
 
     res = make_request(
-        endpoint=TASKS_BY_DOC_ENDPOINT, params={"doc_path": doc_path, "doc_id": doc_id}
+        endpoint=TASK_BY_IDE_TASK_ID_ENDPOINT,
+        params={"doc_path": doc_path, "doc_id": doc_id},
     )
 
     if "error" in res:

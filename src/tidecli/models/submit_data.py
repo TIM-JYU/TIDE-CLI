@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from tidecli.models.TaskData import TaskFile
+from tidecli.models.task_data import TaskFile
 
 
 class SubmitData(BaseModel):
