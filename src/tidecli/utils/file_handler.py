@@ -66,7 +66,7 @@ def save_file(file: list[TaskFile], save_path: Path, overwrite=False) -> bool:
     if save_path.exists() and not overwrite:
         raise click.ClickException(
             f"File {save_path} already exists\n\n"
-            f"Give    main.py task create -f {save_path} <ide_task_id>    to overwrite"
+            f"To overwrite give tide task create -f {save_path}"
         )
 
     save_path.mkdir(parents=True, exist_ok=overwrite)
@@ -78,7 +78,7 @@ def save_file(file: list[TaskFile], save_path: Path, overwrite=False) -> bool:
             if not overwrite:
                 raise click.ClickException(
                     f"File {file_path} already exists\n\n"
-                    f"Give    main.py task create -f {save_path} <ide_task_id>    to overwrite"
+                    f"To overwrite give tide task create -f {save_path}"
                 )
         file_path.parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "w", encoding="utf-8") as file:
