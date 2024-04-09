@@ -1,7 +1,7 @@
 name: PUBLISH
 on:
   push:
-    # branches: ['main']
+    branches: ['main']
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
       
@@ -12,7 +12,7 @@ jobs:
       matrix:
         python-version: ["3.10"]
         poetry-version: ["1.7.1"]
-        os: [windows-latest, ubuntu-22.04, macos-latest, macos-13-xlarge]
+        os: [windows-latest, ubuntu-22.04, macos-latest]
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
