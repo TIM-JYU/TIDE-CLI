@@ -27,13 +27,8 @@ class TimFeedback(BaseModel):
             return self.web.error
 
         if self.savedNew:
-            return (
-                "Saved answer successfully.\n"
-                + "Stats for nerds:\n"
-                + self.web.runtime
-                + "\n"
-                + "Console feedback:\n"
-                + self.web.console
-            )
+            saved_new = "Saved new answer successfully."
         else:
-            return "Answer was the same as the previous one."
+            saved_new = "New answer was not saved. Same file was already submitted."
+
+        return f"{saved_new}\n\nStats for nerds:\n{self.web.runtime}\nConsole feedback:\n{self.web.console}"
