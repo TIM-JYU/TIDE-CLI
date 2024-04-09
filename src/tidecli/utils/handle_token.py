@@ -10,11 +10,10 @@ def save_token(token, username):
     :param username: The username to save the token for
     """
     try:
-        # TODO: katso että keyring tsekkaa vielä kaikille järjestelmille sopivalla tavalla tämän
-        credentials = kr.get_credential("TIDE", None)
+        credentials = kr.get_password("TIDE", "username")
         if credentials:
             # Remove the old token if it exists to avoid duplicates
-            kr.delete_password("TIDE", credentials.username)
+            delete_token()
 
         kr.set_password("TIDE", "username", username)
         kr.set_password("TIDE", username, token)
