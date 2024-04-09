@@ -14,7 +14,7 @@ def login_details():
     user_login = get_signed_in_user()
 
     # If the username exist in credential manager then return the token validity
-    if user_login:
+    if user_login.password:
 
         token_validity_time = validate_token()
 
