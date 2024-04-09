@@ -30,3 +30,15 @@ Step 10: Login details can be acquired from the TIDE project team vie email
 
 Step 11: Run `python main.py` to see the list of commands available
 
+## Building CLI tool to executable
+There may be a need for build the CLI tool into an executable using user's own operating system. If that is the case, please follow these after above steps are completed untill `Step 7`.
+
+**Build the CLI tool**
+
+Step 1: `poetry run build`
+
+Step 2: `cd dist && ls -la`, file permissions should look like `-rwxr-xr-x`
+
+Step 3: Move app named 'main' as 'tide' to some folder that is in PATH. E.g. `mv main /usr/bin/tide`.
+
+Step 4: Start use, please refer user instructions in TIM.
