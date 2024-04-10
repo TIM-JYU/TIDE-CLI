@@ -75,14 +75,8 @@ def courses(jsondata):
 
     if jsondata:
         # Create JSON object list
-        json_data = []
-        for course in data:
-            course_dict = {
-                "course_name": course.name,
-                "exercise_paths": course.tasks
-            }
-            json_data.append(course_dict)
-        click.echo(json.dumps(json_data, ensure_ascii=False))
+        json_data = [course.to_json() for course in data]
+        click.echo(json.dumps(json_data, ensure_ascii=False, indent=4))
 
 
 @click.group()
