@@ -10,10 +10,12 @@ def save_token(token, username):
     :param username: The username to save the token for
     """
     try:
-        credentials = kr.get_credential("TIDE", None)
+        credentials = kr.get_password("TIDE", "username")
         if credentials:
             # Remove the old token if it exists to avoid duplicates
-            kr.delete_password("TIDE", credentials.username)
+            delete_token()
+
+        kr.set_password("TIDE", "username", username)
         kr.set_password("TIDE", username, token)
 
     except Exception as e:
@@ -41,7 +43,13 @@ def get_signed_in_user() -> Credential | None:
     return: The signed in user username and token
     """
     try:
-        return kr.get_credential("TIDE", None)
+        user = lambda: None # Create helper object
+        username = kr.get_password("TIDE", "username")
+        password = kr.get_password("TIDE", username)
+        user.username = username
+        user.password = password
+
+        return user
     except Exception as e:
         print(f"Error getting signed in user: {e}")
         return None
@@ -53,10 +61,11 @@ def delete_token():
     when log out is called
     """
     try:
-        user_name = get_signed_in_user()
-        if user_name:
-            kr.delete_password("TIDE", user_name.username)
-            return f"Token for {user_name.username} deleted successfully."
+        user = get_signed_in_user()
+        if user:
+            kr.delete_password("TIDE", user.username)
+            kr.delete_password("TIDE", "username")
+            return f"Token for {user.username} deleted successfully."
         else:
             return "User not logged in."
     except Exception as e:

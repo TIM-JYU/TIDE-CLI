@@ -43,6 +43,11 @@ def login():
     """
     click.echo(login_details())
 
+    # Verify the login
+    try:
+        get_ide_courses()
+    except Exception as e:
+        raise click.ClickException(f"An error occurred after login, contact support. {e}")
 
 @tim_ide.command()
 def logout():
