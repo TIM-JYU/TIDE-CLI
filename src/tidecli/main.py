@@ -47,7 +47,7 @@ def login():
     try:
         get_ide_courses()
     except Exception as e:
-        raise click.ClickException(f"An error occurred after login, contact support. {e}")
+        raise click.ClickException(f"An error raised after login. Have you added IDE-courses to bookmarks already? Error message: {e}")
 
 @tim_ide.command()
 def logout():
