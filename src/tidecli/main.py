@@ -6,7 +6,7 @@ The whole CLI app may be located in different module.
 """
 
 from pathlib import Path
-
+import json
 import click
 
 from tidecli.models.submit_data import SubmitData
@@ -57,12 +57,32 @@ def logout():
 
 
 @tim_ide.command()
-def courses():
-    """List  all courses."""
+@click.option("--json", "-j", "jsondata", is_flag=True, default=False)
+def courses(jsondata):
+    """
+    List  all courses.
+
+    Prints all courses that the user has access to.
+
+    If --json flag is used, the output is printed in JSON format.
+    """
+
     data = get_ide_courses()
 
-    for course in data:
-        click.echo(course.pretty_print())
+    if not jsondata:
+        for course in data:
+            click.echo(course.pretty_print())
+
+    if jsondata:
+        # Create JSON object list
+        json_data = []
+        for course in data:
+            course_dict = {
+                "course_name": course.name,
+                "exercise_paths": course.tasks
+            }
+            json_data.append(course_dict)
+        click.echo(json.dumps(json_data, ensure_ascii=False))
 
 
 @click.group()
