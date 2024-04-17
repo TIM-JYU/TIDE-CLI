@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class TaskFile(BaseModel):
     """Model for single code file."""
-
+    # TODO: Tarkista TIMistä voiko tätä task_id_extiä käyttää
     task_id_ext: str
     content: str
     file_name: str = ""
