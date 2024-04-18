@@ -107,7 +107,7 @@ def list(demo_path, jsondata):
     tasks: list[TaskData] = get_tasks_by_doc(doc_path=demo_path)
 
     if not jsondata:
-        for taskdata in tasks:
+        for task in tasks:
             click.echo(task.pretty_print())
 
     if jsondata:
