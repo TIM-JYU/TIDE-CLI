@@ -48,4 +48,3 @@ class Course(BaseModel):
             "path": self.path,
             "task_docs": [task.dict() for task in self.tasks],
         }
-
