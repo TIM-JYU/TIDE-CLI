@@ -1,3 +1,4 @@
+
 """
 Main module for the Tide CLI.
 
@@ -6,7 +7,7 @@ The whole CLI app may be located in different module.
 """
 
 from pathlib import Path
-
+import json
 import click
 
 from tidecli.models.submit_data import SubmitData
@@ -47,7 +48,8 @@ def login():
     try:
         get_ide_courses()
     except Exception as e:
-        raise click.ClickException(f"An error occurred after login, contact support. {e}")
+        raise click.ClickException(f"An error raised after login. Have you added IDE-courses to bookmarks already? Error message: {e}")
+
 
 @tim_ide.command()
 def logout():
@@ -56,12 +58,26 @@ def logout():
 
 
 @tim_ide.command()
-def courses():
-    """List  all courses."""
+@click.option("--json", "-j", "jsondata", is_flag=True, default=False)
+def courses(jsondata):
+    """
+    List  all courses.
+
+    Prints all courses that the user has access to.
+
+    If --json flag is used, the output is printed in JSON format.
+    """
+
     data = get_ide_courses()
 
-    for course in data:
-        click.echo(course.pretty_print())
+    if not jsondata:
+        for course in data:
+            click.echo(course.pretty_print())
+
+    if jsondata:
+        # Create JSON object list
+        courses_json = [course.to_json() for course in data]
+        click.echo(json.dumps(courses_json, ensure_ascii=False, indent=4))
 
 
 @click.group()
@@ -77,13 +93,27 @@ def task():
 
 
 @task.command()
+@click.option("--json", "-j", "jsondata", is_flag=True, default=False)
 @click.argument("demo_path", type=str, required=True)
-def list(demo_path):
-    """Fetch tasks by doc path."""
-    tasks = get_tasks_by_doc(doc_path=demo_path)
+def list(demo_path, jsondata):
+    """
+    Fetch tasks by doc path.
 
-    for task in tasks:
-        click.echo(task.pretty_print())
+    Fetches all tasks from the given doc path and prints them.
+    :param demo_path: Path to the demo file.
+    :param jsondata: If True, prints the output in JSON format.
+
+    """
+    tasks: list[TaskData] = get_tasks_by_doc(doc_path=demo_path)
+
+    if not jsondata:
+        for task in tasks:
+            click.echo(task.pretty_print())
+
+    if jsondata:
+        # Create JSON object list
+        tasks_json = [task.to_json() for task in tasks]
+        click.echo(json.dumps(tasks_json, ensure_ascii=False, indent=4))
 
 
 @task.command()

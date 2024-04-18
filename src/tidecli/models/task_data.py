@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class TaskFile(BaseModel):
     """Model for single code file."""
-
+    # TODO: Tarkista TIMistä voiko tätä task_id_extiä käyttää
     task_id_ext: str
     content: str
     file_name: str = ""
@@ -29,7 +29,18 @@ _task_type_split_re = re.compile(r"[/,; ]")
 
 
 class TaskData(BaseModel):
-    """Model for task data."""
+    """
+    Model for task data.
+
+    :param path: Path to the task
+    :param type: Type of the task
+    :param doc_id: Document ID
+    :param ide_task_id: Task ID
+    :param task_files: List of task files
+    :param stem: Stem of the task
+    :param header: Header of the task
+
+    """
 
     path: str
     type: str
@@ -56,3 +67,10 @@ class TaskData(BaseModel):
             return f"Taskname: {self.header}, ID: {self.ide_task_id}"
         else:
             return f"ID: {self.ide_task_id}"
+
+    def to_json(self):
+        """Convert to dict."""
+        task_data = self.dict()
+        task_data['task_files'] = [task_file.dict() for task_file in self.task_files]
+
+        return task_data

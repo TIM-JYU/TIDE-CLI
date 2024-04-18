@@ -35,3 +35,17 @@ class Course(BaseModel):
         ]
 
         return f"Course: {self.name}, ID: {self.id}\n{''.join(task_paths)}"
+
+    def to_json(self):
+        """
+        Converts the course to JSON.
+
+        :return: Course as JSON
+        """
+        return {
+            "name": self.name,
+            "id": self.id,
+            "path": self.path,
+            "tasks": [task.dict() for task in self.tasks],
+        }
+
