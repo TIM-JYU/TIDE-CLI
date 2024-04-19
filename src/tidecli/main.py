@@ -1,4 +1,3 @@
-
 """
 Main module for the Tide CLI.
 
@@ -16,12 +15,14 @@ from tidecli.utils.file_handler import (
     create_task,
     get_task_file_data,
     get_metadata,
+    create_tasks,
 )
 from tidecli.api.routes import (
     get_ide_courses,
     get_tasks_by_doc,
     get_task_by_ide_task_id,
     submit_task,
+    validate_token,
 )
 
 from tidecli.utils.handle_token import delete_token
@@ -43,12 +44,6 @@ def login():
 
     """
     click.echo(login_details())
-
-    # Verify the login
-    try:
-        get_ide_courses()
-    except Exception as e:
-        raise click.ClickException(f"An error raised after login. Have you added IDE-courses to bookmarks already? Error message: {e}")
 
 
 @tim_ide.command()
@@ -126,22 +121,15 @@ def create(demo_path, ide_task_id, all, force, dir):
     """Create tasks based on options."""
     if all:
         # Create all tasks
-        tasks = get_tasks_by_doc(doc_path=demo_path)
-        for task in tasks:
-            if create_task(task_data=task, overwrite=force, user_path=dir):
-                click.echo(f"{task.ide_task_id} was saved")
-            else:
-                click.echo(f"{task.ide_task_id} was not saved")
+        tasks: list[TaskData] = get_tasks_by_doc(doc_path=demo_path)
+        create_tasks(task_datas=tasks, overwrite=force, user_path=dir)
 
     elif ide_task_id:
         # Create a single task
         task_data: TaskData = get_task_by_ide_task_id(
             ide_task_id=ide_task_id, doc_path=demo_path
         )
-        if create_task(task_data=task_data, overwrite=force, user_path=dir):
-            click.echo(f"{task_data.ide_task_id} was saved")
-        else:
-            click.echo(f"{task_data.ide_task_id} was not saved")
+        create_task(task_data=task_data, overwrite=force, user_path=dir)
 
     else:
         click.echo("Please provide either --all or an ide_task_id.")

@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 class TaskFile(BaseModel):
     """Model for single code file."""
-    # TODO: Tarkista TIMistä voiko tätä task_id_extiä käyttää
+
     task_id_ext: str
     content: str
     file_name: str = ""
@@ -13,7 +13,7 @@ class TaskFile(BaseModel):
     user_input: str = ""
     user_args: str = ""
 
-    def to_json(self):
+    def to_json(self) -> dict:
         """Convert to JSON."""
         return {
             "task_id_ext": self.task_id_ext,
@@ -71,6 +71,6 @@ class TaskData(BaseModel):
     def to_json(self):
         """Convert to dict."""
         task_data = self.dict()
-        task_data['task_files'] = [task_file.dict() for task_file in self.task_files]
+        task_data["task_files"] = [task_file.dict() for task_file in self.task_files]
 
         return task_data

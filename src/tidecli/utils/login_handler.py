@@ -1,7 +1,10 @@
 import datetime
 
+import click
+
 from tidecli.api.oauth_login import authenticate
 from tidecli.api.routes import validate_token
+from tidecli.models.user import User
 from tidecli.utils.handle_token import get_signed_in_user
 
 
@@ -11,21 +14,20 @@ def login_details():
     If the user is not logged in then return the login link
     """
 
-    user_login = get_signed_in_user()
+    user_login: User = get_signed_in_user()
 
     # If the username exist in credential manager then return the token validity
-    if user_login.password:
+    if user_login and user_login.password:
 
-        token_validity_time = validate_token()
-
-        # If the token is expired or returns error message TODO: test this
-        if token_validity_time.get("error"):
+        # Validate the token, in case of error in validation, return the error message and ask the user to login again
+        try:
+            token_validity_time = validate_token()
+        except click.ClickException as e:
+            print(f"Error: {e}" + "\n Please try to log in again.")
             if authenticate():
                 return "Login successful!"
             else:
-                return "Login failed. Please try again." + token_validity_time.get(
-                    "error"
-                )
+                return "Login failed. Please try again."
 
         # If the token is not expired then return the token validity time
         expiration_time = token_validity_time.get("exp")

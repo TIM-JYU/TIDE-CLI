@@ -9,8 +9,25 @@ from tidecli.models.task_data import TaskData, TaskFile
 METADATA_NAME = ".timdata"
 
 
+def create_tasks(
+    task_datas: list[TaskData], overwrite: bool, user_path: str | None = None
+) -> bool:
+    """
+    Create multiple tasks.
+
+    :param task_datas: List of TaskData objects
+    :param overwrite: Flag if overwrite
+    :param user_path: Path to user given folder
+
+    return: True if tasks are created, False if not
+    """
+    for task in task_datas:
+        create_task(task_data=task, overwrite=overwrite, user_path=user_path)
+    return True
+
+
 def create_task(
-    task_data: TaskData | list[TaskData], overwrite: bool, user_path: str | None = None
+    task_data: TaskData, overwrite: bool, user_path: str | None = None
 ) -> bool:
     """
     Create a single task.
@@ -21,9 +38,6 @@ def create_task(
 
     return: True if task is created, False if not
     """
-    if isinstance(task_data, list):
-        for task in task_data:
-            create_task(task_data=task, overwrite=overwrite, user_path=user_path)
 
     # Sets path to current path or user given path
     if user_path:
@@ -54,7 +68,7 @@ def create_task(
             f.file_name = f.file_name + ".c"
 
     saved = save_file(
-        file=task_data.task_files, save_path=user_folder, overwrite=overwrite
+        task_files=task_data.task_files, save_path=user_folder, overwrite=overwrite
     )
 
     if not saved:
@@ -68,38 +82,31 @@ def create_task(
     return saved
 
 
-def save_file(file: list[TaskFile], save_path: Path, overwrite=False) -> bool:
+def save_file(task_files: list[TaskFile], save_path: Path, overwrite=False) -> bool:
     """
     Create files of tasks in the given path.
 
-    :param file: Dict or list of dicts. Contain name with file extension (.eg .py or .txt ...) and content
+    :param task_files: Dict or list of dicts. Contain name with file extension (.eg .py or .txt ...) and content
     :param save_path: Path to exercises in TIM
     :param overwrite: Flag if overwrite
 
     """
 
-    if save_path.exists() and not overwrite:
-        raise click.ClickException(
-            f"File {save_path} already exists\n\n"
-            f"To overwrite give tide task create -f {save_path}"
-        )
+    save_path.mkdir(parents=True, exist_ok=True)
 
-    save_path.mkdir(parents=True, exist_ok=overwrite)
-
-    # TODO: Tarkista tuleeko file_name oikein TIMistä
-    for f in file:
+    for f in task_files:
         file_path = save_path.joinpath(f.file_name)
         if file_path.exists():
             if not overwrite:
-                raise click.ClickException(
-                    f"File {file_path} already exists\n\n"
-                    f"To overwrite give tide task create -f {save_path}"
+                click.echo(
+                    f"File {file_path} already exists\nTo overwrite give tide task create -f {save_path} \n"
                 )
+                return False
         file_path.parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "w", encoding="utf-8") as file:
             file.write(f.content)
             file.close()
-
+    click.echo(f"Task created in {save_path}")
     return True
 
 
@@ -143,7 +150,7 @@ def create_file(item: dict, folder_path: Path, overwrite=False):
         file.close()
 
 
-def get_task_file_data(file_path: Path, metadata: TaskData) -> str:
+def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
     """
     Get file data from the given path excluding .json files.
 

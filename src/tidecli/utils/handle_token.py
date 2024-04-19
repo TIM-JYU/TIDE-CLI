@@ -1,8 +1,9 @@
+import click
 import keyring as kr
-from keyring.credentials import Credential
+from tidecli.models.user import User
 
 
-def save_token(token, username):
+def save_token(token: str, username: str) -> str | None:
     """
     Save the token in the keyring for the user. Removes the old token if it exists to avoid duplicates.
 
@@ -17,9 +18,10 @@ def save_token(token, username):
 
         kr.set_password("TIDE", "username", username)
         kr.set_password("TIDE", username, token)
+        return None
 
     except Exception as e:
-        return f"Error saving token: {e}"
+        raise click.ClickException(f"Error saving token: {e}")
 
 
 def get_token(username) -> str | None:
@@ -36,26 +38,30 @@ def get_token(username) -> str | None:
         return None
 
 
-def get_signed_in_user() -> Credential | None:
+def get_signed_in_user() -> User | None:
     """
     Get the signed in user from the keyring
 
     return: The signed in user username and token
     """
     try:
-        user = lambda: None # Create helper object
         username = kr.get_password("TIDE", "username")
+        if not username:
+            return None
         password = kr.get_password("TIDE", username)
-        user.username = username
-        user.password = password
+        if not password:
+            return None
+
+        user = User(username, password)
 
         return user
+
     except Exception as e:
         print(f"Error getting signed in user: {e}")
         return None
 
 
-def delete_token():
+def delete_token() -> str | None:
     """
     Delete the token from the keyring for the user
     when log out is called
@@ -69,5 +75,4 @@ def delete_token():
         else:
             return "User not logged in."
     except Exception as e:
-        print(f"Error deleting token: {e} ")
-        return None
+        raise click.ClickException(f"Error deleting token: {e}")
