@@ -23,7 +23,7 @@ def login_details():
         try:
             token_validity_time = validate_token()
         except click.ClickException as e:
-            print(f"Error: {e}" + "\n Please try to log in again.")
+            print(f"Error: {e}" + "\nPlease try to log in again.")
             if authenticate():
                 return "Login successful!"
             else:

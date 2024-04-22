@@ -47,15 +47,13 @@ def make_request(
         if "error" in res_json:
             error = res_json["error"]
             if "error_description" in res_json:
-                error = error + "\n" + res_json["error_description"]
-            if "invalid_token" in error:
-                raise click.ClickException(f"{error} \nPlease try to log in again.")
+                raise click.ClickException(error + "\n" + res_json["error_description"])
             else:
-                raise click.ClickException(res_json["error"] + " " + error)
+                raise click.ClickException(error)
         return res_json
 
     except Exception as e:
-        raise click.ClickException(f"Error: {e}")
+        raise click.ClickException(f"{e}")
 
 
 def validate_token() -> dict:

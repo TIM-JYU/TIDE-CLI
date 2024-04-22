@@ -1,9 +1,29 @@
 import unittest
 from unittest.mock import patch, MagicMock
 
-from tidecli.api.routes import *
-from tidecli.models.course import CourseTask
-from tidecli.models.task_data import TaskFile
+import click
+
+from tests.test_data import (
+    validate_token_response,
+    get_profile_test_response,
+    get_ide_courses_test_response,
+    get_tasks_by_doc_test_response,
+    get_task_by_ide_task_id_test_response,
+    submit_task_by_id_test_response,
+    submit_task_by_id_tim_test_response,
+)
+from tidecli.api.routes import (
+    validate_token,
+    get_profile,
+    get_ide_courses,
+    get_tasks_by_doc,
+    get_task_by_ide_task_id,
+    submit_task,
+)
+from tidecli.models.course import Course
+from tidecli.models.submit_data import SubmitData
+from tidecli.models.task_data import TaskData
+from tidecli.models.tim_feedback import TimFeedback
 
 
 class TestRoutes(unittest.TestCase):
@@ -12,22 +32,12 @@ class TestRoutes(unittest.TestCase):
         self.patch = patch(
             "tidecli.api.routes.requests.request", return_value=self.mock_response
         )
-        self.mock_response.side_effect = click.ClickException("Error message")
 
     def test_validate_token(self):
         """
         TDD-unit test model for the route to validate valid token
         """
-        self.mock_response.json.return_value = {
-            "active": True,
-            "client_id": "oauth2_tide",
-            "token_type": "Bearer",
-            "username": "test_user",
-            "scope": "profile user_tasks user_courses",
-            "aud": "oauth2_tide",
-            "exp": 864000,
-            "iat": 1713772959,
-        }
+        self.mock_response.json.return_value = validate_token_response
 
         with self.patch:
             res = validate_token()
@@ -53,14 +63,7 @@ class TestRoutes(unittest.TestCase):
         """
         TDD-unit test model for the route to get user profile
         """
-        self.mock_response.json.return_value = {
-            "id": 11111111,
-            "emails": [{"email": "test@test.fi", "verified": True}],
-            "last_name": "Test",
-            "given_name": "Test",
-            "real_name": "Test Test",
-            "username": "test_user",
-        }
+        self.mock_response.json.return_value = get_profile_test_response
 
         with self.patch:
             res = get_profile()
@@ -70,44 +73,8 @@ class TestRoutes(unittest.TestCase):
         """
         TDD-unit test model for the route, gets all courses user has bookmarked and have ideDocument tag with task paths
         """
-        self.mock_response.json.return_value = [
-            {
-                "name": "Testikurssi",
-                "id": 111111,
-                "path": "kurssit/testi/test/",
-                "tasks": [
-                    {
-                        "name": "Demo1",
-                        "path": "kurssit/testi/test/demot/Demo1",
-                        "doc_id": 1111111,
-                    },
-                    {
-                        "name": "Demo2",
-                        "path": "kurssit/testi/test/demot/Demo2",
-                        "doc_id": 2222222,
-                    },
-                ],
-            }
-        ]
-        validated_value = [
-            Course(
-                name="Testikurssi",
-                id=111111,
-                path="kurssit/testi/test/",
-                tasks=[
-                    CourseTask(
-                        name="Demo1",
-                        doc_id=1111111,
-                        path="kurssit/testi/test/demot/Demo1",
-                    ),
-                    CourseTask(
-                        name="Demo2",
-                        doc_id=2222222,
-                        path="kurssit/testi/test/demot/Demo2",
-                    ),
-                ],
-            )
-        ]
+        self.mock_response.json.return_value = get_ide_courses_test_response
+        validated_value = [Course(**course) for course in get_ide_courses_test_response]
 
         with self.patch:
             res = get_ide_courses()
@@ -117,50 +84,10 @@ class TestRoutes(unittest.TestCase):
         """
         TDD-unit test model for the route to get tasks by document path
         """
-        self.mock_response.json.return_value = [
-            {
-                "task_files": [
-                    {
-                        "task_id_ext": "111.test.test",
-                        "content": '#include <stdio.h>\n\nvoid ohjeet(void)\n{\n  printf("Ohjelma laskee huoneen '
-                        'pinta-alan ja tilavuuden annettujen tietojen perusteella.");\n\n}\n\n/* Kirjoita '
-                        "tarvittavat aliohjelmat */\n\nint main(void)\n{\n  ohjeet();\n\n  /* Täydennä "
-                        "ohjelman toiminta */\n\n  return 0;\n}",
-                        "file_name": "test.c",
-                        "user_input": "3 4 2.5",
-                        "user_args": "",
-                    }
-                ],
-                "path": "kurssit/testi/test/demot/Demo1",
-                "header": None,
-                "stem": None,
-                "type": "cc/input/comtest",
-                "task_id": "testi",
-                "doc_id": 1,
-                "par_id": "asd",
-                "ide_task_id": "t2",
-            },
-        ]
+        self.mock_response.json.return_value = get_tasks_by_doc_test_response
 
         validated_value = [
-            TaskData(
-                path="kurssit/testi/test/demot/Demo1",
-                type="cc/input/comtest",
-                doc_id=1,
-                ide_task_id="t2",
-                task_files=[
-                    TaskFile(
-                        task_id_ext="111.test.test",
-                        content='#include <stdio.h>\n\nvoid ohjeet(void)\n{\n  printf("Ohjelma laskee huoneen pinta-alan ja tilavuuden annettujen tietojen perusteella.");\n\n}\n\n/* Kirjoita tarvittavat aliohjelmat */\n\nint main(void)\n{\n  ohjeet();\n\n  /* Täydennä ohjelman toiminta */\n\n  return 0;\n}',
-                        file_name="test.c",
-                        source="editor",
-                        user_input="3 4 2.5",
-                        user_args="",
-                    )
-                ],
-                stem=None,
-                header=None,
-            )
+            TaskData(**task) for task in self.mock_response.json.return_value
         ]
 
         with self.patch:
@@ -172,28 +99,7 @@ class TestRoutes(unittest.TestCase):
         TDD-unit test model for the route to get tasks by ideTask id
         """
 
-        self.mock_response.json.return_value = {
-            "task_files": [
-                {
-                    "task_id_ext": "11.test.test",
-                    "content": '#include <stdio.h>\n\nvoid ohjeet(void)\n{\n  printf("Ohjelma laskee huoneen '
-                    'pinta-alan ja tilavuuden annettujen tietojen perusteella.");\n\n}\n\n/* Kirjoita '
-                    "tarvittavat aliohjelmat */\n\nint main(void)\n{\n  ohjeet();\n\n  /* Täydennä "
-                    "ohjelman toiminta */\n\n  return 0;\n}",
-                    "file_name": "test.c",
-                    "user_input": "3 4 2.5",
-                    "user_args": "",
-                }
-            ],
-            "path": "kurssit/testi/test/demot/Demo1",
-            "header": None,
-            "stem": None,
-            "type": "cc/input/comtest",
-            "task_id": "test",
-            "doc_id": 1,
-            "par_id": "asd",
-            "ide_task_id": "t1",
-        }
+        self.mock_response.json.return_value = get_task_by_ide_task_id_test_response
         validated_value = TaskData(**self.mock_response.json.return_value)
 
         with self.patch:
@@ -208,37 +114,10 @@ class TestRoutes(unittest.TestCase):
 
         """
 
-        submit_data = {
-            "code_files": [
-                {
-                    "task_id_ext": "1111.test.asd",
-                    "content": '#include <stdio.h>\n\nint main(void)\n{\n  printf("Hello, World!\\n");\n\n  return '
-                    "0;\n}",
-                    "file_name": "test.c",
-                    "source": "editor",
-                    "user_input": "",
-                    "user_args": "",
-                }
-            ],
-            "code_language": "cc",
-        }
+        submit_data = submit_task_by_id_test_response
         submit_data = SubmitData(**submit_data)
 
-        self.mock_response.json.return_value = {
-            "result": {
-                "web": {
-                    "console": "Hello, World!\n",
-                    "error": "",
-                    "pwd": "",
-                    "language": None,
-                    "runtime": "0.883   0.872\nCompile time:\nreal\t0m0.105s\nuser\t0m0.039s\nsys\t0m0.022s\n\nRun "
-                    "time:\nreal\t0m0.001s\nuser\t0m0.001s\nsys\t0m0.000s\n",
-                },
-                "savedNew": 111111,
-                "valid": True,
-            },
-            "plugin": None,
-        }
+        self.mock_response.json.return_value = submit_task_by_id_tim_test_response
 
         with self.patch:
             res = submit_task(submit_data)
