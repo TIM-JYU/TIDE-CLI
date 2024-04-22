@@ -19,7 +19,7 @@ from tidecli.utils.handle_token import get_signed_in_user
 
 def make_request(
     endpoint: str, method: str = "GET", params: dict[str, str] | None = None
-):
+) -> dict:
     """
     Make a request to the API
 
@@ -110,11 +110,13 @@ def get_tasks_by_doc(doc_path: str, doc_id: int = None) -> list[TaskData]:
 def get_task_by_ide_task_id(
     ide_task_id: str,
     doc_path: str,
+    doc_id: int = None,
 ) -> TaskData:
     """
     Get the tasks by ideTask id and demo document path or id
     :param doc_path: Demo document path
     :param ide_task_id: ideTask id
+    :param doc_id: Demo document id
     return: JSON response of tasks
     """
     # TODO: fix tim to not require doc_id and remove the parameter
@@ -123,7 +125,7 @@ def get_task_by_ide_task_id(
         endpoint=TASK_BY_IDE_TASK_ID_ENDPOINT,
         params={
             "doc_path": doc_path,
-            "doc_id": "",
+            "doc_id": doc_id,
             "ide_task_id": ide_task_id,
         },
     )

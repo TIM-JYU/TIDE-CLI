@@ -22,7 +22,6 @@ from tidecli.api.routes import (
     get_tasks_by_doc,
     get_task_by_ide_task_id,
     submit_task,
-    validate_token,
 )
 
 from tidecli.utils.handle_token import delete_token
