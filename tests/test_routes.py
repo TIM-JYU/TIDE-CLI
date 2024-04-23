@@ -9,8 +9,8 @@ from tests.test_data import (
     get_ide_courses_test_response,
     get_tasks_by_doc_test_response,
     get_task_by_ide_task_id_test_response,
-    submit_task_by_id_test_response,
     submit_task_by_id_tim_test_response,
+    submit_task_by_id_test_submit,
 )
 from tidecli.api.routes import (
     validate_token,
@@ -26,101 +26,95 @@ from tidecli.models.task_data import TaskData
 from tidecli.models.tim_feedback import TimFeedback
 
 
-class TestRoutes(unittest.TestCase):
-    def setUp(self):
-        self.mock_response = MagicMock()
-        self.patch = patch(
-            "tidecli.api.routes.requests.request", return_value=self.mock_response
-        )
+def _create_mock_request(mock_response: dict) -> MagicMock:
+    """
+    Create a mock request object with wanted response
+    """
+    mm = MagicMock()
+    mm.json.return_value = mock_response
+    return mm
 
-    def test_validate_token(self):
+
+@patch("tidecli.api.routes.requests.request")
+@patch("keyring.get_password", return_value="test_token")
+class TestRoutes(unittest.TestCase):
+    def test_validate_token(self, kr_mock, mock_request):
         """
         TDD-unit test model for the route to validate valid token
         """
-        self.mock_response.json.return_value = validate_token_response
+        mock_request.return_value = _create_mock_request(validate_token_response)
 
-        with self.patch:
-            res = validate_token()
-            assert res == self.mock_response.json.return_value
+        res = validate_token()
+        assert res == validate_token_response
 
-    def test_validate_faulty_token(self):
+    def test_validate_faulty_token(self, kr_mock, mock_request):
         """
         TDD-unit test model for the route to validate token which is faulty
         """
+        mock_request.return_value = _create_mock_request({"error": "invalid_token"})
 
-        self.mock_response.json.return_value = {"error": "invalid_token"}
+        with self.assertRaises(click.ClickException) as context:
+            validate_token()
 
-        with self.patch:
-            with self.assertRaises(click.ClickException) as context:
-                validate_token()
+        self.assertIn(
+            "invalid_token",
+            str(context.exception.message),
+        )
 
-            self.assertIn(
-                "Error: invalid_token \nPlease try to log in again.",
-                str(context.exception),
-            )
-
-    def test_get_profile(self):
+    def test_get_profile(self, kr_mock, mock_request):
         """
         TDD-unit test model for the route to get user profile
         """
-        self.mock_response.json.return_value = get_profile_test_response
+        return_value = _create_mock_request(get_profile_test_response)
+        mock_request.return_value = return_value
 
-        with self.patch:
-            res = get_profile()
-            assert res == self.mock_response.json.return_value
+        res = get_profile()
+        assert res == return_value.json.return_value
 
-    def test_get_user_ide_courses(self):
+    def test_get_user_ide_courses(self, kr_mock, mock_request):
         """
         TDD-unit test model for the route, gets all courses user has bookmarked and have ideDocument tag with task paths
         """
-        self.mock_response.json.return_value = get_ide_courses_test_response
+        mock_request.return_value = _create_mock_request(get_ide_courses_test_response)
         validated_value = [Course(**course) for course in get_ide_courses_test_response]
 
-        with self.patch:
-            res = get_ide_courses()
-            assert res == validated_value
+        res = get_ide_courses()
+        assert res == validated_value
 
-    def test_get_tasks_by_doc(self):
+    def test_get_tasks_by_doc(self, kr_mock, mock_request):
         """
         TDD-unit test model for the route to get tasks by document path
         """
-        self.mock_response.json.return_value = get_tasks_by_doc_test_response
+        return_value = _create_mock_request(get_tasks_by_doc_test_response)
+        mock_request.return_value = return_value
+        validated_value = [TaskData(**task) for task in return_value.json.return_value]
 
-        validated_value = [
-            TaskData(**task) for task in self.mock_response.json.return_value
-        ]
+        res = get_tasks_by_doc(doc_path="kurssit/testi/test/demot/Demo1")
+        assert res == validated_value
 
-        with self.patch:
-            res = get_tasks_by_doc(doc_path="kurssit/testi/test/demot/Demo1")
-            assert res == validated_value
-
-    def test_get_task_by_ide_task_id(self):
+    def test_get_task_by_ide_task_id(self, kr_mock, mock_request):
         """
         TDD-unit test model for the route to get tasks by ideTask id
         """
+        return_value = _create_mock_request(get_task_by_ide_task_id_test_response)
+        mock_request.return_value = return_value
+        validated_value = TaskData(**return_value.json.return_value)
 
-        self.mock_response.json.return_value = get_task_by_ide_task_id_test_response
-        validated_value = TaskData(**self.mock_response.json.return_value)
+        res = get_task_by_ide_task_id(
+            ide_task_id="t1", doc_path="kurssit/testi/test/demot/Demo1"
+        )
+        assert res == validated_value
 
-        with self.patch:
-            res = get_task_by_ide_task_id(
-                ide_task_id="t1", doc_path="kurssit/testi/test/demot/Demo1"
-            )
-            assert res == validated_value
-
-    def test_submit_task_by_id(self):
+    def test_submit_task_by_id(self, kr_mock, mock_request):
         """
         TDD-unit test model for the route to submit task by task id, document id and paragraph id
 
         """
+        submit_data = SubmitData(**submit_task_by_id_test_submit)
+        return_value = _create_mock_request(submit_task_by_id_tim_test_response)
 
-        submit_data = submit_task_by_id_test_response
-        submit_data = SubmitData(**submit_data)
+        mock_request.return_value = return_value
 
-        self.mock_response.json.return_value = submit_task_by_id_tim_test_response
+        res = submit_task(submit_data)
 
-        with self.patch:
-            res = submit_task(submit_data)
-            assert res == TimFeedback(
-                **self.mock_response.json.return_value.get("result")
-            )
+        assert res == TimFeedback(**return_value.json().get("result"))

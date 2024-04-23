@@ -59,6 +59,28 @@ get_tasks_by_doc_test_response = [
         "task_id": "testi",
         "doc_id": 1,
         "par_id": "asd",
+        "ide_task_id": "t1",
+    },
+    {
+        "task_files": [
+            {
+                "task_id_ext": "222.test.test",
+                "content": '#include <stdio.h>\n\nvoid ohjeet(void)\n{\n  printf("Ohjelma laskee huoneen '
+                'pinta-alan ja tilavuuden annettujen tietojen perusteella.");\n\n}\n\n/* Kirjoita '
+                "tarvittavat aliohjelmat */\n\nint main(void)\n{\n  ohjeet();\n\n  /* Täydennä "
+                "ohjelman toiminta */\n\n  return 0;\n}",
+                "file_name": "test.c",
+                "user_input": "3 4 2.5",
+                "user_args": "",
+            }
+        ],
+        "path": "kurssit/testi/test/demot/Demo1",
+        "header": None,
+        "stem": None,
+        "type": "cc/input/comtest",
+        "task_id": "testi",
+        "doc_id": 2,
+        "par_id": "asd",
         "ide_task_id": "t2",
     },
 ]
@@ -86,7 +108,7 @@ get_task_by_ide_task_id_test_response = {
     "ide_task_id": "t1",
 }
 
-submit_task_by_id_test_response = {
+submit_task_by_id_test_submit = {
     "code_files": [
         {
             "task_id_ext": "1111.test.asd",
