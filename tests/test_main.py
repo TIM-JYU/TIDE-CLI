@@ -1,5 +1,9 @@
+import os
 import unittest
-from unittest.mock import patch, MagicMock
+from pathlib import Path
+
+from pyfakefs.fake_filesystem_unittest import TestCase
+from unittest.mock import patch
 
 from click.testing import CliRunner
 
@@ -7,6 +11,7 @@ from tests.test_data import (
     get_ide_courses_test_response,
     validate_token_response,
     get_tasks_by_doc_test_response,
+    get_task_by_ide_task_id_test_response,
 )
 from tests.test_routes import _create_mock_request
 from tidecli.main import login, logout, courses, task
@@ -22,6 +27,9 @@ class TestMain(unittest.TestCase):
     @patch("tidecli.utils.login_handler.authenticate")
     @patch("keyring.get_password")
     def test_successful_new_login(self, mock_get_password, mock_authenticate):
+        """
+        Test successful login with new token
+        """
         mock_get_password.return_value = None
         mock_authenticate.return_value = True
         result = self.runner.invoke(login)
@@ -33,6 +41,9 @@ class TestMain(unittest.TestCase):
     @patch("tidecli.api.routes.requests.request")
     @patch("keyring.get_password")
     def test_successful_existing_login(self, mock_get_password, mock_request):
+        """
+        Test successful login with existing token
+        """
         mock_get_password.return_value = "test_token"
         mock_request.return_value = _create_mock_request(validate_token_response)
 
@@ -48,6 +59,9 @@ class TestMain(unittest.TestCase):
     def test_failed_login_invalid_token(
         self, mock_authenticate, mock_get_password, mock_request
     ):
+        """
+        Test failed login due to invalid token
+        """
         mock_get_password.return_value = "test_token"
         mock_authenticate.return_value = True
         mock_request.return_value = _create_mock_request({"error": "invalid_token"})
@@ -68,6 +82,9 @@ class TestMain(unittest.TestCase):
     @patch("tidecli.api.routes.requests.request")
     @patch("tidecli.api.routes.get_signed_in_user")
     def test_courses(self, mock_get_signed_in_user, mock_request):
+        """
+        Test listing courses
+        """
         mock_get_signed_in_user.return_value = User("test", "test")
         mock_request.return_value = _create_mock_request(get_ide_courses_test_response)
         validated_value = [Course(**course) for course in get_ide_courses_test_response]
@@ -79,6 +96,9 @@ class TestMain(unittest.TestCase):
     @patch("tidecli.api.routes.requests.request")
     @patch("tidecli.api.routes.get_signed_in_user")
     def test_task_list(self, mock_get_signed_in_user, mock_request):
+        """
+        Test listing tasks by document
+        """
         mock_get_signed_in_user.return_value = User("test", "test")
         mock_request.return_value = _create_mock_request(get_tasks_by_doc_test_response)
 
@@ -91,17 +111,96 @@ class TestMain(unittest.TestCase):
         )
         self.assertEqual(result.output, "ID: t1\nID: t2\n")
 
+
+class TestMainFileAccess(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Set up the fake filesystem
+        cls.setUpClassPyfakefs()
+
+    def setUp(self):
+        self.runner = CliRunner()
+        self.working_dir = str(Path.cwd())
+
     @patch("tidecli.api.routes.requests.request")
     @patch("tidecli.api.routes.get_signed_in_user")
     def test_task_create_all(self, mock_get_signed_in_user, mock_request):
+        """
+        Test creating all tasks and trying to overwrite them without the -f flag
+        """
         mock_get_signed_in_user.return_value = User("test", "test")
         mock_request.return_value = _create_mock_request(get_tasks_by_doc_test_response)
 
         result = self.runner.invoke(
             task,
-            ["create", "kurssit/tie/ohj2/2024k/demot/DemoC2", "t1", "--all"],
+            [
+                "create",
+                "kurssit/tie/ohj2/2024k/demot/DemoC2",
+                "--all",
+            ],
         )
+
         self.assertEqual(
             result.output,
-            "Task created in C:\\kurssit\finalcli\\TIDE-CLI\\tests\Demo1\\t1\nTask created in C:\\kurssit\\finalcli\TIDE-CLI\\tests\Demo1\\t2",
+            f"Task created in {self.working_dir}Demo1\\t1\nTask created in {self.working_dir}Demo1\\t2\n",
         )
+        test_path1 = f"{self.working_dir}Demo1/t1"
+        test_path2 = f"{self.working_dir}Demo1/t2"
+        test_metadata1 = f"{self.working_dir}Demo1/t1/.timdata"
+        test_metadata2 = f"{self.working_dir}Demo1/t2/.timdata"
+        test_file1 = f"{self.working_dir}Demo1/t1/test.c"
+        test_file2 = f"{self.working_dir}Demo1/t2/test.c"
+
+        self.assertTrue(os.path.exists(test_path1))
+        self.assertTrue(os.path.exists(test_metadata1))
+        self.assertTrue(os.path.exists(test_file1))
+        self.assertTrue(os.path.exists(test_path2))
+        self.assertTrue(os.path.exists(test_metadata2))
+        self.assertTrue(os.path.exists(test_file2))
+
+        result_overwrite = self.runner.invoke(
+            task,
+            [
+                "create",
+                "kurssit/Demo1",
+                "--all",
+            ],
+        )
+
+        # Test overwrite
+        self.assertEqual(
+            result_overwrite.output,
+            "File C:\\Demo1\\t1\\test.c already exists\nTo overwrite give tide task create -f C:\\Demo1\\t1\n\nFile "
+            "C:\\Demo1\\t2\\test.c already exists\nTo overwrite give tide task create -f C:\\Demo1\\t2\n\n",
+        )
+
+    @patch("tidecli.api.routes.requests.request")
+    @patch("tidecli.api.routes.get_signed_in_user")
+    def test_task_create_one(self, mock_get_signed_in_user, mock_request):
+        """
+        Test creating a single task
+        """
+        mock_get_signed_in_user.return_value = User("test", "test")
+        mock_request.return_value = _create_mock_request(
+            get_task_by_ide_task_id_test_response
+        )
+
+        result = self.runner.invoke(
+            task,
+            [
+                "create",
+                "kurssit/Demo1",
+                "t3",
+            ],
+        )
+
+        self.assertEqual(
+            result.output, f"Task created in {self.working_dir}Demo1\\t3\n"
+        )
+
+        test_path1 = f"{self.working_dir}Demo1/t3"
+        test_metadata1 = f"{self.working_dir}Demo1/t3/.timdata"
+        test_file1 = f"{self.working_dir}Demo1/t3/test.c"
+        self.assertTrue(os.path.exists(test_path1))
+        self.assertTrue(os.path.exists(test_metadata1))
+        self.assertTrue(os.path.exists(test_file1))

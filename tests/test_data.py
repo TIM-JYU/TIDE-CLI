@@ -88,7 +88,7 @@ get_tasks_by_doc_test_response = [
 get_task_by_ide_task_id_test_response = {
     "task_files": [
         {
-            "task_id_ext": "11.test.test",
+            "task_id_ext": "333.test.test",
             "content": '#include <stdio.h>\n\nvoid ohjeet(void)\n{\n  printf("Ohjelma laskee huoneen '
             'pinta-alan ja tilavuuden annettujen tietojen perusteella.");\n\n}\n\n/* Kirjoita '
             "tarvittavat aliohjelmat */\n\nint main(void)\n{\n  ohjeet();\n\n  /* Täydennä "
@@ -103,9 +103,9 @@ get_task_by_ide_task_id_test_response = {
     "stem": None,
     "type": "cc/input/comtest",
     "task_id": "test",
-    "doc_id": 1,
+    "doc_id": 3,
     "par_id": "asd",
-    "ide_task_id": "t1",
+    "ide_task_id": "t3",
 }
 
 submit_task_by_id_test_submit = {
