@@ -35,14 +35,20 @@ def tim_ide():
 
 
 @tim_ide.command()
-def login():
+@click.option("--json", "-j", "jsondata", is_flag=True, default=False)
+def login(jsondata):
     """
     Log in the user and saves the token to the keyring.
 
     Functionality: Opens a browser window for the user to log in.
 
     """
-    click.echo(login_details())
+    if jsondata:
+        click.echo(
+            json.dumps(login_details(jsondata=True), ensure_ascii=False, indent=4)
+        )
+    else:
+        click.echo(login_details())
 
 
 @tim_ide.command()
