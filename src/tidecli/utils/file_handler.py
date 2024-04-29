@@ -10,29 +10,51 @@ METADATA_NAME = ".timdata"
 
 
 def create_tasks(
-    task_datas: list[TaskData], overwrite: bool, user_path: str | None = None
-) -> bool:
+    tasks: list[TaskData], overwrite: bool, user_path: str | None = None
+) -> None:
     """
     Create multiple tasks.
 
-    :param task_datas: List of TaskData objects
+    :param tasks: List of TaskData objects
     :param overwrite: Flag if overwrite
     :param user_path: Path to user given folder
 
     return: True if tasks are created, False if not
     """
-    for task in task_datas:
-        create_task(task_data=task, overwrite=overwrite, user_path=user_path)
-    return True
+
+    # Combines tasks with same ide_task_id
+    combined_tasks = []
+    combined_task_ids = []
+    for i in tasks:
+        if i.ide_task_id in combined_task_ids:
+            continue
+        same_ide_task_id = [i]
+        i_task_id_ext = i.task_files[0].task_id_ext
+        for y in tasks:
+            y_task_id_ext = y.task_files[0].task_id_ext
+            if y.ide_task_id == i.ide_task_id and i_task_id_ext != y_task_id_ext:
+                same_ide_task_id.append(y)
+
+        if len(same_ide_task_id) == 1:
+            combined_tasks.append(same_ide_task_id[0])
+            combined_task_ids.append(same_ide_task_id[0].ide_task_id)
+        else:
+            task_nfo = same_ide_task_id[0]
+            task_files = [f for t in same_ide_task_id for f in t.task_files]
+
+            task_nfo.task_files = task_files
+            combined_tasks.append(task_nfo)
+            combined_task_ids.append(task_nfo.ide_task_id)
+
+    for task in combined_tasks:
+        create_task(task=task, overwrite=overwrite, user_path=user_path)
 
 
-def create_task(
-    task_data: TaskData, overwrite: bool, user_path: str | None = None
-) -> bool:
+def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -> bool:
     """
     Create a single task.
 
-    :param task_data: TaskData object
+    :param task: TaskData object
     :param overwrite: Flag if overwrite
     :param user_path: Path to user given folder
 
@@ -45,22 +67,22 @@ def create_task(
     else:
         user_folder = Path.cwd()
 
-    end = Path(task_data.ide_task_id)
-    end_path = Path(Path(task_data.path).parts[-1])
+    end = Path(task.ide_task_id)
+    end_path = Path(Path(task.path).parts[-1])
     end_path = end_path.joinpath(end)
 
     # Add course path to create task path
     user_folder = user_folder.joinpath(end_path)
 
     # Fix for tasks that have file_name without suffix
-    for f in task_data.task_files:
+    for f in task.task_files:
         path = Path(f.file_name)
         suffix = path.suffix
 
         if suffix != "":
             continue
 
-        file_type = task_data.run_type
+        file_type = task.run_type
         if file_type == "c++" or file_type == "cpp":
             f.file_name = f.file_name + ".cpp"
 
@@ -68,15 +90,15 @@ def create_task(
             f.file_name = f.file_name + ".c"
 
     saved = save_file(
-        task_files=task_data.task_files, save_path=user_folder, overwrite=overwrite
+        task_files=task.task_files, save_path=user_folder, overwrite=overwrite
     )
 
     if not saved:
         return False
 
-    saved = write_metadata(
+    write_metadata(
         folder_path=user_folder,
-        metadata=task_data,
+        metadata=task,
     )
 
     return saved
@@ -110,7 +132,7 @@ def save_file(task_files: list[TaskFile], save_path: Path, overwrite=False) -> b
     return True
 
 
-def write_metadata(folder_path: Path, metadata: TaskData) -> bool:
+def write_metadata(folder_path: Path, metadata: TaskData) -> None:
     """
     Write metadata.json to the given folder path.
     :param metadata: TaskData object
@@ -124,8 +146,6 @@ def write_metadata(folder_path: Path, metadata: TaskData) -> bool:
         content = metadata.model_dump_json()
         file.write(content)
         file.close()
-
-    return True
 
 
 def create_file(item: dict, folder_path: Path, overwrite=False):

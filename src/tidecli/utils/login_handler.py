@@ -14,7 +14,7 @@ def login_details(jsondata: bool = False):
     If the user is not logged in then return the login link
     """
 
-    user_login: User = get_signed_in_user()
+    user_login: User | None = get_signed_in_user()
 
     # If the username exist in credential manager then return the token validity
     if user_login and user_login.password:

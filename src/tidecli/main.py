@@ -5,10 +5,17 @@ This module contains the main command group for the Tide CLI.
 The whole CLI app may be located in different module.
 """
 
-from pathlib import Path
 import json
+from pathlib import Path
+
 import click
 
+from tidecli.api.routes import (
+    get_ide_courses,
+    get_tasks_by_doc,
+    get_task_by_ide_task_id,
+    submit_task,
+)
 from tidecli.models.submit_data import SubmitData
 from tidecli.models.task_data import TaskData
 from tidecli.utils.file_handler import (
@@ -17,13 +24,6 @@ from tidecli.utils.file_handler import (
     get_metadata,
     create_tasks,
 )
-from tidecli.api.routes import (
-    get_ide_courses,
-    get_tasks_by_doc,
-    get_task_by_ide_task_id,
-    submit_task,
-)
-
 from tidecli.utils.handle_token import delete_token
 from tidecli.utils.login_handler import login_details
 
@@ -127,14 +127,14 @@ def create(demo_path, ide_task_id, all, force, dir):
     if all:
         # Create all tasks
         tasks: list[TaskData] = get_tasks_by_doc(doc_path=demo_path)
-        create_tasks(task_datas=tasks, overwrite=force, user_path=dir)
+        create_tasks(tasks=tasks, overwrite=force, user_path=dir)
 
     elif ide_task_id:
         # Create a single task
         task_data: TaskData = get_task_by_ide_task_id(
             ide_task_id=ide_task_id, doc_path=demo_path
         )
-        create_task(task_data=task_data, overwrite=force, user_path=dir)
+        create_task(task=task_data, overwrite=force, user_path=dir)
 
     else:
         click.echo("Please provide either --all or an ide_task_id.")
@@ -142,33 +142,37 @@ def create(demo_path, ide_task_id, all, force, dir):
 
 @tim_ide.command()
 @click.argument("path", type=str, required=True)
-def submit(path):
+@click.argument("file_name", type=str, required=False)
+def submit(path, file_name):
     """
-    Enter the path of the task folder to submit the task to TIM.
+    Enter the path of the task folder to submit the task/tasks to TIM.
     Path must be inserted in the following format: "/path/to/task/folder".
     """
+
     path = Path(path)
 
     if not path.exists():
         raise click.ClickException("Invalid path")
 
-    metadata = get_metadata(path)
-    answer_files = get_task_file_data(path, metadata)
-
-    if not answer_files:
-        raise click.ClickException("Invalid task file")
-
     # Get metadata from the task folder
+    metadata = get_metadata(path)
     if not metadata:
         raise click.ClickException("Invalid metadata")
 
-    t = SubmitData(
-        code_files=answer_files,
-        code_language=metadata.run_type,
-    )
+    answer_files = get_task_file_data(path, metadata)
+    if not answer_files:
+        raise click.ClickException("Invalid task file")
 
-    feedback = submit_task(t)
-    click.echo(feedback.console_output())
+    for f in answer_files:
+        if file_name and f.file_name != file_name:
+            continue
+
+        t = SubmitData(
+            code_files=[f],
+            code_language=metadata.run_type,
+        )
+        feedback = submit_task(t)
+        click.echo(feedback.console_output())
 
 
 tim_ide.add_command(task)

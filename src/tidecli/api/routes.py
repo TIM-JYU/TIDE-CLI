@@ -143,5 +143,8 @@ def submit_task(
     res = make_request(
         endpoint=SUBMIT_TASK_ENDPOINT, method="PUT", params=task_files.submit_json()
     )
+    feedback = res.get("result")
+    if not feedback:
+        raise click.ClickException("No feedback received")
 
-    return TimFeedback(**res.get("result"))
+    return TimFeedback(**feedback)
