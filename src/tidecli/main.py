@@ -7,7 +7,7 @@ The whole CLI app may be located in different module.
 
 import json
 from pathlib import Path
-
+from utils.error_logger import timed
 import click
 
 from tidecli.api.routes import (
@@ -34,6 +34,7 @@ def tim_ide():
     pass
 
 
+@timed
 @tim_ide.command()
 @click.option("--json", "-j", "jsondata", is_flag=True, default=False)
 def login(jsondata):

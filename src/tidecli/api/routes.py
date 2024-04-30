@@ -15,8 +15,9 @@ from tidecli.tide_config import (
     TASKS_BY_DOC_ENDPOINT,
 )
 from tidecli.utils.handle_token import get_signed_in_user
+from tidecli.utils.error_logger import timed
 
-
+@timed
 def make_request(
     endpoint: str, method: str = "GET", params: dict[str, str] | None = None
 ) -> dict:
@@ -55,7 +56,7 @@ def make_request(
     except Exception as e:
         raise click.ClickException(f"{e}")
 
-
+@timed
 def validate_token() -> dict:
     """
     Validate the token for the user

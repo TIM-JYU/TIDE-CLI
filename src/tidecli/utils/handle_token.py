@@ -1,7 +1,7 @@
 import click
 import keyring as kr
 from tidecli.models.user import User
-
+from tidecli.utils.error_logger import timed
 
 def save_token(token: str, username: str) -> str | None:
     """
@@ -37,7 +37,7 @@ def get_token(username) -> str | None:
         print(f"Error getting token: {e}")
         return None
 
-
+@timed
 def get_signed_in_user() -> User | None:
     """
     Get the signed in user from the keyring

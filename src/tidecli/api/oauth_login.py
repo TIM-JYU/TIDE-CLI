@@ -20,6 +20,7 @@ from tidecli.tide_config import (
     PORT,
 )
 from tidecli.utils.handle_token import save_token
+from tidecli.utils.error_logger import timed
 
 
 def create_s256_code_challenge(code_verifier: str) -> str:
@@ -133,7 +134,7 @@ class OAuthAuthenticator:
 
         return login_successful
 
-
+@timed
 def authenticate() -> bool:
     """
     Authenticates the user for the TIM API

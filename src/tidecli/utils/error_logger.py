@@ -1,12 +1,14 @@
 import logging
-
+import time
 import click
+from functools import wraps
 
+# ODO: vaihda lokittaja käyttämään muuta kuin baseloggeria
 # Configure logger
 logging.basicConfig(
     filename="tide-cli.log",
     filemode="a",
-    level=logging.ERROR,
+    level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
@@ -28,6 +30,31 @@ def error_handler(func):
             # For simplicity, I'm just re-raising the error here
             # raise
             print("\033[91m {}\033[00m".format(e))
+
+    return wrapper
+
+
+logger = logging.getLogger(__name__)
+
+# Misc logger setup so a debug log statement gets printed on stdout.
+logger.setLevel("ERROR")
+handler = logging.StreamHandler()
+log_format = "%(asctime)s %(levelname)s -- %(message)s"
+formatter = logging.Formatter(log_format)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
+
+def timed(func):
+    """Print the execution time for the decorated function."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        logging.info("{} ran in {}s".format(func.__name__, round(end - start, 2)))
+        return result
 
     return wrapper
 
