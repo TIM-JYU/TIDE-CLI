@@ -99,9 +99,10 @@ class OAuthAuthenticator:
                 if response.status_code == 200:
                     access_token = response.json().get("access_token")
                 else:
-                    raise click.ClickException(
-                        f"{response.status_code}, Error message: {response.text}"
+                    self.send_error(
+                        response.status_code, f"Error message: {response.text}"
                     )
+                    return
 
                 # Get the user profile to save token for right user
                 try:

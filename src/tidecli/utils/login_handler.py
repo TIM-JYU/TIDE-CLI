@@ -58,4 +58,6 @@ def login_details(jsondata: bool = False):
                 return {"login_success": True}
             return "Login successful!"
         else:
+            if jsondata:
+                return {"login_success": False}
             return "Login failed. Please try again."
