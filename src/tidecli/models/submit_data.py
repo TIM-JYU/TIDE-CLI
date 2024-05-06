@@ -12,7 +12,7 @@ class SubmitData(BaseModel):
     code_files: TaskFile | list[TaskFile]
     code_language: str  # Plugin "type"
 
-    def submit_json(self):
+    def submit_json(self) -> dict:
         if isinstance(self.code_files, TaskFile):
             self.code_files = [self.code_files]
 

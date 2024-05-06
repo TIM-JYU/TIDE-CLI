@@ -5,24 +5,25 @@ This module contains the main command group for the Tide CLI.
 The whole CLI app may be located in different module.
 """
 
+import json
 from pathlib import Path
 
 import click
 
-from tidecli.models.submit_data import SubmitData
-from tidecli.models.task_data import TaskData
-from tidecli.utils.file_handler import (
-    create_task,
-    get_task_file_data,
-    get_metadata,
-)
 from tidecli.api.routes import (
     get_ide_courses,
     get_tasks_by_doc,
     get_task_by_ide_task_id,
     submit_task,
 )
-
+from tidecli.models.submit_data import SubmitData
+from tidecli.models.task_data import TaskData
+from tidecli.utils.file_handler import (
+    create_task,
+    get_task_file_data,
+    get_metadata,
+    create_tasks,
+)
 from tidecli.utils.handle_token import delete_token
 from tidecli.utils.login_handler import login_details
 
@@ -34,20 +35,21 @@ def tim_ide():
 
 
 @tim_ide.command()
-def login():
+@click.option("--json", "-j", "jsondata", is_flag=True, default=False)
+def login(jsondata):
     """
     Log in the user and saves the token to the keyring.
 
     Functionality: Opens a browser window for the user to log in.
 
     """
-    click.echo(login_details())
+    if jsondata:
+        click.echo(
+            json.dumps(login_details(jsondata=True), ensure_ascii=False, indent=4)
+        )
+    else:
+        click.echo(login_details())
 
-    # Verify the login
-    try:
-        get_ide_courses()
-    except Exception as e:
-        raise click.ClickException(f"An error raised after login. Have you added IDE-courses to bookmarks already? Error message: {e}")
 
 @tim_ide.command()
 def logout():
@@ -56,12 +58,26 @@ def logout():
 
 
 @tim_ide.command()
-def courses():
-    """List  all courses."""
+@click.option("--json", "-j", "jsondata", is_flag=True, default=False)
+def courses(jsondata):
+    """
+    List  all courses.
+
+    Prints all courses that the user has access to.
+
+    If --json flag is used, the output is printed in JSON format.
+    """
+
     data = get_ide_courses()
 
-    for course in data:
-        click.echo(course.pretty_print())
+    if not jsondata:
+        for course in data:
+            click.echo(course.pretty_print())
+
+    if jsondata:
+        # Create JSON object list
+        courses_json = [course.to_json() for course in data]
+        click.echo(json.dumps(courses_json, ensure_ascii=False, indent=4))
 
 
 @click.group()
@@ -77,13 +93,27 @@ def task():
 
 
 @task.command()
+@click.option("--json", "-j", "jsondata", is_flag=True, default=False)
 @click.argument("demo_path", type=str, required=True)
-def list(demo_path):
-    """Fetch tasks by doc path."""
-    tasks = get_tasks_by_doc(doc_path=demo_path)
+def list(demo_path, jsondata):
+    """
+    Fetch tasks by doc path.
 
-    for task in tasks:
-        click.echo(task.pretty_print())
+    Fetches all tasks from the given doc path and prints them.
+    :param demo_path: Path to the demo file.
+    :param jsondata: If True, prints the output in JSON format.
+
+    """
+    tasks: list[TaskData] = get_tasks_by_doc(doc_path=demo_path)
+
+    if not jsondata:
+        for task in tasks:
+            click.echo(task.pretty_print())
+
+    if jsondata:
+        # Create JSON object list
+        tasks_json = [task.to_json() for task in tasks]
+        click.echo(json.dumps(tasks_json, ensure_ascii=False, indent=4))
 
 
 @task.command()
@@ -96,22 +126,15 @@ def create(demo_path, ide_task_id, all, force, dir):
     """Create tasks based on options."""
     if all:
         # Create all tasks
-        tasks = get_tasks_by_doc(doc_path=demo_path)
-        for task in tasks:
-            if create_task(task_data=task, overwrite=force, user_path=dir):
-                click.echo(f"{task.ide_task_id} was saved")
-            else:
-                click.echo(f"{task.ide_task_id} was not saved")
+        tasks: list[TaskData] = get_tasks_by_doc(doc_path=demo_path)
+        create_tasks(tasks=tasks, overwrite=force, user_path=dir)
 
     elif ide_task_id:
         # Create a single task
         task_data: TaskData = get_task_by_ide_task_id(
             ide_task_id=ide_task_id, doc_path=demo_path
         )
-        if create_task(task_data=task_data, overwrite=force, user_path=dir):
-            click.echo(f"{task_data.ide_task_id} was saved")
-        else:
-            click.echo(f"{task_data.ide_task_id} was not saved")
+        create_task(task=task_data, overwrite=force, user_path=dir)
 
     else:
         click.echo("Please provide either --all or an ide_task_id.")
@@ -119,33 +142,37 @@ def create(demo_path, ide_task_id, all, force, dir):
 
 @tim_ide.command()
 @click.argument("path", type=str, required=True)
-def submit(path):
+@click.argument("file_name", type=str, required=False)
+def submit(path, file_name):
     """
-    Enter the path of the task folder to submit the task to TIM.
+    Enter the path of the task folder to submit the task/tasks to TIM.
     Path must be inserted in the following format: "/path/to/task/folder".
     """
+
     path = Path(path)
 
     if not path.exists():
         raise click.ClickException("Invalid path")
 
-    metadata = get_metadata(path)
-    answer_files = get_task_file_data(path, metadata)
-
-    if not answer_files:
-        raise click.ClickException("Invalid task file")
-
     # Get metadata from the task folder
+    metadata = get_metadata(path)
     if not metadata:
         raise click.ClickException("Invalid metadata")
 
-    t = SubmitData(
-        code_files=answer_files,
-        code_language=metadata.run_type,
-    )
+    answer_files = get_task_file_data(path, metadata)
+    if not answer_files:
+        raise click.ClickException("Invalid task file")
 
-    feedback = submit_task(t)
-    click.echo(feedback.console_output())
+    for f in answer_files:
+        if file_name and f.file_name != file_name:
+            continue
+
+        t = SubmitData(
+            code_files=[f],
+            code_language=metadata.run_type,
+        )
+        feedback = submit_task(t)
+        click.echo(feedback.console_output())
 
 
 tim_ide.add_command(task)

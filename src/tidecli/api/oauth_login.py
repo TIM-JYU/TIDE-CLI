@@ -72,12 +72,15 @@ class OAuthAuthenticator:
                 # Handles the case where the user denied the authorization / closed the browser
                 if "error" in query:
                     self.send_error(403, "Authorization denied by user")
+                    return
 
                 # Temporary code, which is used to obtain the API key
-                if "code" in query:
-                    code = query.get("code")[0]
-                else:
+                code_query = query.get("code")
+                if code_query is None:
                     self.send_error(403, "Api key not found in the response.")
+                    return
+
+                code = code_query[0]
 
                 token_params = {
                     "client_id": CLIENT_ID,
@@ -96,7 +99,9 @@ class OAuthAuthenticator:
                 if response.status_code == 200:
                     access_token = response.json().get("access_token")
                 else:
-                    print(f"{response.status_code}, Error message: {response.text}")
+                    self.send_error(
+                        response.status_code, f"Error message: {response.text}"
+                    )
                     return
 
                 # Get the user profile to save token for right user
@@ -106,8 +111,7 @@ class OAuthAuthenticator:
                         headers={"Authorization": f"Bearer {access_token}"},
                     )
                 except requests.exceptions.RequestException as e:
-                    print(f"Error: {e}")
-                    return
+                    raise click.ClickException(f"Error: {e}")
 
                 save_token(token=access_token, username=res.json().get("username"))
 

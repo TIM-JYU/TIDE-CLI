@@ -18,12 +18,15 @@ keyring = "^24.3.1"
 unittest-prettify = "^1.0.post4"
 pydantic = "^2.6.4"
 pyinstaller = "^6.5.0"
+pyfakefs = "^5.4.1"
+testcase = "^0.1.0"
 
 [tool.poetry.group.test]
 optional = true
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.0.0"
+pyfakefs = "^5.4.1"
 
 
 [tool.poetry.group.dev.dependencies]

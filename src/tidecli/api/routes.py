@@ -19,7 +19,7 @@ from tidecli.utils.handle_token import get_signed_in_user
 
 def make_request(
     endpoint: str, method: str = "GET", params: dict[str, str] | None = None
-):
+) -> dict:
     """
     Make a request to the API
 
@@ -29,22 +29,31 @@ def make_request(
     return: JSON response
     """
 
+    signed_in_user = get_signed_in_user()
+    if not signed_in_user:
+        raise click.ClickException("User not logged in")
+
+    token: str = signed_in_user.password
+
     try:
-        token: str = get_signed_in_user().password if get_signed_in_user() else None
-
-        if not token:
-            raise click.ClickException("User not logged in")
-
         res = requests.request(
             method,
             f"{BASE_URL}{endpoint}",
             headers={"Authorization": f"Bearer {token}"},
             json=params,
         )
-        return res.json()
+
+        res_json = res.json()
+        if "error" in res_json:
+            error = res_json["error"]
+            if "error_description" in res_json:
+                raise click.ClickException(error + "\n" + res_json["error_description"])
+            else:
+                raise click.ClickException(error)
+        return res_json
 
     except Exception as e:
-        raise click.ClickException("Request failed. " + str(e))
+        raise click.ClickException(f"{e}")
 
 
 def validate_token() -> dict:
@@ -52,7 +61,9 @@ def validate_token() -> dict:
     Validate the token for the user
     return: JSON response  of token validity
     """
-    return make_request(endpoint=INTROSPECT_ENDPOINT, method="POST")
+    res = make_request(endpoint=INTROSPECT_ENDPOINT, method="POST")
+
+    return res
 
 
 def get_profile() -> dict:
@@ -69,35 +80,25 @@ def get_ide_courses() -> list[Course]:
     return: JSON response of course name and course path, course id and paths for demo documents
     """
     res = make_request(endpoint=IDE_COURSES_ENDPOINT)
-
-    if "error" in res:
-        raise click.ClickException(res["error"])
-
     all_courses = [Course(**course) for course in res]
 
     return all_courses
 
 
-def get_tasks_by_doc(
-    doc_path: str | None = None, doc_id: int | None = None
-) -> list[TaskData]:
+def get_tasks_by_doc(doc_path: str, doc_id: int = None) -> list[TaskData]:
     """
     Get the tasks by document path or document id
-    :param doc_path: Tasks folder path
-    :param doc_id: Document id
+    :param doc_path: Tasks document path
+    :param doc_id: Tasks document id
     return: JSON response of tasks
     """
 
-    if doc_path is None and doc_id is None:
-        raise click.ClickException("doc_path or doc_id must be provided")
+    # TODO: fix tim to not require doc_id and remove the parameter
 
     res = make_request(
         endpoint=TASKS_BY_DOC_ENDPOINT,
         params={"doc_path": doc_path, "doc_id": doc_id},
     )
-
-    if "error" in res:
-        raise click.ClickException(res["error"])
 
     tasks = [TaskData(**task) for task in res]
 
@@ -106,8 +107,8 @@ def get_tasks_by_doc(
 
 def get_task_by_ide_task_id(
     ide_task_id: str,
-    doc_path: str | None = None,
-    doc_id: int | None = None,
+    doc_path: str,
+    doc_id: int = None,
 ) -> TaskData:
     """
     Get the tasks by ideTask id and demo document path or id
@@ -116,19 +117,16 @@ def get_task_by_ide_task_id(
     :param doc_id: Demo document id
     return: JSON response of tasks
     """
-    # TODO: muuta funktio toimimaan pelkällä
-    # idllä tai pathilla. Ei tarvita molempia
+    # TODO: fix tim to not require doc_id and remove the parameter
+
     res = make_request(
         endpoint=TASK_BY_IDE_TASK_ID_ENDPOINT,
         params={
-            "doc_id": doc_id,
             "doc_path": doc_path,
+            "doc_id": doc_id,
             "ide_task_id": ide_task_id,
         },
     )
-
-    if "error" in res:
-        raise click.ClickException(res["error"])
 
     return TaskData(**res)
 
@@ -145,8 +143,8 @@ def submit_task(
     res = make_request(
         endpoint=SUBMIT_TASK_ENDPOINT, method="PUT", params=task_files.submit_json()
     )
+    feedback = res.get("result")
+    if not feedback:
+        raise click.ClickException("No feedback received")
 
-    if "error" in res:
-        raise click.ClickException(res["error"])
-
-    return TimFeedback(**res.get("result"))
+    return TimFeedback(**feedback)
