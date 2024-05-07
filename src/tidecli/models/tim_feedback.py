@@ -1,7 +1,11 @@
+"""Provide feedback to console/IDE from TIM."""
+
 from pydantic import BaseModel
 
 
 class WebData(BaseModel):
+    """Contains data from the web response."""
+
     console: str | None = None
     error: str
     language: str | None = None
@@ -10,19 +14,14 @@ class WebData(BaseModel):
 
 
 class TimFeedback(BaseModel):
-    """
-    Model for feedback response after submitting a task
-    """
+    """Model for feedback response after submitting a task."""
 
     savedNew: int | None
     valid: bool
     web: WebData | None
 
     def console_output(self):
-        """
-        Returns the console output of the task
-        """
-
+        """Return the console output of the task."""
         if self.web.error != "":
             return self.web.error
 
@@ -31,4 +30,4 @@ class TimFeedback(BaseModel):
         else:
             saved_new = "New answer was not saved. Same file was already submitted."
 
-        return f"{saved_new}\n\nStats for nerds:\n{self.web.runtime}\nConsole feedback:\n{self.web.console}"
+        return [saved_new, "\nFeedback from TIM:", self.web.console]
