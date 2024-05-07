@@ -172,7 +172,7 @@ def submit(path, file_name):
             code_language=metadata.run_type,
         )
         feedback = submit_task(t)
-        click.echo(feedback.console_output())
+        click.echo("\n".join(feedback.console_output()))
 
 
 tim_ide.add_command(task)
