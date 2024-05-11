@@ -21,33 +21,44 @@ def create_tasks(
 
     return: True if tasks are created, False if not
     """
-
-    # Combines tasks with same ide_task_id
-    combined_tasks = []
-    combined_task_ids = []
-    for i in tasks:
-        if i.ide_task_id in combined_task_ids:
-            continue
-        same_ide_task_id = [i]
-        i_task_id_ext = i.task_files[0].task_id_ext
-        for y in tasks:
-            y_task_id_ext = y.task_files[0].task_id_ext
-            if y.ide_task_id == i.ide_task_id and i_task_id_ext != y_task_id_ext:
-                same_ide_task_id.append(y)
-
-        if len(same_ide_task_id) == 1:
-            combined_tasks.append(same_ide_task_id[0])
-            combined_task_ids.append(same_ide_task_id[0].ide_task_id)
-        else:
-            task_nfo = same_ide_task_id[0]
-            task_files = [f for t in same_ide_task_id for f in t.task_files]
-
-            task_nfo.task_files = task_files
-            combined_tasks.append(task_nfo)
-            combined_task_ids.append(task_nfo.ide_task_id)
+    combined_tasks = combine_tasks(tasks)
 
     for task in combined_tasks:
         create_task(task=task, overwrite=overwrite, user_path=user_path)
+
+
+def combine_tasks(tasks: list[TaskData]) -> list[TaskData]:
+    """
+    Combine tasks with same ide_task_id.
+
+    :param tasks: List of TaskData objects
+    return: List of TaskData objects
+    """
+
+    # Combine tasks with same ide_task_id
+    tasks_by_ide_task_id = {}
+    for t in tasks:
+        ide_task_id = t.ide_task_id
+        task_list = tasks_by_ide_task_id.get(ide_task_id, [])
+        task_list.append(t)
+        tasks_by_ide_task_id[ide_task_id] = task_list
+
+    # Create new list with combined tasks
+    combined_tasks = []
+    for ide_task_id, task_list in tasks_by_ide_task_id.items():
+        combined_tasks.append(
+            TaskData(
+                path=task_list[0].path,
+                type=task_list[0].type,
+                doc_id=task_list[0].doc_id,
+                ide_task_id=ide_task_id,
+                task_files=[f for t in task_list for f in t.task_files],
+                stem=task_list[0].stem,
+                header=task_list[0].header,
+            )
+        )
+
+    return combined_tasks
 
 
 def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -> bool:
