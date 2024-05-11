@@ -18,7 +18,7 @@ from tidecli.utils.handle_token import get_signed_in_user
 
 
 def make_request(
-    endpoint: str, method: str = "GET", params: dict[str, str] | None = None
+    endpoint: str, method: str = "GET", params: dict[str, str | None] | None = None
 ) -> dict:
     """
     Make a request to the API
@@ -85,15 +85,14 @@ def get_ide_courses() -> list[Course]:
     return all_courses
 
 
-def get_tasks_by_doc(doc_path: str, doc_id: int = None) -> list[TaskData]:
+def get_tasks_by_doc(doc_path: str) -> list[TaskData]:
     """
     Get the tasks by document path or document id
     :param doc_path: Tasks document path
-    :param doc_id: Tasks document id
     return: JSON response of tasks
     """
 
-    # TODO: fix tim to not require doc_id and remove the parameter
+    doc_id = None  # Tim requires doc_id to be None if not used
 
     res = make_request(
         endpoint=TASKS_BY_DOC_ENDPOINT,
@@ -108,16 +107,15 @@ def get_tasks_by_doc(doc_path: str, doc_id: int = None) -> list[TaskData]:
 def get_task_by_ide_task_id(
     ide_task_id: str,
     doc_path: str,
-    doc_id: int = None,
 ) -> TaskData:
     """
     Get the tasks by ideTask id and demo document path or id
     :param doc_path: Demo document path
     :param ide_task_id: ideTask id
-    :param doc_id: Demo document id
     return: JSON response of tasks
     """
-    # TODO: fix tim to not require doc_id and remove the parameter
+
+    doc_id = None  # Tim requires doc_id to be None if not used
 
     res = make_request(
         endpoint=TASK_BY_IDE_TASK_ID_ENDPOINT,

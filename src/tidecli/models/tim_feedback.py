@@ -20,8 +20,11 @@ class TimFeedback(BaseModel):
     valid: bool
     web: WebData | None
 
-    def console_output(self):
+    def console_output(self) -> str | list[str]:
         """Return the console output of the task."""
+        if self.web is None:
+            return "No response from TIM."
+
         if self.web.error != "":
             return self.web.error
 
@@ -29,5 +32,8 @@ class TimFeedback(BaseModel):
             saved_new = "Saved new answer successfully."
         else:
             saved_new = "New answer was not saved. Same file was already submitted."
+
+        if self.web.console is None:
+            return [saved_new, " No console feedback from TIM."]
 
         return [saved_new, "\nFeedback from TIM:", self.web.console]

@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel
 
 
@@ -21,7 +23,7 @@ class Course(BaseModel):
     path: str
     tasks: list[CourseTask]
 
-    def pretty_print(self):
+    def pretty_print(self) -> str:
         """
         Prints the course as readable string.
 
@@ -36,7 +38,7 @@ class Course(BaseModel):
 
         return f"Course: {self.name}, ID: {self.id}\n{''.join(task_paths)}"
 
-    def to_json(self):
+    def to_json(self) -> dict[str, Any]:
         """
         Converts the course to JSON.
 

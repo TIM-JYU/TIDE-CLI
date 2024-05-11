@@ -55,7 +55,7 @@ class TaskData(BaseModel):
         """Returns run type eg. cc from cc/input/comtest"""
         return _task_type_split_re.split(self.type)[0]
 
-    def pretty_print(self):
+    def pretty_print(self) -> str:
         """
         Pretty print the task data.
 
@@ -68,7 +68,7 @@ class TaskData(BaseModel):
         else:
             return f"ID: {self.ide_task_id}"
 
-    def to_json(self):
+    def to_json(self) -> dict:
         """Convert to dict."""
         task_data = self.dict()
         task_data["task_files"] = [task_file.dict() for task_file in self.task_files]

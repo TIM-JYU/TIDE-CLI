@@ -7,6 +7,7 @@ The whole CLI app may be located in different module.
 
 import json
 from pathlib import Path
+from typing import List
 
 import click
 
@@ -104,15 +105,15 @@ def list(demo_path, jsondata):
     :param jsondata: If True, prints the output in JSON format.
 
     """
-    tasks: list[TaskData] = get_tasks_by_doc(doc_path=demo_path)
+    tasks: List[TaskData] = get_tasks_by_doc(doc_path=demo_path)
 
     if not jsondata:
-        for task in tasks:
-            click.echo(task.pretty_print())
+        for t in tasks:
+            click.echo(t.pretty_print())
 
     if jsondata:
         # Create JSON object list
-        tasks_json = [task.to_json() for task in tasks]
+        tasks_json = [t.to_json() for t in tasks]
         click.echo(json.dumps(tasks_json, ensure_ascii=False, indent=4))
 
 
@@ -126,7 +127,7 @@ def create(demo_path, ide_task_id, all, force, dir):
     """Create tasks based on options."""
     if all:
         # Create all tasks
-        tasks: list[TaskData] = get_tasks_by_doc(doc_path=demo_path)
+        tasks: List[TaskData] = get_tasks_by_doc(doc_path=demo_path)
         create_tasks(tasks=tasks, overwrite=force, user_path=dir)
 
     elif ide_task_id:
