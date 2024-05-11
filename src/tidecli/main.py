@@ -153,7 +153,9 @@ def submit(path, file_name):
     path = Path(path)
 
     if not path.exists():
-        raise click.ClickException("Invalid path")
+        raise click.ClickException(
+            "Invalid path. Give an absolute path to the task folder in the local file system"
+        )
 
     # Get metadata from the task folder
     metadata = get_metadata(path)
