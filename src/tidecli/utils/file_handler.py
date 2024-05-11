@@ -1,5 +1,9 @@
 """Module for creating file structures for tasks and demos."""
 
+authors = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
+license = "MIT"
+date = "11.5.2024"
+
 import json
 import click.exceptions
 from pathlib import Path
@@ -7,6 +11,7 @@ from pathlib import Path
 from tidecli.models.task_data import TaskData, TaskFile
 
 METADATA_NAME = ".timdata"
+"""File to store metadata in task folder."""
 
 
 def create_tasks(
@@ -34,7 +39,6 @@ def combine_tasks(tasks: list[TaskData]) -> list[TaskData]:
     :param tasks: List of TaskData objects
     return: List of TaskData objects
     """
-
     # Combine tasks with same ide_task_id
     tasks_by_ide_task_id = {}
     for t in tasks:
@@ -61,7 +65,9 @@ def combine_tasks(tasks: list[TaskData]) -> list[TaskData]:
     return combined_tasks
 
 
-def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -> bool:
+def create_task(
+    task: TaskData, overwrite: bool, user_path: str | None = None
+) -> bool:
     """
     Create a single task.
 
@@ -71,7 +77,6 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
 
     return: True if task is created, False if not
     """
-
     # Sets path to current path or user given path
     if user_path:
         user_folder = Path.cwd() / user_path
@@ -107,13 +112,13 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
 def add_suffix(file_name: str, file_type: str) -> str:
     """
     Add suffix to file name if it is missing. Fix for C++ and C files.
+
     TODO: Support more file types, should this be done in TIM?
 
     :param file_name: Name of the file
     :param file_type: Type of the file
     :return: File name with suffix
     """
-
     if file_type == "c++" or file_type == "cpp":
         return file_name + ".cpp"
 
@@ -123,16 +128,17 @@ def add_suffix(file_name: str, file_type: str) -> str:
     return file_name
 
 
-def save_file(task_files: list[TaskFile], save_path: Path, overwrite=False) -> bool:
+def save_file(
+    task_files: list[TaskFile], save_path: Path, overwrite=False
+) -> bool:
     """
     Create files of tasks in the given path.
 
-    :param task_files: Dict or list of dicts. Contain name with file extension (.eg .py or .txt ...) and content
+    :param task_files: Dict or list of dicts.
+    Contain name with file extension (.eg .py or .txt ...) and content
     :param save_path: Path to exercises in TIM
     :param overwrite: Flag if overwrite
-
     """
-
     save_path.mkdir(parents=True, exist_ok=True)
 
     for f in task_files:
@@ -140,7 +146,8 @@ def save_file(task_files: list[TaskFile], save_path: Path, overwrite=False) -> b
         if file_path.exists():
             if not overwrite:
                 click.echo(
-                    f"File {file_path} already exists\nTo overwrite give tide task create -f {save_path}\n"
+                    f"File {file_path} already exists\nTo overwrite \
+                    give tide task create -f {save_path}\n"
                 )
                 return False
         file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -154,6 +161,7 @@ def save_file(task_files: list[TaskFile], save_path: Path, overwrite=False) -> b
 def write_metadata(folder_path: Path, metadata: TaskData) -> None:
     """
     Write metadata.json to the given folder path.
+
     :param metadata: TaskData object
     :param folder_path: Path to folder to create metadata.json
     """
@@ -196,11 +204,12 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
     :param file_path: Path to the directory containing the files.
     :return: File data
     """
-
     task_files = metadata.task_files
 
     files_in_dir = [
-        f for f in file_path.iterdir() if f.is_file() and not f.suffix == METADATA_NAME
+        f
+        for f in file_path.iterdir()
+        if f.is_file() and not f.suffix == METADATA_NAME
     ]
 
     for f1 in task_files:
@@ -216,11 +225,11 @@ def get_metadata(metadata_path: Path) -> TaskData:
     """
     Get metadata from the given path.
 
-    :param metadata_path: Path to the directory containing the metadata.json file.
+    :param metadata_path: Path to the directory containing the
+    metadata.json file.
     :return: Metadata
     :raises: ClickException if metadata not found
     """
-
     metadata_path = metadata_path / METADATA_NAME
     if not metadata_path.exists():
         raise click.ClickException(f"Metadata not found in {metadata_path}")
