@@ -40,7 +40,8 @@ class TimFeedback(BaseModel):
         if self.savedNew:
             saved_new = "Saved new answer successfully."
         else:
-            saved_new = "New answer was not saved. Same file was already submitted."
+            saved_new = "New answer was not saved.\
+            Same file was already submitted."
 
         if self.web.console is None:
             return f"{saved_new} No console feedback from TIM."
