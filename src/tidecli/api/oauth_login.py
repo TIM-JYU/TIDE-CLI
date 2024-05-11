@@ -1,13 +1,13 @@
 import base64
-from dataclasses import dataclass
 import hashlib
+import http.server
+import secrets
+import urllib.parse
+import webbrowser
+from dataclasses import dataclass
 
 import click
 import requests
-import webbrowser
-import urllib.parse
-import secrets
-import http.server
 
 from tidecli.tide_config import (
     CLIENT_ID,
@@ -23,6 +23,13 @@ from tidecli.utils.handle_token import save_token
 
 
 def create_s256_code_challenge(code_verifier: str) -> str:
+    """
+    Create the code challenge for the OAuth2 authentication (PKCE)
+
+    :param code_verifier: Random string generated for the code verifier
+    :return: The code challenge hash
+    """
+
     data = hashlib.sha256(code_verifier.encode("ascii")).digest()
     return base64.urlsafe_b64encode(data).rstrip(b"=").decode("utf-8")
 
@@ -77,7 +84,7 @@ class OAuthAuthenticator:
                 # Temporary code, which is used to obtain the API key
                 code_query = query.get("code")
                 if code_query is None:
-                    self.send_error(403, "Api key not found in the response.")
+                    self.send_error(403, "API key not found in the response.")
                     return
 
                 code = code_query[0]

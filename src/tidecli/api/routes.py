@@ -47,13 +47,15 @@ def make_request(
         if "error" in res_json:
             error = res_json["error"]
             if "error_description" in res_json:
-                raise click.ClickException(error + "\n" + res_json["error_description"])
+                raise Exception(error + "\n" + res_json["error_description"])
             else:
-                raise click.ClickException(error)
+                raise Exception(error)
         return res_json
 
     except Exception as e:
-        raise click.ClickException(f"{e}")
+        raise click.ClickException(
+            f"Could not complete API call {endpoint}\n{e}"
+        ) from e
 
 
 def validate_token() -> dict:

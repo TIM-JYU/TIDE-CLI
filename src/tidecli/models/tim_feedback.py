@@ -34,6 +34,6 @@ class TimFeedback(BaseModel):
             saved_new = "New answer was not saved. Same file was already submitted."
 
         if self.web.console is None:
-            return [saved_new, " No console feedback from TIM."]
+            return f"{saved_new} No console feedback from TIM."
 
-        return [saved_new, "\nFeedback from TIM:", self.web.console]
+        return f" {saved_new}\n\nFeedback from TIM: {self.web.console}"

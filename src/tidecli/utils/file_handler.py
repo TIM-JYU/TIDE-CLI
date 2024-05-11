@@ -63,31 +63,20 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
 
     # Sets path to current path or user given path
     if user_path:
-        user_folder = Path.cwd().joinpath(user_path)
+        user_folder = Path.cwd() / user_path
     else:
         user_folder = Path.cwd()
 
-    end = Path(task.ide_task_id)
-    end_path = Path(Path(task.path).parts[-1])
-    end_path = end_path.joinpath(end)
-
     # Add course path to create task path
-    user_folder = user_folder.joinpath(end_path)
+    user_folder = user_folder / Path(task.path).name / task.ide_task_id
 
     # Fix for tasks that have file_name without suffix
     for f in task.task_files:
         path = Path(f.file_name)
         suffix = path.suffix
-
         if suffix != "":
             continue
-
-        file_type = task.run_type
-        if file_type == "c++" or file_type == "cpp":
-            f.file_name = f.file_name + ".cpp"
-
-        if file_type == "cc":
-            f.file_name = f.file_name + ".c"
+        f.file_name = add_suffix(f.file_name, task.run_type)
 
     saved = save_file(
         task_files=task.task_files, save_path=user_folder, overwrite=overwrite
@@ -104,6 +93,25 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
     return saved
 
 
+def add_suffix(file_name: str, file_type: str) -> str:
+    """
+    Add suffix to file name if it is missing. Fix for C++ and C files.
+    TODO: Support more file types, should this be done in TIM?
+
+    :param file_name: Name of the file
+    :param file_type: Type of the file
+    :return: File name with suffix
+    """
+
+    if file_type == "c++" or file_type == "cpp":
+        return file_name + ".cpp"
+
+    if file_type == "cc":
+        return file_name + ".c"
+
+    return file_name
+
+
 def save_file(task_files: list[TaskFile], save_path: Path, overwrite=False) -> bool:
     """
     Create files of tasks in the given path.
@@ -117,7 +125,7 @@ def save_file(task_files: list[TaskFile], save_path: Path, overwrite=False) -> b
     save_path.mkdir(parents=True, exist_ok=True)
 
     for f in task_files:
-        file_path = save_path.joinpath(f.file_name)
+        file_path = save_path / f.file_name
         if file_path.exists():
             if not overwrite:
                 click.echo(
@@ -138,7 +146,7 @@ def write_metadata(folder_path: Path, metadata: TaskData) -> None:
     :param metadata: TaskData object
     :param folder_path: Path to folder to create metadata.json
     """
-    metadata_path = Path(folder_path).joinpath(METADATA_NAME)
+    metadata_path = Path(folder_path) / METADATA_NAME
     write_mode = "w"
     if metadata_path.exists():
         write_mode = "w"
@@ -161,8 +169,7 @@ def create_file(item: dict, folder_path: Path, overwrite=False):
     # If path exists already, write mode is WRITE (overwrites)
     if folder_path.exists():
         if not overwrite:
-            # Raise SystemExit with code 1
-            click.ClickException(f"Folder {folder_path} already exists")
+            raise click.ClickException(f"Folder {folder_path} already exists")
 
     # Write the file with desired writemode, CREATE or WRITE
     with open(folder_path, "x", encoding="utf-8") as file:
