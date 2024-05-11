@@ -1,3 +1,13 @@
+"""
+This module contain the functions that make requests to the API.
+
+Functions are used by main program and utility functions.
+"""
+
+authors = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
+license = "MIT"
+date = "11.5.2024"
+
 import click
 import requests
 
@@ -18,17 +28,18 @@ from tidecli.utils.handle_token import get_signed_in_user
 
 
 def make_request(
-    endpoint: str, method: str = "GET", params: dict[str, str | None] | None = None
+    endpoint: str,
+    method: str = "GET",
+    params: dict[str, str | None] | None = None,
 ) -> dict:
     """
-    Make a request to the API
+    Make a request to the API.
 
     :param endpoint: API endpoint
     :param method: HTTP method
     :param params: data to send
     return: JSON response
     """
-
     signed_in_user = get_signed_in_user()
     if not signed_in_user:
         raise click.ClickException("User not logged in")
@@ -60,7 +71,8 @@ def make_request(
 
 def validate_token() -> dict:
     """
-    Validate the token for the user
+    Validate the token for the user.
+
     return: JSON response  of token validity
     """
     res = make_request(endpoint=INTROSPECT_ENDPOINT, method="POST")
@@ -70,7 +82,8 @@ def validate_token() -> dict:
 
 def get_profile() -> dict:
     """
-    Get the user profile
+    Get the user profile.
+
     return: JSON response  of user profile
     """
     return make_request(endpoint=PROFILE_ENDPOINT)
@@ -78,8 +91,12 @@ def get_profile() -> dict:
 
 def get_ide_courses() -> list[Course]:
     """
-    Get the logged in user courses that are in user bookmarks and have ideCourse tag
-    return: JSON response of course name and course path, course id and paths for demo documents
+    Get the logged in user courses.
+
+    Get users that are in user bookmarks and have ideCourse tag.
+
+    return: JSON response of course name and course path,
+    course id and paths for demo documents
     """
     res = make_request(endpoint=IDE_COURSES_ENDPOINT)
     all_courses = [Course(**course) for course in res]
@@ -89,11 +106,11 @@ def get_ide_courses() -> list[Course]:
 
 def get_tasks_by_doc(doc_path: str) -> list[TaskData]:
     """
-    Get the tasks by document path or document id
+    Get the tasks by document path or document id.
+
     :param doc_path: Tasks document path
     return: JSON response of tasks
     """
-
     doc_id = None  # Tim requires doc_id to be None if not used
 
     res = make_request(
@@ -111,12 +128,12 @@ def get_task_by_ide_task_id(
     doc_path: str,
 ) -> TaskData:
     """
-    Get the tasks by ideTask id and demo document path or id
+    Get the tasks by ideTask id and demo document path or id.
+
     :param doc_path: Demo document path
     :param ide_task_id: ideTask id
     return: JSON response of tasks
     """
-
     doc_id = None  # Tim requires doc_id to be None if not used
 
     res = make_request(
@@ -135,13 +152,15 @@ def submit_task(
     task_files: SubmitData,
 ) -> TimFeedback:
     """
-    Submit the task by task id, document id and paragraph id
+    Submit the task by task id, document id and paragraph id.
+
     :param task_files: Task/s data
     return: JSON response of tasks
     """
-
     res = make_request(
-        endpoint=SUBMIT_TASK_ENDPOINT, method="PUT", params=task_files.submit_json()
+        endpoint=SUBMIT_TASK_ENDPOINT,
+        method="PUT",
+        params=task_files.submit_json(),
     )
     feedback = res.get("result")
     if not feedback:
