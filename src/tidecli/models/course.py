@@ -1,31 +1,49 @@
+"""
+This module contains the Course and CourseTask models.
+
+Models are used to validate data from TIM API.
+"""
+
+authors = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
+license = "MIT"
+date = "11.5.2024"
+
 from typing import Any
 
 from pydantic import BaseModel
 
 
 class CourseTask(BaseModel):
-    """
-    CourseTask model
-    """
+    """Simple model for course task."""
 
     name: str
+    """Task name."""
+
     doc_id: int
+    """Doc ID, where task/csPlugin belongs to."""
+
     path: str
+    """Task virtual path in TIM."""
 
 
 class Course(BaseModel):
-    """
-    Course model
-    """
+    """Course model."""
 
     name: str
+    """Course name."""
+
     id: int
+    """Course ID."""
+
     path: str
+    """Course virtual path in TIM."""
+
     tasks: list[CourseTask]
+    """List of tasks in the course defined in TIM."""
 
     def pretty_print(self) -> str:
         """
-        Prints the course as readable string.
+        Print the course as readable string.
 
         Return values with headings.
         :return: Course as string, like Course: <name>, ID: <id>
@@ -40,7 +58,7 @@ class Course(BaseModel):
 
     def to_json(self) -> dict[str, Any]:
         """
-        Converts the course to JSON.
+        Convert the course to JSON.
 
         :return: Course as JSON
         """

@@ -5,6 +5,10 @@ This module contains the main command group for the Tide CLI.
 The whole CLI app may be located in different module.
 """
 
+authors = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
+license = "MIT"
+date = "11.5.2024"
+
 import json
 from pathlib import Path
 from typing import List
@@ -31,7 +35,7 @@ from tidecli.utils.login_handler import login_details
 
 @click.group()
 def tim_ide():
-    """Tide CLI base command?."""
+    """CLI tool for downloading and submitting TIM tasks."""
     pass
 
 
@@ -42,11 +46,12 @@ def login(jsondata):
     Log in the user and saves the token to the keyring.
 
     Functionality: Opens a browser window for the user to log in.
-
     """
     if jsondata:
         click.echo(
-            json.dumps(login_details(jsondata=True), ensure_ascii=False, indent=4)
+            json.dumps(
+                login_details(jsondata=True), ensure_ascii=False, indent=4
+            )
         )
     else:
         click.echo(login_details())
@@ -62,13 +67,12 @@ def logout():
 @click.option("--json", "-j", "jsondata", is_flag=True, default=False)
 def courses(jsondata):
     """
-    List  all courses.
+    List all courses.
 
     Prints all courses that the user has access to.
 
     If --json flag is used, the output is printed in JSON format.
     """
-
     data = get_ide_courses()
 
     if not jsondata:
@@ -83,13 +87,13 @@ def courses(jsondata):
 
 @click.group()
 def task():
-    """Task related commands.
+    """
+    Task related commands.
 
     It is possible to list and create all tasks per excercise or just
     create one task.
-
     """
-    # TODO: printtaa esim. aiemmin noudetut taskit tms järkevää. Tai sitten ole printtaamatta
+    # TODO: printtaa esim. aiemmin noudetut taskit tms järkevää.
     pass
 
 
@@ -147,14 +151,15 @@ def create(demo_path, ide_task_id, all, force, dir):
 def submit(path, file_name):
     """
     Enter the path of the task folder to submit the task/tasks to TIM.
+
     Path must be inserted in the following format: "/path/to/task/folder".
     """
-
     path = Path(path)
 
     if not path.exists():
         raise click.ClickException(
-            "Invalid path. Give an absolute path to the task folder in the local file system"
+            "Invalid path. Give an absolute path to the task folder \
+            in the local file system"
         )
 
     # Get metadata from the task folder
