@@ -1,3 +1,9 @@
+"""Handler for the token management."""
+
+__authors__ = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
+__license__ = "MIT"
+__date__ = "11.5.2024"
+
 import click
 import keyring as kr
 from tidecli.models.user import User
@@ -5,7 +11,13 @@ from tidecli.models.user import User
 
 def save_token(token: str, username: str) -> str | None:
     """
-    Save the token in the keyring for the user. Removes the old token if it exists to avoid duplicates.
+    Save the token in the keyring for the user.
+
+    Removes the old token if it exists to avoid duplicates.
+    Token is saved separately with the username as the key.
+    Username is saved separately with the key "username".
+
+    This workaround is found from https://stackoverflow.com/a/48831213
 
     :param token: The token to save
     :param username: The username to save the token for
@@ -26,7 +38,7 @@ def save_token(token: str, username: str) -> str | None:
 
 def get_token(username) -> str | None:
     """
-    Get the token from the keyring for the user
+    Get the token from the keyring for the user.
 
     :param username: The username to get the token for
     """
@@ -40,7 +52,7 @@ def get_token(username) -> str | None:
 
 def get_signed_in_user() -> User | None:
     """
-    Get the signed in user from the keyring
+    Get the signed in user from the keyring.
 
     return: The signed in user username and token
     """
@@ -63,8 +75,9 @@ def get_signed_in_user() -> User | None:
 
 def delete_token() -> str | None:
     """
-    Delete the token from the keyring for the user
-    when log out is called
+    Delete the token from the keyring for the user.
+
+    Invoked when log out is called. 
     """
     try:
         user = get_signed_in_user()

@@ -1,13 +1,23 @@
+"""
+Provide oauth login for CLI app.
+
+Authentication is saved to keyring.
+"""
+
+__authors__ = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
+__license__ = "MIT"
+__date__ = "11.5.2024"
+
 import base64
-from dataclasses import dataclass
 import hashlib
+import http.server
+import secrets
+import urllib.parse
+import webbrowser
+from dataclasses import dataclass
 
 import click
 import requests
-import webbrowser
-import urllib.parse
-import secrets
-import http.server
 
 from tidecli.tide_config import (
     CLIENT_ID,
@@ -23,17 +33,22 @@ from tidecli.utils.handle_token import save_token
 
 
 def create_s256_code_challenge(code_verifier: str) -> str:
+    """
+    Create the code challenge for the OAuth2 authentication (PKCE).
+
+    :param code_verifier: Random string generated for the code verifier
+    :return: The code challenge hash
+    """
     data = hashlib.sha256(code_verifier.encode("ascii")).digest()
     return base64.urlsafe_b64encode(data).rstrip(b"=").decode("utf-8")
 
 
 @dataclass
 class OAuthAuthenticator:
-    """
-    Class for OAuth2 authenticating
-    """
+    """Class for OAuth2 authenticating."""
 
     def auth(self) -> bool:
+        """Authenticate the user for the TIM API."""
         # Generating a random string for the code verifier
         code_verifier = secrets.token_urlsafe(48)
         # Generating the code challenge hash
@@ -57,8 +72,10 @@ class OAuthAuthenticator:
 
         class Handler(http.server.BaseHTTPRequestHandler):
             """
-            Temporary server to handle the callback
-            This class is used to handle the callback from the authentication server.
+            Temporary server to handle the callback.
+
+            This class is used to handle the callback
+            from the authentication server.
             """
 
             def do_GET(self) -> None:
@@ -69,7 +86,8 @@ class OAuthAuthenticator:
                 url = urllib.parse.urlparse(self.path)
                 query = urllib.parse.parse_qs(url.query)
 
-                # Handles the case where the user denied the authorization / closed the browser
+                # Handles the case where the user denied the
+                # authorization / closed the browser
                 if "error" in query:
                     self.send_error(403, "Authorization denied by user")
                     return
@@ -77,7 +95,7 @@ class OAuthAuthenticator:
                 # Temporary code, which is used to obtain the API key
                 code_query = query.get("code")
                 if code_query is None:
-                    self.send_error(403, "Api key not found in the response.")
+                    self.send_error(403, "API key not found in the response.")
                     return
 
                 code = code_query[0]
@@ -95,7 +113,8 @@ class OAuthAuthenticator:
                     data=token_params,
                 )
 
-                # If the response is successful, the API key is saved, else an error message is printed
+                # If the response is successful, the API key is saved,
+                # else an error message is printed
                 if response.status_code == 200:
                     access_token = response.json().get("access_token")
                 else:
@@ -113,13 +132,17 @@ class OAuthAuthenticator:
                 except requests.exceptions.RequestException as e:
                     raise click.ClickException(f"Error: {e}")
 
-                save_token(token=access_token, username=res.json().get("username"))
+                save_token(
+                    token=access_token, username=res.json().get("username")
+                )
 
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain; charset=utf-8")
                 self.end_headers()
                 self.wfile.write(
-                    "Login successful! You can now close the browser.".encode("utf-8")
+                    "Login successful! You can now close the browser.".encode(
+                        "utf-8"
+                    )
                 )
                 login_successful = True
 
@@ -136,8 +159,6 @@ class OAuthAuthenticator:
 
 
 def authenticate() -> bool:
-    """
-    Authenticates the user for the TIM API
-    """
+    """Authenticate the user for the TIM API."""
     auth = OAuthAuthenticator()
     return auth.auth()

@@ -1,3 +1,13 @@
+"""
+Task data models.
+
+Provides validation and conversion to JSON for task data.
+"""
+
+__authors__ = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
+__license__ = "MIT"
+__date__ = "11.5.2024"
+
 import re
 
 from pydantic import BaseModel
@@ -7,11 +17,22 @@ class TaskFile(BaseModel):
     """Model for single code file."""
 
     task_id_ext: str
+    """Extended version of task ID as string."""
+
     content: str
+    """Content of the file."""
+
     file_name: str = ""
+    """Name of the file."""
+
     source: str = "editor"
+    """Source attribute in TIM. Not used in CLI app."""
+
     user_input: str = ""
+    """User input argument for submit."""
+
     user_args: str = ""
+    """User arguments for submit."""
 
     def to_json(self) -> dict:
         """Convert to JSON."""
@@ -43,19 +64,32 @@ class TaskData(BaseModel):
     """
 
     path: str
+    """Path to the task."""
+
     type: str
+    """Type of the task."""
+
     doc_id: int
+    """Document ID where task belongs in TIM."""
+
     ide_task_id: str
+    """Task ID in TIM for IDE fetch."""
+
     task_files: list[TaskFile]
+    """List of task files."""
+
     stem: str | None = None
+    """Stem of the task, may containg a short instructions."""
+
     header: str | None = None
+    """Header of the task."""
 
     @property
     def run_type(self) -> str:
-        """Returns run type eg. cc from cc/input/comtest"""
+        """Return run type eg. cc from cc/input/comtest."""
         return _task_type_split_re.split(self.type)[0]
 
-    def pretty_print(self):
+    def pretty_print(self) -> str:
         """
         Pretty print the task data.
 
@@ -68,9 +102,11 @@ class TaskData(BaseModel):
         else:
             return f"ID: {self.ide_task_id}"
 
-    def to_json(self):
+    def to_json(self) -> dict:
         """Convert to dict."""
         task_data = self.dict()
-        task_data["task_files"] = [task_file.dict() for task_file in self.task_files]
+        task_data["task_files"] = [
+            task_file.dict() for task_file in self.task_files
+        ]
 
         return task_data
