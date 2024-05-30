@@ -1,8 +1,8 @@
 """Basic error handling and logging for the CLI application."""
 
-authors = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
-license = "MIT"
-date = "11.5.2024"
+__authors__ = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
+__license__ = "MIT"
+__date__ = "11.5.2024"
 
 import logging
 import click

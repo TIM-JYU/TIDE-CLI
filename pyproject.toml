@@ -3,8 +3,6 @@ name = "TIDE-CLI"
 version = "0.1.0"
 description = ""
 authors = [
-	"Hannes Koivusipilä",
-	"Stella Palenius",
 	"Olli-Pekka Riikola",
 	"Olli Rutanen",
 	"Joni Sinokki"

@@ -6,9 +6,9 @@ Provides helper class for keyring save.
 """
 from dataclasses import dataclass
 
-authors = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
-license = "MIT"
-date = "11.5.2024"
+__authors__ = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
+__license__ = "MIT"
+__date__ = "11.5.2024"
 
 
 @dataclass

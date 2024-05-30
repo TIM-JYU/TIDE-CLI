@@ -4,9 +4,9 @@ This module contains the Course and CourseTask models.
 Models are used to validate data from TIM API.
 """
 
-authors = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
-license = "MIT"
-date = "11.5.2024"
+__authors__ = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
+__license__ = "MIT"
+__date__ = "11.5.2024"
 
 from typing import Any
 
