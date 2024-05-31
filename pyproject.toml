@@ -2,7 +2,11 @@
 name = "TIDE-CLI"
 version = "0.1.0"
 description = ""
-authors = ["TIDE-project"]
+authors = [
+	"Olli-Pekka Riikola",
+	"Olli Rutanen",
+	"Joni Sinokki"
+]
 license = "MIT"
 readme = "README.md"
 packages = [
