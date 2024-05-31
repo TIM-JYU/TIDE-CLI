@@ -140,7 +140,7 @@ class OAuthAuthenticator:
                 self.send_header("Content-type", "text/plain; charset=utf-8")
                 self.end_headers()
                 self.wfile.write(
-                    "Login successful! You can now close the browser.".encode(
+                    "Login successful! You can now close this tab.".encode(
                         "utf-8"
                     )
                 )
