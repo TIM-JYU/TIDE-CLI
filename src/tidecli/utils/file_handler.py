@@ -40,7 +40,7 @@ def combine_tasks(tasks: list[TaskData]) -> list[TaskData]:
     return: List of TaskData objects
     """
     # Combine tasks with same ide_task_id
-    tasks_by_ide_task_id = {}
+    tasks_by_ide_task_id: dict[str, list[TaskData]] = {}
     for t in tasks:
         ide_task_id = t.ide_task_id
         task_list = tasks_by_ide_task_id.get(ide_task_id, [])
