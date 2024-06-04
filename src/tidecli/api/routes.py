@@ -46,12 +46,6 @@ def make_request(
 
     token: str = signed_in_user.password
 
-    signed_in_user = get_signed_in_user()
-    if not signed_in_user:
-        raise click.ClickException("User not logged in")
-
-    token: str = signed_in_user.password
-
     try:
         res = requests.request(
             method,
