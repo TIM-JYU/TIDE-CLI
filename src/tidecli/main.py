@@ -34,14 +34,14 @@ from tidecli.utils.login_handler import login_details
 
 
 @click.group()
-def tim_ide():
+def tim_ide() -> None:
     """CLI tool for downloading and submitting TIM tasks."""
     pass
 
 
 @tim_ide.command()
 @click.option("--json", "-j", "jsondata", is_flag=True, default=False)
-def login(jsondata):
+def login(jsondata: bool) -> None:
     """
     Log in the user and saves the token to the keyring.
 
@@ -49,23 +49,21 @@ def login(jsondata):
     """
     if jsondata:
         click.echo(
-            json.dumps(
-                login_details(jsondata=True), ensure_ascii=False, indent=4
-            )
+            json.dumps(login_details(jsondata=True), ensure_ascii=False, indent=4)
         )
     else:
         click.echo(login_details())
 
 
 @tim_ide.command()
-def logout():
+def logout() -> None:
     """Log out the user and deletes the token from the keyring."""
     click.echo(delete_token())
 
 
 @tim_ide.command()
 @click.option("--json", "-j", "jsondata", is_flag=True, default=False)
-def courses(jsondata):
+def courses(jsondata: bool) -> None:
     """
     List all courses.
 
@@ -86,21 +84,17 @@ def courses(jsondata):
 
 
 @click.group()
-def task():
+def task() -> None:
     """
     Task related commands.
-
-    It is possible to list and create all tasks per excercise or just
-    create one task.
     """
-    # TODO: printtaa esim. aiemmin noudetut taskit tms järkevää.
     pass
 
 
 @task.command()
 @click.option("--json", "-j", "jsondata", is_flag=True, default=False)
 @click.argument("demo_path", type=str, required=True)
-def list(demo_path, jsondata):
+def list(demo_path: str, jsondata: bool) -> None:
     """
     Fetch tasks by doc path.
 
@@ -127,7 +121,7 @@ def list(demo_path, jsondata):
 @click.option("--dir", "-d", "dir", type=str, default=None)
 @click.argument("demo_path", type=str)
 @click.argument("ide_task_id", type=str, default=None, required=False)
-def create(demo_path, ide_task_id, all, force, dir):
+def create(demo_path: str, ide_task_id: str, all: bool, force: bool, dir: str) -> None:
     """Create tasks based on options."""
     if all:
         # Create all tasks
@@ -148,15 +142,13 @@ def create(demo_path, ide_task_id, all, force, dir):
 @tim_ide.command()
 @click.argument("path", type=str, required=True)
 @click.argument("file_name", type=str, required=False)
-def submit(path, file_name):
+def submit(path: str, file_name: str) -> None:
     """
     Enter the path of the task folder to submit the task/tasks to TIM.
 
     Path must be inserted in the following format: "/path/to/task/folder".
     """
-
     path = Path(path)
-
     if not path.exists():
         raise click.ClickException(
             "Invalid path. Give an absolute path to the task folder \
