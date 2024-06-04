@@ -14,9 +14,9 @@ from tests.test_data import (
     get_task_by_ide_task_id_test_response,
 )
 from tests.test_routes import _create_mock_request
-from tidecli.main import login, logout, courses, task
-from tidecli.models.course import Course
-from tidecli.models.user import User
+from src.tidecli.main import login, logout, courses, task
+from src.tidecli.models.course import Course
+from src.tidecli.models.user import User
 
 
 class TestMain(unittest.TestCase):
@@ -69,10 +69,11 @@ class TestMain(unittest.TestCase):
         result = self.runner.invoke(login)
         self.assertEqual(
             result.output,
-            "Error: invalid_token\nPlease try to log in again.\nLogin successful!\n",
+            "Error: Could not complete API call /oauth/introspect\ninvalid_token\n"
+            "Please try to log in again.\nLogin successful!\n",
         )
 
-    @patch("tidecli.main.delete_token")
+    @patch("src.tidecli.main.delete_token")
     def test_logout(self, mock_delete_token):
         return_value = "Token for test deleted successfully!"
         mock_delete_token.return_value = return_value
@@ -142,7 +143,7 @@ class TestMainFileAccess(TestCase):
 
         self.assertEqual(
             result.output,
-            f"Task created in {self.working_dir}Demo1\\t1\nTask created in {self.working_dir}Demo1\\t2\n",
+            f"Task created in {self.working_dir}Demo1{os.sep}t1\nTask created in {self.working_dir}Demo1{os.sep}t2\n",
         )
         test_path1 = f"{self.working_dir}Demo1/t1"
         test_path2 = f"{self.working_dir}Demo1/t2"
@@ -170,8 +171,8 @@ class TestMainFileAccess(TestCase):
         # Test overwrite
         self.assertEqual(
             result_overwrite.output,
-            "File C:\\Demo1\\t1\\test.c already exists\nTo overwrite give tide task create -f C:\\Demo1\\t1\n\nFile "
-            "C:\\Demo1\\t2\\test.c already exists\nTo overwrite give tide task create -f C:\\Demo1\\t2\n\n",
+            f"File {test_file1} already exists\nTo overwrite give tide task create -f {test_path1}\n\nFile "
+            f"{test_file2} already exists\nTo overwrite give tide task create -f {test_path2}\n\n",
         )
 
     @patch("tidecli.api.routes.requests.request")
@@ -195,7 +196,7 @@ class TestMainFileAccess(TestCase):
         )
 
         self.assertEqual(
-            result.output, f"Task created in {self.working_dir}Demo1\\t3\n"
+            result.output, f"Task created in {self.working_dir}Demo1{os.sep}t3\n"
         )
 
         test_path1 = f"{self.working_dir}Demo1/t3"
@@ -204,3 +205,4 @@ class TestMainFileAccess(TestCase):
         self.assertTrue(os.path.exists(test_path1))
         self.assertTrue(os.path.exists(test_metadata1))
         self.assertTrue(os.path.exists(test_file1))
+
