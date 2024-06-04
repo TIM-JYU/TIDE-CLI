@@ -79,7 +79,7 @@ def courses(jsondata: bool) -> None:
 
     if jsondata:
         # Create JSON object list
-        courses_json = [course.to_json() for course in data]
+        courses_json = [course.model_dump() for course in data]
         click.echo(json.dumps(courses_json, ensure_ascii=False, indent=4))
 
 
