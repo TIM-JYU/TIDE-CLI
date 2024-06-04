@@ -14,11 +14,11 @@ Step 2: Modify src/tidecli/tide_config.py BASE_URL to correspond the TIM-server 
 
 Step 3: Python 3.10 or higher is required
 
-Step 4: Run `pip install poetry` to install poetry
+Step 4: Run `pip install poetry` to install Poetry tool for dependency management and packaging
 
 Step 5: Run `poetry shell` to enter virtual environment 
 
-Step 6: Run `poetry install` to install dependencies. If poetry install fails, run first `poetry lock`
+Step 6: Run `poetry install` to install dependencies. If Poetry install fails, run first `poetry lock`
 
 Step 7: Go to correct folder: `cd src/tidecli`
 
@@ -40,5 +40,8 @@ Step 3: Move app named 'main' as 'tide' to some folder that is in PATH. E.g. `mv
 Step 4: Start use, please refer user instructions in TIM.
 
 ## Running unit tests
-After cloning and starting the Poetry environment, unit tests can be run with command: `python -m unittest`
+After cloning and starting the Poetry environment:
 
+Step 1: Navigate to test folder `cd tests`
+
+Step 2: Run unit tests with command `python -m unittest`
