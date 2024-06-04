@@ -38,3 +38,7 @@ Step 2: `cd dist && ls -la`, file permissions should look like `-rwxr-xr-x`
 Step 3: Move app named 'main' as 'tide' to some folder that is in PATH. E.g. `mv main /usr/bin/tide`.
 
 Step 4: Start use, please refer user instructions in TIM.
+
+## Running unit tests
+After cloning and starting the Poetry environment, unit tests can be run with command: `python -m unittest`
+
