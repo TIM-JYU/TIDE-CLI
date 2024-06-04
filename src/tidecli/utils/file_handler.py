@@ -146,8 +146,9 @@ def save_file(
         if file_path.exists():
             if not overwrite:
                 click.echo(
-                    f"File {file_path} already exists\nTo overwrite \
-                    give tide task create -f {save_path}\n"
+                    f"File {file_path} already exists\n
+                    To overwrite give tide task create -f
+                    {save_path}\n"
                 )
                 return False
         file_path.parent.mkdir(parents=True, exist_ok=True)
