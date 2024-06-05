@@ -40,7 +40,7 @@ def combine_tasks(tasks: list[TaskData]) -> list[TaskData]:
     return: List of TaskData objects
     """
     # Combine tasks with same ide_task_id
-    tasks_by_ide_task_id = {}
+    tasks_by_ide_task_id: dict[str, list[TaskData]] = {}
     for t in tasks:
         ide_task_id = t.ide_task_id
         task_list = tasks_by_ide_task_id.get(ide_task_id, [])
@@ -146,8 +146,8 @@ def save_file(
         if file_path.exists():
             if not overwrite:
                 click.echo(
-                    f"File {file_path} already exists\nTo overwrite \
-                    give tide task create -f {save_path}\n"
+                    f"File {file_path} already exists\n"
+                    f"To overwrite give tide task create -f {save_path}\n"
                 )
                 return False
         file_path.parent.mkdir(parents=True, exist_ok=True)
