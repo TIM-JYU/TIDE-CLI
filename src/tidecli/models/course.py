@@ -14,7 +14,7 @@ from pydantic import BaseModel
 
 
 class CourseTask(BaseModel):
-    """"Information about a single task in a course that can be submitted."""
+    """ "Information about a single task in a course that can be submitted."""
 
     name: str
     """Task name."""

@@ -77,7 +77,7 @@ def delete_token() -> str | None:
     """
     Delete the token from the keyring for the user.
 
-    Invoked when log out is called. 
+    Invoked when log out is called.
     """
     try:
         user = get_signed_in_user()

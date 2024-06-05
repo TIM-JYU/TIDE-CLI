@@ -65,9 +65,7 @@ def combine_tasks(tasks: list[TaskData]) -> list[TaskData]:
     return combined_tasks
 
 
-def create_task(
-    task: TaskData, overwrite: bool, user_path: str | None = None
-) -> bool:
+def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -> bool:
     """
     Create a single task.
 
@@ -128,9 +126,7 @@ def add_suffix(file_name: str, file_type: str) -> str:
     return file_name
 
 
-def save_file(
-    task_files: list[TaskFile], save_path: Path, overwrite=False
-) -> bool:
+def save_file(task_files: list[TaskFile], save_path: Path, overwrite=False) -> bool:
     """
     Create files of tasks in the given path.
 
@@ -207,9 +203,7 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
     task_files = metadata.task_files
 
     files_in_dir = [
-        f
-        for f in file_path.iterdir()
-        if f.is_file() and not f.suffix == METADATA_NAME
+        f for f in file_path.iterdir() if f.is_file() and not f.suffix == METADATA_NAME
     ]
 
     for f1 in task_files:

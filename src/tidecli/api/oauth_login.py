@@ -132,17 +132,13 @@ class OAuthAuthenticator:
                 except requests.exceptions.RequestException as e:
                     raise click.ClickException(f"Error: {e}")
 
-                save_token(
-                    token=access_token, username=res.json().get("username")
-                )
+                save_token(token=access_token, username=res.json().get("username"))
 
                 self.send_response(200)
                 self.send_header("Content-type", "text/plain; charset=utf-8")
                 self.end_headers()
                 self.wfile.write(
-                    "Login successful! You can now close this tab.".encode(
-                        "utf-8"
-                    )
+                    "Login successful! You can now close this tab.".encode("utf-8")
                 )
                 login_successful = True
 

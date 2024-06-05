@@ -3,6 +3,7 @@ Datamodel for user.
 
 Provides helper class for keyring save.
 """
+
 from dataclasses import dataclass
 
 __authors__ = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]

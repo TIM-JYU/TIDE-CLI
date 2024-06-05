@@ -105,8 +105,6 @@ class TaskData(BaseModel):
     def to_json(self) -> dict:
         """Convert to dict."""
         task_data = self.dict()
-        task_data["task_files"] = [
-            task_file.dict() for task_file in self.task_files
-        ]
+        task_data["task_files"] = [task_file.dict() for task_file in self.task_files]
 
         return task_data
