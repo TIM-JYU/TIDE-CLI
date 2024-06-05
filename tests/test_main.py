@@ -171,8 +171,8 @@ class TestMainFileAccess(TestCase):
         # Test overwrite
         self.assertEqual(
             result_overwrite.output,
-            f"File {test_file1} already exists\nTo overwrite give tide task create -f {test_path1}\n\nFile "
-            f"{test_file2} already exists\nTo overwrite give tide task create -f {test_path2}\n\n",
+            f"File {Path(test_file1)} already exists\nTo overwrite give tide task create -f {Path(test_path1)}\n\nFile "
+            f"{Path(test_file2)} already exists\nTo overwrite give tide task create -f {Path(test_path2)}\n\n",
         )
 
     @patch("tidecli.api.routes.requests.request")
