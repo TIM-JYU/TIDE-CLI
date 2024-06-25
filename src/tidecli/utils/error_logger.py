@@ -7,43 +7,40 @@ __date__ = "11.5.2024"
 import logging
 import click
 
-# Configure logger
-logging.basicConfig(
-    filename="tide-cli.log",
-    filemode="a",
-    level=logging.ERROR,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-)
 
+class Logger:
+    """Log different levels."""
 
-def error_handler(func):
-    """
-    Handle CLI errors.
-
-    This is used as decorator @error_handler
-    """
-
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            # Log the error
-            logging.error(f"Error in function {func.__name__}: {e}")
-            # You can add more actions here,
-            # like sending an email notification or
-            # printing the error to console
-
-            # For simplicity, I'm just re-raising the error here
-            # raise
-            print("\033[91m {}\033[00m".format(e))
-
-    return wrapper
-
-
-# TODO: Add error handling for specific errors
-class CliError(Exception):
-    """Exception raised for errors."""
-
-    def __init__(self, message):
+    def __init__(self):
         """Class constructor."""
-        super().__init__(message)
+
+        # TODO: logging level via CLI-flag/env variable
+        self.level = 30  # 10 is the lowest logging level, 50 highest, 0 means not set.
+        self.internal_logger = logging.getLogger(__name__)
+        self.logfile = "tide-cli.log"
+        logging.basicConfig(
+            handlers=[
+                logging.FileHandler(self.logfile, "a", "utf-8"),
+                logging.StreamHandler(),
+            ],
+            level=logging.INFO,
+            format="%(asctime)s - %(levelname)s - %(message)s",
+        )
+
+    def log(self, LEVEL, msg):
+
+        # TODO: generic logger function with specified level
+        self.internal_logger.log(LEVEL, msg)
+        click.echo("Event was logged into {0}.".format(self.logfile))
+
+    def debug(self, msg):
+        """Log events with level DEBUG."""
+        if self.level > logging.DEBUG:
+            return
+        self.internal_logger.debug(msg)
+
+    def info(self, msg):
+        """Log events with level INFO."""
+        if self.level > logging.INFO:
+            return
+        self.internal_logger.info(msg)

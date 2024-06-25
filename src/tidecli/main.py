@@ -12,7 +12,7 @@ __date__ = "11.5.2024"
 import json
 from pathlib import Path
 from typing import List
-
+from tidecli.utils.error_logger import Logger
 import click
 
 from tidecli.api.routes import (
@@ -32,6 +32,8 @@ from tidecli.utils.file_handler import (
 from tidecli.utils.handle_token import delete_token
 from tidecli.utils.login_handler import login_details
 
+logger = Logger()
+
 
 @click.group()
 def tim_ide() -> None:
@@ -47,12 +49,15 @@ def login(jsondata: bool) -> None:
 
     Functionality: Opens a browser window for the user to log in.
     """
+
     if jsondata:
         click.echo(
             json.dumps(login_details(jsondata=True), ensure_ascii=False, indent=4)
         )
     else:
-        click.echo(login_details())
+        details = login_details()
+        logger.info(details.split("\n"))
+        click.echo(details)
 
 
 @tim_ide.command()
