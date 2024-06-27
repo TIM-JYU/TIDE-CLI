@@ -49,7 +49,6 @@ def login(jsondata: bool) -> None:
 
     Functionality: Opens a browser window for the user to log in.
     """
-
     if jsondata:
         click.echo(
             json.dumps(login_details(jsondata=True), ensure_ascii=False, indent=4)
@@ -92,6 +91,8 @@ def courses(jsondata: bool) -> None:
 def task() -> None:
     """
     Task related commands.
+
+    This command is used with subcommands.
     """
     pass
 

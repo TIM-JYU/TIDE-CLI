@@ -4,11 +4,13 @@ __authors__ = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
 __license__ = "MIT"
 __date__ = "11.5.2024"
 
+import re
 import json
 import click.exceptions
 from pathlib import Path
 
 from tidecli.models.task_data import TaskData, TaskFile
+from tidecli.utils.error_logger import Logger
 
 METADATA_NAME = ".timdata"
 """File to store metadata in task folder."""
@@ -202,6 +204,10 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
     """
     task_files = metadata.task_files
 
+    # TODO: find lines where answerfile should not be modified and
+    # compare them against file contents from metadata.
+    # Empty lines should be ignored.
+
     files_in_dir = [
         f for f in file_path.iterdir() if f.is_file() and not f.suffix == METADATA_NAME
     ]
@@ -210,6 +216,8 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
         for f2 in files_in_dir:
             if f1.file_name == f2.name:
                 with open(f2, "r", encoding="utf-8") as answer_file:
+                    # if not validate_answer_file(f2, f1.content):
+                    #     return []
                     f1.content = answer_file.read()
 
     return task_files
@@ -233,3 +241,101 @@ def get_metadata(metadata_path: Path) -> TaskData:
             return TaskData(**metadata)
     except Exception as e:
         raise click.ClickException(f"Error reading metadata: {e}")
+
+
+def validate_answer_file(answerfile: Path, metadata_taskfile: Path) -> bool:
+    """
+    Validate answer file with the metadata.
+
+    No other lines in the file should be modified
+    than the task content lines. The task content lines are marked with
+    //BYCODEBEGIN and //BYCODEEND comments.
+
+    :param answerfile: Path to the answer file
+    :param metadata_taskfile: Path to the metadata task file
+    :return: True if the file is valid, False if not
+    """
+    logger = Logger()
+    logger.debug("Validating {0} against {1}".format(answerfile, metadata_taskfile))
+    answerlines = []
+    metadata_lines = []
+    try:
+        with open(answerfile, "r", encoding="utf-8") as answer_file:
+            answerlines = answer_file.readlines()
+        with open(metadata_taskfile, "r", encoding="utf-8") as metadata_file:
+            metadata_lines = metadata_file.readlines()
+    except Exception as e:
+        click.echo(f"Error reading file: {e}")
+
+    # Find gaps in tasks
+    answer_gap = find_gaps_in_tasks(answerlines)
+    metadata_gap = find_gaps_in_tasks(metadata_lines)
+
+    if metadata_gap is None or answer_gap is None:
+        return False
+
+    # Clear the contents of the answer file and metadata content
+    clear_answer = clear_contents(answerlines, answer_gap)
+    clear_metadata_content = clear_contents(metadata_lines, metadata_gap)
+
+    if clear_answer is None or clear_metadata_content is None:
+        return False
+
+    bycodediff = clear_answer.difference(clear_metadata_content)
+    logger.debug(bycodediff)
+
+    return len(bycodediff) == 0
+
+
+def clear_contents(lines: list[str], gap: tuple[int, int]) -> set[str] | None:
+    """
+    Clear the contents of the answer file.
+
+    :param lines: List of lines in the file
+    :param gap: Tuple of start and end of the gap
+    :return: Set of lines in the file
+    """
+    start, end = gap
+
+    logger = Logger()
+    logger.debug(f"Gap found in {gap}")
+
+    # Create list of strings for validation
+    bycodebegin = lines[:start + 1]
+    bycodeend = lines[end :]
+    answer = lines[start + 1: end]
+    bycode = bycodebegin + bycodeend
+
+    # Remove empty lines for comparison
+    for i, line in enumerate(bycode):
+        clean = line.strip()
+        if clean == "" or clean == "\n":
+            bycode.pop(i)
+
+    logger.debug("".join(bycode))
+    logger.debug(f"Text in the gap: \n{"".join(answer)}")
+
+    return set(bycode)
+
+
+def find_gaps_in_tasks(lines: list[str]) -> tuple[int, int] | None:
+    """
+    Find gaps in tasks.
+
+    :param lines: List of lines in the file
+    """
+    # TODO: Find multiple gaps, store tuples into a list
+    gap = None
+    start: int | None = None
+    end: int | None = None
+    for i, line in enumerate(lines):
+        if re.search(r"BYCODEBEGIN", line):
+            start = i
+        if re.search(r"BYCODEEND", line):
+            end = i
+
+    gap = (start, end)
+    if start is None or end is None:
+        return None
+
+    return gap

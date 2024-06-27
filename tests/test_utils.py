@@ -1,7 +1,12 @@
+"""File utility tests."""
+
 import os
 import shutil
 import unittest
-# from src.tidecli.utils import file_handler
+import tests.test_data as testdata
+from pathlib import Path
+from tidecli.utils import file_handler
+
 # from src.tidecli.models.TaskData import TaskData
 # from unittest_prettify.colorize import colorize, GREEN, YELLOW, MAGENTA
 
@@ -300,3 +305,63 @@ test_path = os.path.join(user_home, "Desktop", "Ohjelmointikurssi 1/Demo1/Tehtä
 
 #     def tearDownClass():
 #         shutil.rmtree(os.path.join(user_home, "Desktop", "Ohjelmointikurssi"))
+
+
+# TODO: Refactor/update tests above. Tests below are updated.
+class TestValidateAnswerFile(unittest.TestCase):
+    """
+    Test the validation of answer file.
+
+    Answer file is validated against the current metadata.
+    """
+
+    shutil.os.mkdir(Path("./temp-test"))
+    answercs = Path("./temp-test/answerfilecs.cs")
+    answercs_broken = Path("./temp-test/answerfilecs-broken.cs")
+    answerpy = Path("./temp-test/answerfilepy.py")
+    answerpy_none = Path("./temp-test/answerfilepy-none.py")
+    answercs_metadata = Path("./temp-test/metadatafilecs.cs")
+    answerpy_metadata = Path("./temp-test/metadatafilepy.py")
+
+    def test_validate_answer_file(self):
+        """
+        Validate answer file against metadata.
+
+        Answer file cannot be submitted unless validated.
+        """
+        with open(self.answercs, "x", encoding="utf-8") as file:
+            file.write(testdata.example_task_cs)
+
+        with open(self.answerpy, "x", encoding="utf-8") as file:
+            file.write(testdata.example_task_py)
+
+        with open(self.answercs_metadata, "x", encoding="utf-8") as file:
+            file.write(testdata.example_task_metadata_cs)
+
+        with open(self.answerpy_metadata, "x", encoding="utf-8") as file:
+            file.write(testdata.example_task_metadata_py)
+
+        self.assertTrue(file_handler.validate_answer_file(
+            self.answercs, self.answercs_metadata))
+        self.assertTrue(file_handler.validate_answer_file(
+            self.answerpy, self.answerpy_metadata))
+
+    def test_validate_answer_file_broken(self):
+        """Validate broken answer file against metadata."""
+        with open(self.answercs_broken, "x", encoding="utf-8") as file:
+            file.write(testdata.example_task_broken_cs)
+
+        self.assertFalse(file_handler.validate_answer_file(
+            self.answercs_broken, self.answercs_metadata))
+
+    def test_validate_answer_file_none(self):
+        """Validate answer file with None metadata."""
+        with open(self.answerpy_none, "x", encoding="utf-8") as file:
+            file.write(testdata.example_task_none_py)
+
+        self.assertFalse(file_handler.validate_answer_file(
+            self.answerpy_none, self.answerpy_metadata))
+
+    def tearDownClass():
+        """Remove temporary files."""
+        shutil.rmtree(Path("./temp-test"))

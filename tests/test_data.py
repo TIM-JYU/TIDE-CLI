@@ -138,3 +138,119 @@ submit_task_by_id_tim_test_response = {
     },
     "plugin": None,
 }
+
+example_task_cs = """
+using System;
+
+namespace HelloWorld
+{
+    class Program
+    {
+   
+        static void Main(string[] args)
+        {
+            // BYCODEBEGIN
+
+
+            // Edit an output.
+            Console.Writeline("Hello!");
+
+            Console.Writeline("World!");
+
+            // BYCODEEND
+        }
+    }
+}
+
+"""
+
+example_task_py = """
+class Program:
+
+    @staticmethod
+    def main():
+        # BYCODEBEGIN
+
+        # Edit an output.
+        print("Hello, World!")
+        print("Hello University also!")
+        # BYCODEEND
+if __name__ == "__main__":
+    Program.main()
+
+"""
+
+example_task_metadata_cs = """
+using System;
+
+namespace HelloWorld
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // BYCODEBEGIN
+
+            // Edit an output.
+            Console.Writeline("Hello, World!");
+
+            // BYCODEEND
+        }
+    }
+}
+
+"""
+
+example_task_metadata_py = """
+class Program:
+    @staticmethod
+    def main():
+        # BYCODEBEGIN
+
+        # Edit an output.
+        print("Hello, World!")
+
+        # BYCODEEND
+if __name__ == "__main__":
+    Program.main()
+
+"""
+
+example_task_broken_cs = """
+using System;
+using Jypeli;
+
+namespace HelloWorld
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // BYCODEBEGIN
+
+
+            // Edit an output.
+            Console.Writeline("Hello!");
+
+            Console.Writeline("World!");
+
+            // BYCODEEND
+        }
+    }
+}
+
+"""
+
+example_task_none_py = """
+class Program:
+
+    @staticmethod
+    def main():
+        # Edit an output.
+        print("Hello, World!")
+        print("Hello University also!")
+
+if __name__ == "__main__":
+    Program.main()
+
+"""
