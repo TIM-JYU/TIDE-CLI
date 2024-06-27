@@ -316,12 +316,12 @@ class TestValidateAnswerFile(unittest.TestCase):
     """
 
     shutil.os.mkdir(Path("./temp-test"))
-    answercs = Path("./temp-test/answerfilecs.cs")
-    answercs_broken = Path("./temp-test/answerfilecs-broken.cs")
-    answerpy = Path("./temp-test/answerfilepy.py")
-    answerpy_none = Path("./temp-test/answerfilepy-none.py")
-    answercs_metadata = Path("./temp-test/metadatafilecs.cs")
-    answerpy_metadata = Path("./temp-test/metadatafilepy.py")
+    answercs = testdata.example_task_cs
+    answercs_broken = testdata.example_task_broken_cs
+    answerpy = testdata.example_task_py
+    answerpy_none = testdata.example_task_none_py
+    answercs_metadata = testdata.example_task_metadata_cs
+    answerpy_metadata = testdata.example_task_metadata_py
 
     def test_validate_answer_file(self):
         """
@@ -329,38 +329,42 @@ class TestValidateAnswerFile(unittest.TestCase):
 
         Answer file cannot be submitted unless validated.
         """
-        with open(self.answercs, "x", encoding="utf-8") as file:
-            file.write(testdata.example_task_cs)
-
-        with open(self.answerpy, "x", encoding="utf-8") as file:
-            file.write(testdata.example_task_py)
-
-        with open(self.answercs_metadata, "x", encoding="utf-8") as file:
-            file.write(testdata.example_task_metadata_cs)
-
-        with open(self.answerpy_metadata, "x", encoding="utf-8") as file:
-            file.write(testdata.example_task_metadata_py)
+        answer_bycode, answer_gapcode = file_handler.split_file_contents(
+            self.answercs)
+        metadata_bycode, metadata_gapcode = file_handler.split_file_contents(
+            self.answercs_metadata)
 
         self.assertTrue(file_handler.validate_answer_file(
-            self.answercs, self.answercs_metadata))
+            answer_bycode, metadata_bycode))
+
+        answer_bycode, answer_gapcode = file_handler.split_file_contents(
+            self.answerpy)
+        metadata_bycode, metadata_gapcode = file_handler.split_file_contents(
+            self.answerpy_metadata)
+
         self.assertTrue(file_handler.validate_answer_file(
-            self.answerpy, self.answerpy_metadata))
+            answer_bycode, metadata_bycode))
 
     def test_validate_answer_file_broken(self):
         """Validate broken answer file against metadata."""
-        with open(self.answercs_broken, "x", encoding="utf-8") as file:
-            file.write(testdata.example_task_broken_cs)
+        answer_bycode, answer_gapcode = file_handler.split_file_contents(
+            self.answercs_broken)
+        metadata_bycode, metadata_gapcode = file_handler.split_file_contents(
+            self.answercs_metadata)
 
         self.assertFalse(file_handler.validate_answer_file(
-            self.answercs_broken, self.answercs_metadata))
+            answer_bycode, metadata_bycode))
 
     def test_validate_answer_file_none(self):
         """Validate answer file with None metadata."""
-        with open(self.answerpy_none, "x", encoding="utf-8") as file:
-            file.write(testdata.example_task_none_py)
+        answer_bycode, answer_gapcode = file_handler.split_file_contents(
+            self.answerpy_none)
+        metadata_bycode, metadata_gapcode = file_handler.split_file_contents(
+            self.answerpy_metadata)
 
+        # None cases needs more testing.
         self.assertFalse(file_handler.validate_answer_file(
-            self.answerpy_none, self.answerpy_metadata))
+            answer_bycode, metadata_bycode))
 
     def tearDownClass():
         """Remove temporary files."""

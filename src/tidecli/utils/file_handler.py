@@ -202,6 +202,7 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
     :param file_path: Path to the directory containing the files.
     :return: File data
     """
+    logger = Logger()
     task_files = metadata.task_files
 
     # TODO: find lines where answerfile should not be modified and
@@ -215,8 +216,10 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
     for f1 in task_files:
         for f2 in files_in_dir:
             if f1.file_name == f2.name:
+                logger.debug(
+                    "Validating {0} against metadata content of task.".format(f2.name))
                 with open(f2, "r", encoding="utf-8") as answer_file:
-                    # if not validate_answer_file(f2, f1.content):
+                    # if not validate_answer_file(answer_file, f1.content):
                     #     return []
                     f1.content = answer_file.read()
 
@@ -243,7 +246,32 @@ def get_metadata(metadata_path: Path) -> TaskData:
         raise click.ClickException(f"Error reading metadata: {e}")
 
 
-def validate_answer_file(answerfile: Path, metadata_taskfile: Path) -> bool:
+def split_file_contents(content: str) -> tuple[list[str], list[str]]:
+    """
+    Split file contents to find gaps in tasks.
+
+    :param content: Content of the file
+    """
+    lines = content.splitlines(keepends=True)
+    gap = find_gaps_in_tasks(lines)
+    if gap is None:
+        return [], []
+
+    start, end = gap
+
+    # Create list of strings for validation
+    bycodebegin = lines[:start + 1]
+    bycodeend = lines[end :]
+    gap_content = lines[start + 1: end]
+    bycode = bycodebegin + bycodeend
+
+    logger = Logger()
+    logger.debug(f"Text in the gap: \n{"".join(gap_content)}")
+
+    return bycode, content
+
+
+def validate_answer_file(answer_by: list[str], metadata_by: list[str]) -> bool:
     """
     Validate answer file with the metadata.
 
@@ -256,27 +284,13 @@ def validate_answer_file(answerfile: Path, metadata_taskfile: Path) -> bool:
     :return: True if the file is valid, False if not
     """
     logger = Logger()
-    logger.debug("Validating {0} against {1}".format(answerfile, metadata_taskfile))
-    answerlines = []
-    metadata_lines = []
-    try:
-        with open(answerfile, "r", encoding="utf-8") as answer_file:
-            answerlines = answer_file.readlines()
-        with open(metadata_taskfile, "r", encoding="utf-8") as metadata_file:
-            metadata_lines = metadata_file.readlines()
-    except Exception as e:
-        click.echo(f"Error reading file: {e}")
-
-    # Find gaps in tasks
-    answer_gap = find_gaps_in_tasks(answerlines)
-    metadata_gap = find_gaps_in_tasks(metadata_lines)
-
-    if metadata_gap is None or answer_gap is None:
+    if len(answer_by) == 0 or len(metadata_by) == 0:
+        logger.debug("Both files are empty") 
         return False
 
     # Clear the contents of the answer file and metadata content
-    clear_answer = clear_contents(answerlines, answer_gap)
-    clear_metadata_content = clear_contents(metadata_lines, metadata_gap)
+    clear_answer = clear_contents(answer_by)
+    clear_metadata_content = clear_contents(metadata_by)
 
     if clear_answer is None or clear_metadata_content is None:
         return False
@@ -287,35 +301,24 @@ def validate_answer_file(answerfile: Path, metadata_taskfile: Path) -> bool:
     return len(bycodediff) == 0
 
 
-def clear_contents(lines: list[str], gap: tuple[int, int]) -> set[str] | None:
+def clear_contents(lines_by: list[str]) -> set[str] | None:
     """
     Clear the contents of the answer file.
 
     :param lines: List of lines in the file
-    :param gap: Tuple of start and end of the gap
     :return: Set of lines in the file
     """
-    start, end = gap
-
     logger = Logger()
-    logger.debug(f"Gap found in {gap}")
-
-    # Create list of strings for validation
-    bycodebegin = lines[:start + 1]
-    bycodeend = lines[end :]
-    answer = lines[start + 1: end]
-    bycode = bycodebegin + bycodeend
 
     # Remove empty lines for comparison
-    for i, line in enumerate(bycode):
+    for i, line in enumerate(lines_by):
         clean = line.strip()
         if clean == "" or clean == "\n":
-            bycode.pop(i)
+            lines_by.pop(i)
 
-    logger.debug("".join(bycode))
-    logger.debug(f"Text in the gap: \n{"".join(answer)}")
+    logger.debug("".join(lines_by))
 
-    return set(bycode)
+    return set(lines_by)
 
 
 def find_gaps_in_tasks(lines: list[str]) -> tuple[int, int] | None:
