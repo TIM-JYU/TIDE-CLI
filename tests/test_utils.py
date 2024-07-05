@@ -369,3 +369,41 @@ class TestValidateAnswerFile(unittest.TestCase):
     def tearDownClass():
         """Remove temporary files."""
         shutil.rmtree(Path("./temp-test"))
+
+class TestResetNoneditableSections(unittest.TestCase):
+    """
+    Test reseting the sections outside of editable areas.
+    """
+    
+    def test_base_case(self):
+        """A normal case where both strings are valid"""
+        original = """
+        const a = 3
+        //BYCODEBEGIN
+        your code here
+        //BYCODEEND
+        console.log(a + b)
+        """
+
+        answer = """
+        const a = 5
+        koira haukkuu
+        //BYCODEBEGIN
+        b = 0
+        //BYCODEEND
+        kissa istuu
+        console.log(a)
+        """
+
+        expected = """
+        const a = 3
+        //BYCODEBEGIN
+        b = 0
+        //BYCODEEND
+        console.log(a + b)
+        """
+
+        result = file_handler.answer_with_original_noneditable_sections(answer, original)
+
+        self.assertEqual(result, expected)
+

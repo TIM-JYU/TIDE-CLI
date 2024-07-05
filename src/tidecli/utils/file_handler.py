@@ -8,6 +8,7 @@ import re
 import json
 import click.exceptions
 from pathlib import Path
+import itertools
 
 from tidecli.models.task_data import TaskData, TaskFile
 from tidecli.utils.error_logger import Logger
@@ -266,7 +267,7 @@ def split_file_contents(content: str) -> tuple[list[str], list[str]]:
     bycode = bycodebegin + bycodeend
 
     logger = Logger()
-    logger.debug(f"Text in the gap: \n{"".join(gap_content)}")
+    # logger.debug(f"Text in the gap: \n{"".join(gap_content)}")
 
     return bycode, content
 
@@ -342,3 +343,23 @@ def find_gaps_in_tasks(lines: list[str]) -> tuple[int, int] | None:
         return None
 
     return gap
+
+def answer_with_original_noneditable_sections(answer: str, original: str) -> str:
+    answer_lines = re.split(r"\r?\n", answer)
+    original_lines = re.split(r"\r?\n", original)
+
+    answer_gaps = find_gaps_in_tasks(answer_lines)
+    original_gaps = find_gaps_in_tasks(original_lines)
+    
+    if answer_gaps == None or original_gaps == None:
+        # TODO! add error handling
+        return answer
+
+    combined_lines = itertools.chain( original_lines[:original_gaps[0] + 1],
+                               answer_lines[answer_gaps[0] + 1:answer_gaps[1]],
+                               original_lines[original_gaps[1]:]
+                               ) 
+
+    return "\n".join(combined_lines)
+
+    
