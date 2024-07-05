@@ -159,7 +159,10 @@ def reset(file_path_string: str):
     file_contents = file_path.read_text()
 
     metadata = get_metadata(file_path.parent)
-    task_file_contents = next(x.content for x in metadata.task_files if x.file_name == file_path.name)
+    task_file_contents = next((x.content for x in metadata.task_files if x.file_name == file_path.name), None)
+ 
+    if task_file_contents == None:
+        raise click.ClickException("File is not part of this task")
     
     combined_contents = answer_with_original_noneditable_sections(file_contents, task_file_contents)
     
