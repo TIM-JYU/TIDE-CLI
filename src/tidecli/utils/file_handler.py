@@ -16,6 +16,9 @@ from tidecli.utils.error_logger import Logger
 METADATA_NAME = ".timdata"
 """File to store metadata in task folder."""
 
+# Search strings for finding the beginning and end of the task content
+BEGIN_MSG_SEARCH_STRING = r"Write your code below this line"
+END_MSG_SEARCH_STRING = r"Write your code above this line"
 
 def create_tasks(
     tasks: list[TaskData], overwrite: bool, user_path: str | None = None
@@ -206,23 +209,28 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
     logger = Logger()
     task_files = metadata.task_files
 
-    # TODO: find lines where answerfile should not be modified and
-    # compare them against file contents from metadata.
-    # Empty lines should be ignored.
-
     files_in_dir = [
         f for f in file_path.iterdir() if f.is_file() and not f.suffix == METADATA_NAME
     ]
-
     for f1 in task_files:
         for f2 in files_in_dir:
             if f1.file_name == f2.name:
                 logger.debug(
                     "Validating {0} against metadata content of task.".format(f2.name))
                 with open(f2, "r", encoding="utf-8") as answer_file:
-                    # if not validate_answer_file(answer_file, f1.content):
-                    #     return []
-                    f1.content = answer_file.read()
+                    answer_bycode, answer_gapcode = split_file_contents(
+                        answer_file.read()
+                    )
+                    metadata_bycode, metadata_gapcode = split_file_contents(
+                        f1.content
+                    )
+                    if not validate_answer_file(answer_bycode, metadata_bycode):
+                        # TODO: tarvitaan lisää testitapauksia,
+                        # validointi antaa välillä Falsea, vaikka filu olisi ok
+                        logger.info("Answer file is content is not valid.")
+                        continue
+                    breakpoint()
+                    f1.content = "\n".join(answer_gapcode)
 
     return task_files
 
@@ -253,7 +261,7 @@ def split_file_contents(content: str) -> tuple[list[str], list[str]]:
 
     :param content: Content of the file
     """
-    lines = content.splitlines(keepends=True)
+    lines = re.split(r"\r?\n", content)
     gap = find_gaps_in_tasks(lines)
     if gap is None:
         return [], []
@@ -267,9 +275,10 @@ def split_file_contents(content: str) -> tuple[list[str], list[str]]:
     bycode = bycodebegin + bycodeend
 
     logger = Logger()
-    # logger.debug(f"Text in the gap: \n{"".join(gap_content)}")
+    log_text = "\n".join(gap_content)
+    logger.debug(f"Text in the gap: \n{0}".format(log_text))
 
-    return bycode, content
+    return bycode, gap_content
 
 
 def validate_answer_file(answer_by: list[str], metadata_by: list[str]) -> bool:
@@ -278,15 +287,18 @@ def validate_answer_file(answer_by: list[str], metadata_by: list[str]) -> bool:
 
     No other lines in the file should be modified
     than the task content lines. The task content lines are marked with
-    //BYCODEBEGIN and //BYCODEEND comments.
+    comments/messages
 
     :param answerfile: Path to the answer file
     :param metadata_taskfile: Path to the metadata task file
     :return: True if the file is valid, False if not
     """
     logger = Logger()
+    # TODO: Korjataan. Validoinnin pitäisi myös päästää läpi tehtävä,
+    # joka ei ole aukkotehtävätyyppinen. Käytännössä tarvittaisiin joku
+    # järkevämpi tarkistus, sisältääkö filu aukon määrittävät kommentit vai ei.
     if len(answer_by) == 0 or len(metadata_by) == 0:
-        logger.debug("Both files are empty") 
+        logger.debug("Both files are empty")
         return False
 
     # Clear the contents of the answer file and metadata content
@@ -317,7 +329,7 @@ def clear_contents(lines_by: list[str]) -> set[str] | None:
         if clean == "" or clean == "\n":
             lines_by.pop(i)
 
-    logger.debug("".join(lines_by))
+    logger.debug("\n".join(lines_by))
 
     return set(lines_by)
 
@@ -332,10 +344,11 @@ def find_gaps_in_tasks(lines: list[str]) -> tuple[int, int] | None:
     gap = None
     start: int | None = None
     end: int | None = None
+    
     for i, line in enumerate(lines):
-        if re.search(r"BYCODEBEGIN", line):
+        if re.search(BEGIN_MSG_SEARCH_STRING, line):
             start = i
-        if re.search(r"BYCODEEND", line):
+        if re.search(END_MSG_SEARCH_STRING, line):
             end = i
 
     gap = (start, end)
@@ -344,22 +357,27 @@ def find_gaps_in_tasks(lines: list[str]) -> tuple[int, int] | None:
 
     return gap
 
+
 def answer_with_original_noneditable_sections(answer: str, original: str) -> str:
+    """
+    Combine answer with original file, keeping non-editable sections from original.
+
+    :param answer: Answer file content
+    :param original: Original file content
+    """
     answer_lines = re.split(r"\r?\n", answer)
     original_lines = re.split(r"\r?\n", original)
 
     answer_gaps = find_gaps_in_tasks(answer_lines)
     original_gaps = find_gaps_in_tasks(original_lines)
-    
-    if answer_gaps == None or original_gaps == None:
+
+    if answer_gaps is None or original_gaps is None:
         # TODO! add error handling
         return answer
 
-    combined_lines = itertools.chain( original_lines[:original_gaps[0] + 1],
-                               answer_lines[answer_gaps[0] + 1:answer_gaps[1]],
-                               original_lines[original_gaps[1]:]
-                               ) 
+    combined_lines = itertools.chain(original_lines[:original_gaps[0] + 1],
+                                     answer_lines[answer_gaps[0] + 1:answer_gaps[1]],
+                                     original_lines[original_gaps[1]:]
+                                     )
 
     return "\n".join(combined_lines)
-
-    

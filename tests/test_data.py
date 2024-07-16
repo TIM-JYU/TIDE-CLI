@@ -149,7 +149,7 @@ namespace HelloWorld
    
         static void Main(string[] args)
         {
-            // BYCODEBEGIN
+            // --- Write your code below this line. ---
 
 
             // Edit an output.
@@ -157,7 +157,7 @@ namespace HelloWorld
 
             Console.Writeline("World!");
 
-            // BYCODEEND
+            // --- Write your code above this line. ---
         }
     }
 }
@@ -169,12 +169,12 @@ class Program:
 
     @staticmethod
     def main():
-        # BYCODEBEGIN
+        # --- Write your code below this line. ---
 
         # Edit an output.
         print("Hello, World!")
         print("Hello University also!")
-        # BYCODEEND
+        # --- Write your code above this line. ---
 if __name__ == "__main__":
     Program.main()
 
@@ -189,12 +189,12 @@ namespace HelloWorld
     {
         static void Main(string[] args)
         {
-            // BYCODEBEGIN
+            // --- Write your code below this line. ---
 
             // Edit an output.
             Console.Writeline("Hello, World!");
 
-            // BYCODEEND
+            // --- Write your code above this line. ---
         }
     }
 }
@@ -205,12 +205,12 @@ example_task_metadata_py = """
 class Program:
     @staticmethod
     def main():
-        # BYCODEBEGIN
+        # --- Write your code below this line. ---
 
         # Edit an output.
         print("Hello, World!")
 
-        # BYCODEEND
+        # --- Write your code above this line. ---
 if __name__ == "__main__":
     Program.main()
 
@@ -226,7 +226,7 @@ namespace HelloWorld
     {
         static void Main(string[] args)
         {
-            // BYCODEBEGIN
+            // --- Write your code below this line. ---
 
 
             // Edit an output.
@@ -234,7 +234,7 @@ namespace HelloWorld
 
             Console.Writeline("World!");
 
-            // BYCODEEND
+            // --- Write your code above this line. ---
         }
     }
 }

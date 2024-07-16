@@ -370,36 +370,35 @@ class TestValidateAnswerFile(unittest.TestCase):
         """Remove temporary files."""
         shutil.rmtree(Path("./temp-test"))
 
+
 class TestResetNoneditableSections(unittest.TestCase):
-    """
-    Test reseting the sections outside of editable areas.
-    """
-    
+    """Test reseting the sections outside of editable areas."""
+
     def test_base_case(self):
-        """A normal case where both strings are valid"""
+        """A normal case where both strings are valid."""
         original = """
         const a = 3
-        //BYCODEBEGIN
+        //--- Write your code below this line. ---
         your code here
-        //BYCODEEND
+        //--- Write your code above this line. ---
         console.log(a + b)
         """
 
         answer = """
         const a = 5
         koira haukkuu
-        //BYCODEBEGIN
+        //--- Write your code below this line. ---
         b = 0
-        //BYCODEEND
+        //--- Write your code above this line. ---
         kissa istuu
         console.log(a)
         """
 
         expected = """
         const a = 3
-        //BYCODEBEGIN
+        //--- Write your code below this line. ---
         b = 0
-        //BYCODEEND
+        //--- Write your code above this line. ---
         console.log(a + b)
         """
 
