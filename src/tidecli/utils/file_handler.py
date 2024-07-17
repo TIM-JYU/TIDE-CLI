@@ -10,7 +10,7 @@ import click.exceptions
 from pathlib import Path
 import itertools
 
-from tidecli.models.task_data import TaskData, TaskFile
+from tidecli.models.task_data import SupplementaryFile, TaskData, TaskFile
 from tidecli.utils.error_logger import Logger
 
 METADATA_NAME = ".timdata"
@@ -60,6 +60,7 @@ def combine_tasks(tasks: list[TaskData]) -> list[TaskData]:
                 doc_id=task_list[0].doc_id,
                 ide_task_id=ide_task_id,
                 task_files=[f for t in task_list for f in t.task_files],
+                supplementary_files=[f for t in task_list for f in t.supplementary_files],
                 stem=task_list[0].stem,
                 header=task_list[0].header,
             )
@@ -98,6 +99,9 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
     saved = save_file(
         task_files=task.task_files, save_path=user_folder, overwrite=overwrite
     )
+ 
+    if task.supplementary_files is not None:
+        supplementary_saved = save_file(task_files=task.supplementary_files, save_path=user_folder, overwrite=overwrite)
 
     if not saved:
         return False
@@ -129,7 +133,7 @@ def add_suffix(file_name: str, file_type: str) -> str:
     return file_name
 
 
-def save_file(task_files: list[TaskFile], save_path: Path, overwrite=False) -> bool:
+def save_file(task_files: list[TaskFile] | list[SupplementaryFile], save_path: Path, overwrite=False) -> bool:
     """
     Create files of tasks in the given path.
 
