@@ -24,6 +24,7 @@ from tidecli.api.routes import (
 from tidecli.models.submit_data import SubmitData
 from tidecli.models.task_data import TaskData
 from tidecli.utils.file_handler import (
+    answer_with_original_noneditable_sections,
     create_task,
     get_task_file_data,
     get_metadata,
@@ -49,7 +50,6 @@ def login(jsondata: bool) -> None:
 
     Functionality: Opens a browser window for the user to log in.
     """
-
     if jsondata:
         click.echo(
             json.dumps(login_details(jsondata=True), ensure_ascii=False, indent=4)
@@ -92,6 +92,8 @@ def courses(jsondata: bool) -> None:
 def task() -> None:
     """
     Task related commands.
+
+    This command is used with subcommands.
     """
     pass
 
@@ -142,6 +144,29 @@ def create(demo_path: str, ide_task_id: str, all: bool, force: bool, dir: str) -
 
     else:
         click.echo("Please provide either --all or an ide_task_id.")
+
+
+@task.command()
+@click.argument("file_path_string", type=str, required=True)
+def reset(file_path_string: str):
+    """
+    Enter the path of the task file to reset.
+    """
+    file_path = Path(file_path_string)
+    if not file_path.exists() or not file_path.is_file():
+        raise click.ClickException("Invalid path.")
+
+    file_contents = file_path.read_text()
+
+    metadata = get_metadata(file_path.parent)
+    task_file_contents = next((x.content for x in metadata.task_files if x.file_name == file_path.name), None)
+ 
+    if task_file_contents == None:
+        raise click.ClickException("File is not part of this task")
+    
+    combined_contents = answer_with_original_noneditable_sections(file_contents, task_file_contents)
+    
+    file_path.write_text(combined_contents)
 
 
 @tim_ide.command()

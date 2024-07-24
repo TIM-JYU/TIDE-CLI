@@ -45,6 +45,9 @@ class TaskFile(BaseModel):
             "user_args": self.user_args,
         }
 
+class SupplementaryFile(BaseModel):
+    file_name: str
+    content: str
 
 _task_type_split_re = re.compile(r"[/,; ]")
 
@@ -77,6 +80,9 @@ class TaskData(BaseModel):
 
     task_files: list[TaskFile]
     """List of task files."""
+
+    supplementary_files: list[SupplementaryFile] = []
+    """List of supplemental files."""
 
     stem: str | None = None
     """Stem of the task, may containg a short instructions."""

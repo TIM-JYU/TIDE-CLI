@@ -1,7 +1,12 @@
+"""File utility tests."""
+
 import os
 import shutil
 import unittest
-# from src.tidecli.utils import file_handler
+import tests.test_data as testdata
+from pathlib import Path
+from tidecli.utils import file_handler
+
 # from src.tidecli.models.TaskData import TaskData
 # from unittest_prettify.colorize import colorize, GREEN, YELLOW, MAGENTA
 
@@ -300,3 +305,104 @@ test_path = os.path.join(user_home, "Desktop", "Ohjelmointikurssi 1/Demo1/Tehtä
 
 #     def tearDownClass():
 #         shutil.rmtree(os.path.join(user_home, "Desktop", "Ohjelmointikurssi"))
+
+
+# TODO: Refactor/update tests above. Tests below are updated.
+class TestValidateAnswerFile(unittest.TestCase):
+    """
+    Test the validation of answer file.
+
+    Answer file is validated against the current metadata.
+    """
+
+    shutil.os.mkdir(Path("./temp-test"))
+    answercs = testdata.example_task_cs
+    answercs_broken = testdata.example_task_broken_cs
+    answerpy = testdata.example_task_py
+    answerpy_none = testdata.example_task_none_py
+    answercs_metadata = testdata.example_task_metadata_cs
+    answerpy_metadata = testdata.example_task_metadata_py
+
+    def test_validate_answer_file(self):
+        """
+        Validate answer file against metadata.
+
+        Answer file cannot be submitted unless validated.
+        """
+        answer_bycode, answer_gapcode = file_handler.split_file_contents(
+            self.answercs)
+        metadata_bycode, metadata_gapcode = file_handler.split_file_contents(
+            self.answercs_metadata)
+
+        self.assertTrue(file_handler.validate_answer_file(
+            answer_bycode, metadata_bycode))
+
+        answer_bycode, answer_gapcode = file_handler.split_file_contents(
+            self.answerpy)
+        metadata_bycode, metadata_gapcode = file_handler.split_file_contents(
+            self.answerpy_metadata)
+
+        self.assertTrue(file_handler.validate_answer_file(
+            answer_bycode, metadata_bycode))
+
+    def test_validate_answer_file_broken(self):
+        """Validate broken answer file against metadata."""
+        answer_bycode, answer_gapcode = file_handler.split_file_contents(
+            self.answercs_broken)
+        metadata_bycode, metadata_gapcode = file_handler.split_file_contents(
+            self.answercs_metadata)
+
+        self.assertFalse(file_handler.validate_answer_file(
+            answer_bycode, metadata_bycode))
+
+    def test_validate_answer_file_none(self):
+        """Validate answer file with None metadata."""
+        answer_bycode, answer_gapcode = file_handler.split_file_contents(
+            self.answerpy_none)
+        metadata_bycode, metadata_gapcode = file_handler.split_file_contents(
+            self.answerpy_metadata)
+
+        # None cases needs more testing.
+        self.assertFalse(file_handler.validate_answer_file(
+            answer_bycode, metadata_bycode))
+
+    def tearDownClass():
+        """Remove temporary files."""
+        shutil.rmtree(Path("./temp-test"))
+
+
+class TestResetNoneditableSections(unittest.TestCase):
+    """Test reseting the sections outside of editable areas."""
+
+    def test_base_case(self):
+        """A normal case where both strings are valid."""
+        original = """
+        const a = 3
+        //--- Write your code below this line. ---
+        your code here
+        //--- Write your code above this line. ---
+        console.log(a + b)
+        """
+
+        answer = """
+        const a = 5
+        koira haukkuu
+        //--- Write your code below this line. ---
+        b = 0
+        //--- Write your code above this line. ---
+        kissa istuu
+        console.log(a)
+        """
+
+        expected = """
+        const a = 3
+        //--- Write your code below this line. ---
+        b = 0
+        //--- Write your code above this line. ---
+        console.log(a + b)
+        """
+
+        result = file_handler.answer_with_original_noneditable_sections(answer, original)
+
+        self.assertEqual(result, expected)
+

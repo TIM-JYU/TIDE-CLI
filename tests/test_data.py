@@ -138,3 +138,119 @@ submit_task_by_id_tim_test_response = {
     },
     "plugin": None,
 }
+
+example_task_cs = """
+using System;
+
+namespace HelloWorld
+{
+    class Program
+    {
+   
+        static void Main(string[] args)
+        {
+            // --- Write your code below this line. ---
+
+
+            // Edit an output.
+            Console.Writeline("Hello!");
+
+            Console.Writeline("World!");
+
+            // --- Write your code above this line. ---
+        }
+    }
+}
+
+"""
+
+example_task_py = """
+class Program:
+
+    @staticmethod
+    def main():
+        # --- Write your code below this line. ---
+
+        # Edit an output.
+        print("Hello, World!")
+        print("Hello University also!")
+        # --- Write your code above this line. ---
+if __name__ == "__main__":
+    Program.main()
+
+"""
+
+example_task_metadata_cs = """
+using System;
+
+namespace HelloWorld
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // --- Write your code below this line. ---
+
+            // Edit an output.
+            Console.Writeline("Hello, World!");
+
+            // --- Write your code above this line. ---
+        }
+    }
+}
+
+"""
+
+example_task_metadata_py = """
+class Program:
+    @staticmethod
+    def main():
+        # --- Write your code below this line. ---
+
+        # Edit an output.
+        print("Hello, World!")
+
+        # --- Write your code above this line. ---
+if __name__ == "__main__":
+    Program.main()
+
+"""
+
+example_task_broken_cs = """
+using System;
+using Jypeli;
+
+namespace HelloWorld
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // --- Write your code below this line. ---
+
+
+            // Edit an output.
+            Console.Writeline("Hello!");
+
+            Console.Writeline("World!");
+
+            // --- Write your code above this line. ---
+        }
+    }
+}
+
+"""
+
+example_task_none_py = """
+class Program:
+
+    @staticmethod
+    def main():
+        # Edit an output.
+        print("Hello, World!")
+        print("Hello University also!")
+
+if __name__ == "__main__":
+    Program.main()
+
+"""
