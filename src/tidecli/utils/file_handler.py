@@ -222,19 +222,25 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
                 logger.debug(
                     "Validating {0} against metadata content of task.".format(f2.name))
                 with open(f2, "r", encoding="utf-8") as answer_file:
+                    answer_content = answer_file.read()
                     answer_bycode, answer_gapcode = split_file_contents(
-                        answer_file.read()
-                    )
+                        answer_content)
                     metadata_bycode, metadata_gapcode = split_file_contents(
                         f1.content
                     )
-                    if not validate_answer_file(answer_bycode, metadata_bycode):
-                        # TODO: tarvitaan lisää testitapauksia,
-                        # validointi antaa välillä Falsea, vaikka filu olisi ok
-                        logger.info("Answer file is content is not valid.")
+
+                    if len(metadata_bycode) == 0:
+                        f1.content = answer_content
+                        logger.info("Normal exercise, no gap found.")
                         continue
-                    breakpoint()
-                    f1.content = "\n".join(answer_gapcode)
+
+                    if validate_answer_file(answer_bycode, metadata_bycode):
+                        # TODO: tarvitaan lisää testitapauksia,
+                        logger.info("Gap-type exercise answer file is valid.")
+                        f1.content = "\n".join(answer_gapcode)
+                    else:
+                        logger.debug("Gap-type exercise answer not valid.")
+                        return []
 
     return task_files
 
@@ -298,11 +304,9 @@ def validate_answer_file(answer_by: list[str], metadata_by: list[str]) -> bool:
     :return: True if the file is valid, False if not
     """
     logger = Logger()
-    # TODO: Korjataan. Validoinnin pitäisi myös päästää läpi tehtävä,
-    # joka ei ole aukkotehtävätyyppinen. Käytännössä tarvittaisiin joku
-    # järkevämpi tarkistus, sisältääkö filu aukon määrittävät kommentit vai ei.
-    if len(answer_by) == 0 or len(metadata_by) == 0:
-        logger.debug("Both files are empty")
+
+    if len(answer_by) == 0 and len(metadata_by) == 0:
+        logger.debug("Both files are empty.")
         return False
 
     # Clear the contents of the answer file and metadata content
@@ -348,7 +352,7 @@ def find_gaps_in_tasks(lines: list[str]) -> tuple[int, int] | None:
     gap = None
     start: int | None = None
     end: int | None = None
-    
+
     for i, line in enumerate(lines):
         if re.search(BEGIN_MSG_SEARCH_STRING, line):
             start = i
