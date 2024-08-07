@@ -20,6 +20,7 @@ METADATA_NAME = ".timdata"
 BEGIN_MSG_SEARCH_STRING = r"Write your code below this line"
 END_MSG_SEARCH_STRING = r"Write your code above this line"
 
+
 def create_tasks(
     tasks: list[TaskData], overwrite: bool, user_path: str | None = None
 ) -> None:
@@ -63,7 +64,9 @@ def combine_tasks(tasks: list[TaskData]) -> list[TaskData]:
                 doc_id=task_list[0].doc_id,
                 ide_task_id=ide_task_id,
                 task_files=[f for t in task_list for f in t.task_files],
-                supplementary_files=[f for t in task_list for f in t.supplementary_files],
+                supplementary_files=[
+                    f for t in task_list for f in t.supplementary_files
+                ],
                 stem=task_list[0].stem,
                 header=task_list[0].header,
             )
@@ -102,9 +105,13 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
     saved = save_file(
         task_files=task.task_files, save_path=user_folder, overwrite=overwrite
     )
- 
+
     if task.supplementary_files is not None:
-        supplementary_saved = save_file(task_files=task.supplementary_files, save_path=user_folder, overwrite=overwrite)
+        supplementary_saved = save_file(
+            task_files=task.supplementary_files,
+            save_path=user_folder,
+            overwrite=overwrite,
+        )
 
     if not saved:
         return False
@@ -136,7 +143,11 @@ def add_suffix(file_name: str, file_type: str) -> str:
     return file_name
 
 
-def save_file(task_files: list[TaskFile] | list[SupplementaryFile], save_path: Path, overwrite=False) -> bool:
+def save_file(
+    task_files: list[TaskFile] | list[SupplementaryFile],
+    save_path: Path,
+    overwrite=False,
+) -> bool:
     """
     Create files of tasks in the given path.
 
@@ -220,14 +231,12 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
         for f2 in files_in_dir:
             if f1.file_name == f2.name:
                 logger.debug(
-                    "Validating {0} against metadata content of task.".format(f2.name))
+                    "Validating {0} against metadata content of task.".format(f2.name)
+                )
                 with open(f2, "r", encoding="utf-8") as answer_file:
                     answer_content = answer_file.read()
-                    answer_bycode, answer_gapcode = split_file_contents(
-                        answer_content)
-                    metadata_bycode, metadata_gapcode = split_file_contents(
-                        f1.content
-                    )
+                    answer_bycode, answer_gapcode = split_file_contents(answer_content)
+                    metadata_bycode, metadata_gapcode = split_file_contents(f1.content)
 
                     if len(metadata_bycode) == 0:
                         f1.content = answer_content
@@ -279,9 +288,9 @@ def split_file_contents(content: str) -> tuple[list[str], list[str]]:
     start, end = gap
 
     # Create list of strings for validation
-    bycodebegin = lines[:start + 1]
-    bycodeend = lines[end :]
-    gap_content = lines[start + 1: end]
+    bycodebegin = lines[: start + 1]
+    bycodeend = lines[end:]
+    gap_content = lines[start + 1 : end]
     bycode = bycodebegin + bycodeend
 
     logger = Logger()
@@ -383,9 +392,10 @@ def answer_with_original_noneditable_sections(answer: str, original: str) -> str
         # TODO! add error handling
         return answer
 
-    combined_lines = itertools.chain(original_lines[:original_gaps[0] + 1],
-                                     answer_lines[answer_gaps[0] + 1:answer_gaps[1]],
-                                     original_lines[original_gaps[1]:]
-                                     )
+    combined_lines = itertools.chain(
+        original_lines[: original_gaps[0] + 1],
+        answer_lines[answer_gaps[0] + 1 : answer_gaps[1]],
+        original_lines[original_gaps[1] :],
+    )
 
     return "\n".join(combined_lines)
