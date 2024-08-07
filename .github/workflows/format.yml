@@ -34,4 +34,4 @@ jobs:
           poetry env use "${{ env.PYTHON_VERSION }}"
           poetry install --only=dev
       - name: Run format
-        run: .venv/bin/black --check .
+        run: .venv/bin/black --check src/tidecli
