@@ -31,7 +31,8 @@ jobs:
           cache: poetry
       - name: Install dependencies
         run: |
+          cd src/tidecli
           poetry env use "${{ env.PYTHON_VERSION }}"
           poetry install --only=dev
       - name: Run format
-        run: .venv/bin/black --check src/tidecli
+        run: .venv/bin/black --check .
