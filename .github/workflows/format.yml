@@ -23,7 +23,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install Poetry
-        run: pipx install poetry
+        run: |
+          cd src/tidecli
+          pipx install poetry
       - name: Setup Python
         uses: actions/setup-python@v3
         with:
@@ -31,7 +33,6 @@ jobs:
           cache: poetry
       - name: Install dependencies
         run: |
-          cd src/tidecli
           poetry env use "${{ env.PYTHON_VERSION }}"
           poetry install --only=dev
       - name: Run format
