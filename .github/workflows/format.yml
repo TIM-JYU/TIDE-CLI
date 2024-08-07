@@ -23,9 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install Poetry
-        run: |
-          cd src/tidecli
-          pipx install poetry
+        run: pipx install poetry
       - name: Setup Python
         uses: actions/setup-python@v3
         with:
