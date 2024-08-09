@@ -61,10 +61,9 @@ jobs:
           docker info
           docker compose --version
       - name: Clone TIM
-        run: git clone https://github.com/TIM-JYU/TIM.git
+        run: git clone https://github.com/TIM-JYU/TIM.git .
       - name: Set up
         run: |
-          cd ./TIM/
           ./tim setup --no-interactive --no-install --profile test
       - name: Download images
         run: ./tim dc pull --quiet
