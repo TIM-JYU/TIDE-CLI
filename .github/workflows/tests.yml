@@ -61,19 +61,23 @@ jobs:
           docker info
           docker compose --version
       - name: Clone TIM
-        run: git clone https://github.com/TIM-JYU/TIM.git .
+        run: git clone https://github.com/TIM-JYU/TIM.git
       - name: Set up
-        run: |
-          ./tim setup --no-interactive --no-install --profile test
+        working-directory: ./TIM
+        run: ./tim setup --no-interactive --no-install --profile test
       - name: Download images
+        working-directory: ./TIM
         run: ./tim dc pull --quiet
       - name: Install dependencies
         if: "${{ matrix.test_module == 'browser' || matrix.test_module == 'server'  }}"
+        working-directory: ./TIM
         run: ./tim npmi
       - name: Compile JS
         if: "${{ matrix.test_module == 'browser' || matrix.test_module == 'server'  }}"
+        working-directory: ./TIM
         run: ./tim js --target ${{ matrix.test_module }}
       - name: Install TIM Rust library
+        working-directory: ./TIM
         run: ./tim rust
       - name: Run tests
         run: echo ONLY CLI TESTS WILL BE RUN HERE
