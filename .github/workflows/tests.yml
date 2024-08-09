@@ -64,8 +64,8 @@ jobs:
         run: git clone https://github.com/TIM-JYU/TIM.git
       - name: Set up
         run: |
-          ./tim setup --no-interactive --no-install --profile test
           cd ./TIM/
+          ./tim setup --no-interactive --no-install --profile test
       - name: Download images
         run: ./tim dc pull --quiet
       - name: Install dependencies
