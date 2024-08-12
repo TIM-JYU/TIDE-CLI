@@ -79,8 +79,10 @@ jobs:
       - name: Install TIM Rust library
         working-directory: ./TIM
         run: ./tim rust
+      - name Install timsync
+        run: cargo install --git https://github.com/JYU-DI/timsync.git
       - name: Init test data
-        run: cargo --version
+        run: timsync help
       - name: Run tests
         run: echo ONLY CLI TESTS WILL BE RUN HERE
         timeout-minutes: 40
