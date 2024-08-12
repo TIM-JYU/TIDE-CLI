@@ -79,6 +79,8 @@ jobs:
       - name: Install TIM Rust library
         working-directory: ./TIM
         run: ./tim rust
+      - name: Init test data
+        run: cargo --version
       - name: Run tests
         run: echo ONLY CLI TESTS WILL BE RUN HERE
         timeout-minutes: 40
