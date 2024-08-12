@@ -79,7 +79,7 @@ jobs:
       - name: Install TIM Rust library
         working-directory: ./TIM
         run: ./tim rust
-      - name Install timsync
+      - name: Install timsync
         run: cargo install --git https://github.com/JYU-DI/timsync.git
       - name: Init test data
         run: timsync help
