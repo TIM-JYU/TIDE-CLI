@@ -98,10 +98,10 @@ def task() -> None:
     pass
 
 
-@task.command()
+@task.command(name="list")
 @click.option("--json", "-j", "jsondata", is_flag=True, default=False)
 @click.argument("demo_path", type=str, required=True)
-def list(demo_path: str, jsondata: bool) -> None:
+def list_tasks(demo_path: str, jsondata: bool) -> None:
     """
     Fetch tasks by doc path.
 
