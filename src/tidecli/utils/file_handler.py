@@ -106,8 +106,8 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
         task_files=task.task_files, save_path=user_folder, overwrite=overwrite
     )
 
-    if task.supplementary_files is not None:
-        supplementary_saved = save_file(
+    if len(task.supplementary_files) != 0 :
+        save_file(
             task_files=task.supplementary_files,
             save_path=user_folder,
             overwrite=overwrite,
@@ -325,6 +325,10 @@ def validate_answer_file(answer_by: list[str], metadata_by: list[str]) -> bool:
     if clear_answer is None or clear_metadata_content is None:
         return False
 
+    if len(clear_answer) != len(clear_metadata_content):
+        return False
+
+    # Difference helps, when length of the contents are the same.
     bycodediff = clear_answer.difference(clear_metadata_content)
     logger.debug(bycodediff)
 
