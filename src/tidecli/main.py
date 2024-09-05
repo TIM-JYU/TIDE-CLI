@@ -10,6 +10,7 @@ __license__ = "MIT"
 __date__ = "11.5.2024"
 
 import json
+from os import name
 from pathlib import Path
 from typing import List
 from tidecli.utils import login_handler
@@ -18,6 +19,7 @@ import click
 
 from tidecli.api.routes import (
     get_ide_courses,
+    get_task_points,
     get_tasks_by_doc,
     get_task_by_ide_task_id,
     submit_task,
@@ -130,6 +132,16 @@ def list_tasks(demo_path: str, jsondata: bool) -> None:
         # Create JSON object list
         tasks_json = [t.to_json() for t in tasks]
         click.echo(json.dumps(tasks_json, ensure_ascii=False, indent=4))
+
+
+
+@task.command(name="points")
+@click.option("--json", "-j", "json_format", is_flag=True, default=False)
+@click.argument("doc_path", type=str, required=True)
+@click.argument("ide_task_id", type=str, required=True)
+def points(doc_path: str, ide_task_id: str, json_format: bool):
+    points = get_task_points(ide_task_id, doc_path)
+    click.echo(points)
 
 
 @task.command()

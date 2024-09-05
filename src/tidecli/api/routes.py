@@ -24,6 +24,7 @@ from tidecli.tide_config import (
     IDE_COURSES_ENDPOINT,
     TASK_BY_IDE_TASK_ID_ENDPOINT,
     SUBMIT_TASK_ENDPOINT,
+    TASK_POINTS_ENDPOINT,
     TASKS_BY_DOC_ENDPOINT,
 )
 from tidecli.utils.handle_token import get_signed_in_user
@@ -197,3 +198,8 @@ def submit_task(
         raise click.ClickException("No feedback received")
 
     return TimFeedback(**feedback)
+
+
+def get_task_points(ide_task_id: str, doc_path: str):
+    res = make_request(endpoint=TASK_POINTS_ENDPOINT, method="GET", params={"ide_task_id": ide_task_id, "doc_path": doc_path})
+    return res
