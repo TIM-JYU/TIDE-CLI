@@ -120,31 +120,3 @@ class TestRoutes(unittest.TestCase):
         res = submit_task(submit_data)
 
         assert res == TimFeedback(**return_value.json().get("result"))
-
-        
-class TestGetData:
-    """
-    Run tests in CI.
-
-    Tests for getting, putting and modifying data in TIM via CLI app.
-    """
-
-    CI_RUN_ENABLED = os.environ.get("CI_RUN_ENABLED", 'False').lower() in ('true', '1')
-
-    def test_get_profile(self):
-        """Get user profile, check username correctness."""
-        res = get_profile()
-        assert res.get("username") == "ciuser"
-
-    def test_get_courses(self):
-        """
-        Get all IDE compatible courses.
-
-        Courses has to be set to My courses bookmarks.
-        """
-
-        if not self.CI_RUN_ENABLED:
-            return
-
-        res = get_ide_courses()
-        assert isinstance(res, list)

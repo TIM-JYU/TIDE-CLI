@@ -106,7 +106,7 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
         task_files=task.task_files, save_path=user_folder, overwrite=overwrite
     )
 
-    if len(task.supplementary_files) != 0 :
+    if len(task.supplementary_files) != 0:
         save_file(
             task_files=task.supplementary_files,
             save_path=user_folder,
