@@ -104,7 +104,10 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
     )
  
     if task.supplementary_files is not None:
-        supplementary_saved = save_file(task_files=task.supplementary_files, save_path=user_folder, overwrite=overwrite)
+        supplementary_saved = save_file(task_files=list(filter(lambda x: x.content != None ,task.supplementary_files)), save_path=user_folder, overwrite=overwrite)
+    
+    if task.ide_assets is not None:
+        print(task.ide_assets)
 
     if not saved:
         return False
@@ -113,7 +116,7 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
         folder_path=user_folder,
         metadata=task,
     )
-
+    
     return saved
 
 

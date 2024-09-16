@@ -47,7 +47,11 @@ class TaskFile(BaseModel):
 
 class SupplementaryFile(BaseModel):
     file_name: str
-    content: str
+    content: str | None = None
+    url: str | None = None
+
+class IdeAsset(BaseModel):
+    url: str
 
 _task_type_split_re = re.compile(r"[/,; ]")
 
@@ -83,6 +87,9 @@ class TaskData(BaseModel):
 
     supplementary_files: list[SupplementaryFile] = []
     """List of supplemental files."""
+    
+    ide_assets: list[IdeAsset] = []
+    """List of ide assets."""
 
     stem: str | None = None
     """Stem of the task, may containg a short instructions."""
