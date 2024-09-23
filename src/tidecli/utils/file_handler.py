@@ -6,12 +6,14 @@ __date__ = "11.5.2024"
 
 import re
 import json
+from typing import Any
 import click.exceptions
 from pathlib import Path
 import itertools
 
 from tidecli.models.task_data import SupplementaryFile, TaskData, TaskFile
 from tidecli.utils.error_logger import Logger
+from tidecli.api import routes
 
 METADATA_NAME = ".timdata"
 """File to store metadata in task folder."""
@@ -19,6 +21,23 @@ METADATA_NAME = ".timdata"
 # Search strings for finding the beginning and end of the task content
 BEGIN_MSG_SEARCH_STRING = r"Write your code below this line"
 END_MSG_SEARCH_STRING = r"Write your code above this line"
+
+def write_file(file_path: Path, content: str | bytes) -> None:
+    """
+    Write content to a file.
+
+    :param file_path: Path to the file
+    :param content: Content to write
+    """
+    if isinstance(content, str):
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(content)
+            file.close()
+    else:
+        with open(file_path, "wb") as file:
+            file.write(content)
+            file.close()
+
 
 def create_tasks(
     tasks: list[TaskData], overwrite: bool, user_path: str | None = None
@@ -72,6 +91,23 @@ def combine_tasks(tasks: list[TaskData]) -> list[TaskData]:
     return combined_tasks
 
 
+def get_file_content_from_source(source: str) -> bytes | Any:
+    """
+    Get content of a file from its source address.
+    If address does not start with http URL, it is assumed to be a TIM path.
+
+    :param supplementary_file: SupplementaryFile object
+    return: Content of the source
+    """
+    if source is not None:
+        if re.match(r"^https?://", source):
+            # Source is a URL
+            return routes.get_file_content(source)
+        else:
+            # Source is a TIM path
+            return routes.get_file_content(source, is_tim_file=True)
+
+
 def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -> bool:
     """
     Create a single task.
@@ -99,12 +135,12 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
             continue
         f.file_name = add_suffix(f.file_name, task.run_type)
 
-    saved = save_file(
+    saved = save_files(
         task_files=task.task_files, save_path=user_folder, overwrite=overwrite
     )
  
     if task.supplementary_files is not None:
-        supplementary_saved = save_file(task_files=task.supplementary_files, save_path=user_folder, overwrite=overwrite)
+        save_files(task_files=task.supplementary_files, save_path=user_folder, overwrite=overwrite)
 
     if not saved:
         return False
@@ -136,7 +172,7 @@ def add_suffix(file_name: str, file_type: str) -> str:
     return file_name
 
 
-def save_file(task_files: list[TaskFile] | list[SupplementaryFile], save_path: Path, overwrite=False) -> bool:
+def save_files(task_files: list[TaskFile] | list[SupplementaryFile], save_path: Path, overwrite=False) -> bool:
     """
     Create files of tasks in the given path.
 
@@ -157,9 +193,18 @@ def save_file(task_files: list[TaskFile] | list[SupplementaryFile], save_path: P
                 )
                 return False
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(file_path, "w", encoding="utf-8") as file:
-            file.write(f.content)
-            file.close()
+        if f.content is not None:
+            with open(file_path, "w", encoding="utf-8") as file:
+                file.write(f.content)
+                file.close()
+        elif f.source is not None:
+            # TODO: Handle potential errors from API call (allow errors so that consequent files are saved)
+            # Currently, only files that in the list before an error are saved
+            content = get_file_content_from_source(f.source)
+            with open(file_path, "wb") as file:
+                file.write(content)
+                file.close()
+
     click.echo(f"Task created in {save_path}")
     return True
 

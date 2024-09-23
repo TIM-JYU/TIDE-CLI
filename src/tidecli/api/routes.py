@@ -8,15 +8,17 @@ __authors__ = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
 __license__ = "MIT"
 __date__ = "11.5.2024"
 
+from typing import Any
 import click
 import requests
 
+from urllib.parse import urljoin
 from tidecli.models.course import Course
 from tidecli.models.submit_data import SubmitData
 from tidecli.models.task_data import TaskData
 from tidecli.models.tim_feedback import TimFeedback
 from tidecli.tide_config import (
-    BASE_URL,
+    TIM_URL,
     INTROSPECT_ENDPOINT,
     PROFILE_ENDPOINT,
     IDE_COURSES_ENDPOINT,
@@ -27,13 +29,32 @@ from tidecli.tide_config import (
 from tidecli.utils.handle_token import get_signed_in_user
 
 
-def make_request(
+def get_file_content(url: str, is_tim_file: bool=True) -> bytes | Any:
+    """
+    Get the content of the file from the URL.
+
+    :param url: URL of the file
+    return: Content of the file
+    """
+    if is_tim_file:
+        url = urljoin(TIM_URL, url)
+    try:
+        res = requests.get(url)
+        res.raise_for_status()
+        return res.content
+    except Exception as e:
+        raise click.ClickException(
+            f"Could not get the content of the file from {url}\n{e}"
+        ) from e
+
+
+def tim_request(
     endpoint: str,
     method: str = "GET",
     params: dict[str, str | None] | None = None,
 ) -> dict:
     """
-    Make a request to the API.
+    Make a request to the TIM API.
 
     :param endpoint: API endpoint
     :param method: HTTP method
@@ -49,7 +70,7 @@ def make_request(
     try:
         res = requests.request(
             method,
-            f"{BASE_URL}{endpoint}",
+            f"{TIM_URL}{endpoint}",
             headers={"Authorization": f"Bearer {token}"},
             json=params,
         )
@@ -75,7 +96,7 @@ def validate_token() -> dict:
 
     return: JSON response  of token validity
     """
-    res = make_request(endpoint=INTROSPECT_ENDPOINT, method="POST")
+    res = tim_request(endpoint=INTROSPECT_ENDPOINT, method="POST")
 
     return res
 
@@ -86,7 +107,7 @@ def get_profile() -> dict:
 
     return: JSON response  of user profile
     """
-    return make_request(endpoint=PROFILE_ENDPOINT)
+    return tim_request(endpoint=PROFILE_ENDPOINT)
 
 
 def get_ide_courses() -> list[Course]:
@@ -98,7 +119,7 @@ def get_ide_courses() -> list[Course]:
     return: JSON response of course name and course path,
     course id and paths for demo documents
     """
-    res = make_request(endpoint=IDE_COURSES_ENDPOINT)
+    res = tim_request(endpoint=IDE_COURSES_ENDPOINT)
     all_courses = [Course(**course) for course in res]
 
     return all_courses
@@ -113,7 +134,7 @@ def get_tasks_by_doc(doc_path: str) -> list[TaskData]:
     """
     doc_id = None  # Tim requires doc_id to be None if not used
 
-    res = make_request(
+    res = tim_request(
         endpoint=TASKS_BY_DOC_ENDPOINT,
         params={"doc_path": doc_path, "doc_id": doc_id},
     )
@@ -136,7 +157,7 @@ def get_task_by_ide_task_id(
     """
     doc_id = None  # Tim requires doc_id to be None if not used
 
-    res = make_request(
+    res = tim_request(
         endpoint=TASK_BY_IDE_TASK_ID_ENDPOINT,
         params={
             "doc_path": doc_path,
@@ -157,7 +178,7 @@ def submit_task(
     :param task_files: Task/s data
     return: JSON response of tasks
     """
-    res = make_request(
+    res = tim_request(
         endpoint=SUBMIT_TASK_ENDPOINT,
         method="PUT",
         params=task_files.submit_json(),
