@@ -15,15 +15,15 @@ class Logger:
     def __init__(self):
         """Class constructor."""
         # 10 is the lowest logging level, 50 highest, 0 means not set.
-        TIDECLI_DEBUG_LEVEL = os.getenv("TIDECLI_DEBUG_LEVEL", 20)
+        TIDECLI_LOG_LEVEL = os.getenv("TIDECLI_LOG_LEVEL", 20)
         try:
-            TIDECLI_DEBUG_LEVEL = int(TIDECLI_DEBUG_LEVEL)
+            TIDECLI_LOG_LEVEL = int(TIDECLI_LOG_LEVEL)
         except Exception as e:
-            TIDECLI_DEBUG_LEVEL = 50
+            TIDECLI_LOG_LEVEL = 50
             print(e)
-            print('TIDECLI_DEBUG_LEVEL environment variable set incorrectly.')
+            print('TIDECLI_LOG_LEVEL environment variable set incorrectly.')
 
-        self.level = TIDECLI_DEBUG_LEVEL
+        self.level = TIDECLI_LOG_LEVEL
         self.internal_logger = logging.getLogger(__name__)
         self.logfile = "tide-cli.log"
         logging.basicConfig(
