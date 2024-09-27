@@ -281,11 +281,16 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
 
                     if validate_answer_file(answer_bycode, metadata_bycode):
                         # TODO: tarvitaan lisää testitapauksia,
+                        # Validator OK
                         logger.info("Gap-type exercise answer file is valid.")
                         f1.content = "\n".join(answer_gapcode)
                     else:
                         logger.debug("Gap-type exercise answer not valid.")
-                        return []
+
+                        # Validator complains about answer.
+                        # Answer is submitted despite of complains.
+                        f1.content = "\n".join(answer_gapcode)
+                        # return []
 
     return task_files
 
@@ -362,7 +367,11 @@ def validate_answer_file(answer_by: list[str], metadata_by: list[str]) -> bool:
         return False
 
     bycodediff = clear_answer.difference(clear_metadata_content)
+    logger.debug("Diff between cleared answer and .timdata content: \n")
     logger.debug(bycodediff)
+
+    if len(bycodediff) > 0:
+        logger.info("Note: file has been modified outside of desired area.")
 
     return len(bycodediff) == 0
 
