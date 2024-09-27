@@ -36,10 +36,21 @@ def get_file_content(url: str, is_tim_file: bool=True) -> bytes | Any:
     :param url: URL of the file
     return: Content of the file
     """
+    headers=None
+
     if is_tim_file:
         url = urljoin(TIM_URL, url)
+        signed_in_user = get_signed_in_user()
+        if not signed_in_user:
+            raise click.ClickException("User not logged in")
+
+        token: str = signed_in_user.password
+        headers = {"Authorization": f"Bearer {token}"}
+
+    print('fetching file content from url', url)
+    print('with headers', headers)
     try:
-        res = requests.get(url)
+        res = requests.get(url, headers=headers)
         res.raise_for_status()
         return res.content
     except Exception as e:

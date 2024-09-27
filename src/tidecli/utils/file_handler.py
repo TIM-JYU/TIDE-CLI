@@ -101,10 +101,10 @@ def get_file_content_from_source(source: str) -> bytes | Any:
     """
     if source is not None:
         if re.match(r"^https?://", source):
-            # Source is a URL
+            # Source is a http URL
             return routes.get_file_content(source)
         else:
-            # Source is a TIM path
+            # Source is assumed to be a TIM path
             return routes.get_file_content(source, is_tim_file=True)
 
 
