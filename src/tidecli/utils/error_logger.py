@@ -15,7 +15,7 @@ class Logger:
     def __init__(self):
         """Class constructor."""
         # 10 is the lowest logging level, 50 highest, 0 means not set.
-        TIDECLI_DEBUG_LEVEL = os.getenv("TIDECLI_DEBUG_LEVEL", 50)
+        TIDECLI_DEBUG_LEVEL = os.getenv("TIDECLI_DEBUG_LEVEL", 20)
         try:
             TIDECLI_DEBUG_LEVEL = int(TIDECLI_DEBUG_LEVEL)
         except Exception as e:
