@@ -258,36 +258,39 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
     logger = Logger()
     task_files = metadata.task_files
 
-    # Disabling metadata validation for now. Some gap exercises are designed to allow editing outside the gap
+    files_in_dir = [
+        f for f in file_path.iterdir() if f.is_file() and not f.suffix == METADATA_NAME
+    ]
+    for f1 in task_files:
+        for f2 in files_in_dir:
+            if f1.file_name == f2.name:
+                logger.debug(
+                    "Validating {0} against metadata content of task.".format(f2.name))
+                with open(f2, "r", encoding="utf-8") as answer_file:
+                    answer_content = answer_file.read()
+                    answer_bycode, answer_gapcode = split_file_contents(
+                        answer_content)
+                    metadata_bycode, metadata_gapcode = split_file_contents(
+                        f1.content
+                    )
 
-    # files_in_dir = [
-    #     f for f in file_path.iterdir() if f.is_file() and not f.suffix == METADATA_NAME
-    # ]
-    # for f1 in task_files:
-    #     for f2 in files_in_dir:
-    #         if f1.file_name == f2.name:
-    #             logger.debug(
-    #                 "Validating {0} against metadata content of task.".format(f2.name))
-    #             with open(f2, "r", encoding="utf-8") as answer_file:
-    #                 answer_content = answer_file.read()
-    #                 answer_bycode, answer_gapcode = split_file_contents(
-    #                     answer_content)
-    #                 metadata_bycode, metadata_gapcode = split_file_contents(
-    #                     f1.content
-    #                 )
+                    if len(metadata_bycode) == 0:
+                        f1.content = answer_content
+                        logger.info("Normal exercise, no gap found.")
+                        continue
 
-    #                 if len(metadata_bycode) == 0:
-    #                     f1.content = answer_content
-    #                     logger.info("Normal exercise, no gap found.")
-    #                     continue
+                    if validate_answer_file(answer_bycode, metadata_bycode):
+                        # TODO: tarvitaan lisää testitapauksia,
+                        # Validator OK
+                        logger.info("Gap-type exercise answer file is valid.")
+                        f1.content = "\n".join(answer_gapcode)
+                    else:
+                        logger.debug("Gap-type exercise answer not valid.")
 
-    #                 if validate_answer_file(answer_bycode, metadata_bycode):
-    #                     # TODO: tarvitaan lisää testitapauksia,
-    #                     logger.info("Gap-type exercise answer file is valid.")
-    #                     f1.content = "\n".join(answer_gapcode)
-    #                 else:
-    #                     logger.debug("Gap-type exercise answer not valid.")
-    #                     return []
+                        # Validator complains about answer.
+                        # Answer is submitted despite of complains.
+                        f1.content = "\n".join(answer_gapcode)
+                        # return []
 
     return task_files
 
@@ -364,7 +367,11 @@ def validate_answer_file(answer_by: list[str], metadata_by: list[str]) -> bool:
         return False
 
     bycodediff = clear_answer.difference(clear_metadata_content)
+    logger.debug("Diff between cleared answer and .timdata content: \n")
     logger.debug(bycodediff)
+
+    if len(bycodediff) > 0:
+        logger.info("Note: file has been modified outside of desired area.")
 
     return len(bycodediff) == 0
 
