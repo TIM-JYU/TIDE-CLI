@@ -47,8 +47,6 @@ def get_file_content(url: str, is_tim_file: bool=True) -> bytes | Any:
         token: str = signed_in_user.password
         headers = {"Authorization": f"Bearer {token}"}
 
-    print('fetching file content from url', url)
-    print('with headers', headers)
     try:
         res = requests.get(url, headers=headers)
         res.raise_for_status()
