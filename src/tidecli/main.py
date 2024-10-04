@@ -50,6 +50,8 @@ def login(jsondata: bool) -> None:
 
     Functionality: Opens a browser window for the user to log in.
     """
+    login_details()
+
     if jsondata:
         click.echo(
             json.dumps(login_details(jsondata=True), ensure_ascii=False, indent=4)
@@ -76,6 +78,8 @@ def courses(jsondata: bool) -> None:
 
     If --json flag is used, the output is printed in JSON format.
     """
+    login_details()
+
     data = get_ide_courses()
 
     if not jsondata:
@@ -110,6 +114,8 @@ def list_tasks(demo_path: str, jsondata: bool) -> None:
     :param jsondata: If True, prints the output in JSON format.
 
     """
+    login_details()
+
     tasks: List[TaskData] = get_tasks_by_doc(doc_path=demo_path)
 
     if not jsondata:
@@ -130,6 +136,8 @@ def list_tasks(demo_path: str, jsondata: bool) -> None:
 @click.argument("ide_task_id", type=str, default=None, required=False)
 def create(demo_path: str, ide_task_id: str, all: bool, force: bool, dir: str) -> None:
     """Create tasks based on options."""
+    login_details()
+
     if all:
         # Create all tasks
         tasks: List[TaskData] = get_tasks_by_doc(doc_path=demo_path)
@@ -152,6 +160,8 @@ def reset(file_path_string: str):
     """
     Enter the path of the task file to reset.
     """
+    login_details()
+
     file_path = Path(file_path_string)
     if not file_path.exists() or not file_path.is_file():
         raise click.ClickException("Invalid path.")
@@ -178,6 +188,8 @@ def submit(path: str, file_name: str) -> None:
 
     Path must be inserted in the following format: "/path/to/task/folder".
     """
+    login_details()
+
     path = Path(path)
     if not path.exists():
         raise click.ClickException(
