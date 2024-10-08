@@ -13,6 +13,7 @@ import json
 from os import name
 from pathlib import Path
 from typing import List
+from tidecli.utils import login_handler
 from tidecli.utils.error_logger import Logger
 import click
 
@@ -33,7 +34,7 @@ from tidecli.utils.file_handler import (
     create_tasks,
 )
 from tidecli.utils.handle_token import delete_token
-from tidecli.utils.login_handler import login_details
+from tidecli.utils.login_handler import is_logged_in
 
 logger = Logger()
 
@@ -52,15 +53,16 @@ def login(jsondata: bool) -> None:
 
     Functionality: Opens a browser window for the user to log in.
     """
-    login_details()
+    if is_logged_in(print_errors=False, print_token_info=True):
+        return
 
     if jsondata:
         click.echo(
-            json.dumps(login_details(jsondata=True), ensure_ascii=False, indent=4)
+            json.dumps(login_handler.login(jsondata=True), ensure_ascii=False, indent=4)
         )
     else:
-        details = login_details()
-        logger.info(details.split("\n"))
+        details = login_handler.login()
+        logger.info(str(details).split("\n"))
         click.echo(details)
 
 
@@ -80,7 +82,8 @@ def courses(jsondata: bool) -> None:
 
     If --json flag is used, the output is printed in JSON format.
     """
-    login_details()
+    if not is_logged_in():
+        return
 
     data = get_ide_courses()
 
@@ -116,7 +119,8 @@ def list_tasks(demo_path: str, jsondata: bool) -> None:
     :param jsondata: If True, prints the output in JSON format.
 
     """
-    login_details()
+    if not is_logged_in():
+        return
 
     tasks: List[TaskData] = get_tasks_by_doc(doc_path=demo_path)
 
@@ -148,7 +152,8 @@ def points(doc_path: str, ide_task_id: str, json_format: bool):
 @click.argument("ide_task_id", type=str, default=None, required=False)
 def create(demo_path: str, ide_task_id: str, all: bool, force: bool, dir: str) -> None:
     """Create tasks based on options."""
-    login_details()
+    if not is_logged_in():
+        return
 
     if all:
         # Create all tasks
@@ -172,7 +177,8 @@ def reset(file_path_string: str):
     """
     Enter the path of the task file to reset.
     """
-    login_details()
+    if not is_logged_in():
+        return
 
     file_path = Path(file_path_string)
     if not file_path.exists() or not file_path.is_file():
@@ -200,7 +206,8 @@ def submit(path: str, file_name: str) -> None:
 
     Path must be inserted in the following format: "/path/to/task/folder".
     """
-    login_details()
+    if not is_logged_in():
+        return
 
     path = Path(path)
     if not path.exists():
