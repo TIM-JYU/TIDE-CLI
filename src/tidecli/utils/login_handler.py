@@ -11,10 +11,10 @@ import click
 from tidecli.api.oauth_login import authenticate
 from tidecli.api.routes import validate_token
 from tidecli.models.user import User
-from tidecli.utils.handle_token import get_signed_in_user
+from tidecli.utils.handle_token import delete_token, get_signed_in_user
 
 
-def login_details(jsondata: bool = False):
+def is_logged_in(jsondata: bool = False, print_errors: bool = True, print_token_info: bool = False):
     """
     TODO: description doesn't match the actual functionality
 
@@ -23,6 +23,7 @@ def login_details(jsondata: bool = False):
     If the user is already logged in then return the token validity time.
     If the user is not logged in then return the login link
     """
+    # TODO: add json formated prints if necessary
 
     user_login: User | None = get_signed_in_user()
 
@@ -34,32 +35,36 @@ def login_details(jsondata: bool = False):
         try:
             token_validity_time = validate_token()
         except click.ClickException as e:
-            click.echo(f"Error: {e}")
-            return login(jsondata)
+            delete_token()
+            if print_errors:
+                click.echo(f"Error: {e}\nPlease, login again.")
+            return False
 
         # If the token is not expired then return the token validity time
         expiration_time = token_validity_time.get("exp")
         if expiration_time:
-            if jsondata:
-                return {
-                    "login_success": True,
-                }
-            return (
-                "Logged in as "
-                + user_login.username
-                + "\nToken is still valid for "
-                + str(datetime.timedelta(seconds=expiration_time))
-            )
+            if print_token_info:
+                click.echo(
+                    "Logged in as "
+                    + user_login.username
+                    + "\nToken is still valid for "
+                    + str(datetime.timedelta(seconds=expiration_time))
+                )
+            return True
         else:
-            if jsondata:
-                return {"login_success": False}
-            return "Token validity time not found"
+            delete_token()
+            if print_errors:
+                click.echo("Please, login again.")
+            return False
 
     # If the username does not exist in credential manager
     else:
-        login(jsondata)
+        if print_errors:
+            click.echo("Please, login again.")
+        return False
 
-def login(jsondata: bool):
+
+def login(jsondata: bool = False):
     click.echo(f"Logging in...\nPlease, finish authenticating in the browser.")
     if authenticate():
         if jsondata:
