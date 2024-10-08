@@ -23,7 +23,7 @@ def is_logged_in(jsondata: bool = False, print_errors: bool = True, print_token_
     If the user is already logged in then return the token validity time.
     If the user is not logged in then return the login link
     """
-    # TODO: add json formated prints if necessary
+    # TODO: add json formated prints for vscode
 
     user_login: User | None = get_signed_in_user()
 
