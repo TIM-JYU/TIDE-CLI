@@ -37,7 +37,7 @@ def is_logged_in(jsondata: bool = False, print_errors: bool = True, print_token_
         except click.ClickException as e:
             delete_token()
             if print_errors:
-                click.echo(f"Error: {e}\nPlease, login again.")
+                click.echo(f"Error: {e}\nPlease, login.")
             return False
 
         # If the token is not expired then return the token validity time
@@ -54,13 +54,13 @@ def is_logged_in(jsondata: bool = False, print_errors: bool = True, print_token_
         else:
             delete_token()
             if print_errors:
-                click.echo("Please, login again.")
+                click.echo("Please, login.")
             return False
 
     # If the username does not exist in credential manager
     else:
         if print_errors:
-            click.echo("Please, login again.")
+            click.echo("Please, login.")
         return False
 
 
