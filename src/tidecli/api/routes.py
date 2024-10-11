@@ -202,5 +202,5 @@ def submit_task(
 
 
 def get_task_points(ide_task_id: str, doc_path: str):
-    res = make_request(endpoint=TASK_POINTS_ENDPOINT, method="GET", params={"ide_task_id": ide_task_id, "doc_path": doc_path})
+    res = tim_request(endpoint=TASK_POINTS_ENDPOINT, method="GET", params={"ide_task_id": ide_task_id, "doc_path": doc_path})
     return res
