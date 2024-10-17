@@ -47,8 +47,8 @@ class TaskFile(BaseModel):
 
 class SupplementaryFile(BaseModel):
     file_name: str
-    content: str | None = None
-    url: str | None = None
+    content: str | None
+    source: str | None
 
 _task_type_split_re = re.compile(r"[/,; ]")
 

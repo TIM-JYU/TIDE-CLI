@@ -1,6 +1,6 @@
 # Configuration for the TIM /oauth
 CLIENT_ID = "oauth2_tide"
-BASE_URL = "http://tim.jyu.fi"
+TIM_URL = "http://tim.jyu.fi"
 AUTH_ENDPOINT = "/oauth/authorize"
 TOKEN_ENDPOINT = "/oauth/token"
 PORT = 8083

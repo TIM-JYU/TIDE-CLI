@@ -23,7 +23,7 @@ from tidecli.tide_config import (
     CLIENT_ID,
     REDIRECT_URI,
     SCOPE,
-    BASE_URL,
+    TIM_URL,
     AUTH_ENDPOINT,
     TOKEN_ENDPOINT,
     PROFILE_ENDPOINT,
@@ -65,7 +65,7 @@ class OAuthAuthenticator:
 
         # URL where the user is directed for authentication
         auth_url_with_params = (
-            f"{BASE_URL}{AUTH_ENDPOINT}?{urllib.parse.urlencode(auth_params)}"
+            f"{TIM_URL}{AUTH_ENDPOINT}?{urllib.parse.urlencode(auth_params)}"
         )
 
         login_successful = False
@@ -109,7 +109,7 @@ class OAuthAuthenticator:
                 }
 
                 response = requests.post(
-                    url=f"{BASE_URL}{TOKEN_ENDPOINT}",
+                    url=f"{TIM_URL}{TOKEN_ENDPOINT}",
                     data=token_params,
                 )
 
@@ -126,7 +126,7 @@ class OAuthAuthenticator:
                 # Get the user profile to save token for right user
                 try:
                     res = requests.get(
-                        f"{BASE_URL}{PROFILE_ENDPOINT}",
+                        f"{TIM_URL}{PROFILE_ENDPOINT}",
                         headers={"Authorization": f"Bearer {access_token}"},
                     )
                 except requests.exceptions.RequestException as e:
