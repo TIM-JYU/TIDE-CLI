@@ -141,7 +141,7 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
  
     if task.supplementary_files is not None:
         save_files(task_files=list(filter(lambda x: x.content != None ,task.supplementary_files)), save_path=user_folder, overwrite=overwrite)
-        
+
     if not saved:
         return False
 
