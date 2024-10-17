@@ -16,7 +16,7 @@ from urllib.parse import urljoin
 from tidecli.models.course import Course
 from tidecli.models.submit_data import SubmitData
 from tidecli.models.task_data import TaskData
-from tidecli.models.tim_feedback import TimFeedback
+from tidecli.models.tim_feedback import PointsData, TimFeedback
 from tidecli.tide_config import (
     TIM_URL,
     INTROSPECT_ENDPOINT,
@@ -201,6 +201,6 @@ def submit_task(
     return TimFeedback(**feedback)
 
 
-def get_task_points(ide_task_id: str, doc_path: str):
+def get_task_points(ide_task_id: str, doc_path: str) -> PointsData:
     res = tim_request(endpoint=TASK_POINTS_ENDPOINT, method="GET", params={"ide_task_id": ide_task_id, "doc_path": doc_path})
-    return res
+    return PointsData(**res)

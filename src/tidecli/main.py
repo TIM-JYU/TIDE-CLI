@@ -13,6 +13,7 @@ import json
 from os import name
 from pathlib import Path
 from typing import List
+from tidecli.models.tim_feedback import PointsData
 from tidecli.utils import login_handler
 from tidecli.utils.error_logger import Logger
 import click
@@ -136,12 +137,15 @@ def list_tasks(demo_path: str, jsondata: bool) -> None:
 
 
 @task.command(name="points")
-@click.option("--json", "-j", "json_format", is_flag=True, default=False)
+@click.option("--json", "-j", "print_json", is_flag=True, default=False)
 @click.argument("doc_path", type=str, required=True)
 @click.argument("ide_task_id", type=str, required=True)
-def points(doc_path: str, ide_task_id: str, json_format: bool):
-    points = get_task_points(ide_task_id, doc_path)
-    click.echo(points)
+def points(doc_path: str, ide_task_id: str, print_json: bool):
+    points: PointsData = get_task_points(ide_task_id, doc_path)
+    if print_json:
+        click.echo(points.model_dump_json())
+    else:
+        click.echo(points.pretty_print())
 
 
 @task.command()
