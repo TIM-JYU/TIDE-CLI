@@ -90,6 +90,9 @@ class TaskData(BaseModel):
     header: str | None = None
     """Header of the task."""
 
+    max_points: float | None = None
+    """Maximum points for the task"""
+
     @property
     def run_type(self) -> str:
         """Return run type eg. cc from cc/input/comtest."""
