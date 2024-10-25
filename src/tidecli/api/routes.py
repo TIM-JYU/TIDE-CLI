@@ -27,6 +27,7 @@ from tidecli.tide_config import (
     TASK_POINTS_ENDPOINT,
     TASKS_BY_DOC_ENDPOINT,
 )
+from tidecli.utils.error_logger import Logger
 from tidecli.utils.handle_token import get_signed_in_user
 
 

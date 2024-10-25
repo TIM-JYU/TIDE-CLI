@@ -149,7 +149,7 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
         folder_path=user_folder,
         metadata=task,
     )
-
+    
     return saved
 
 
@@ -282,7 +282,7 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
                     if validate_answer_file(answer_bycode, metadata_bycode):
                         # TODO: tarvitaan lisää testitapauksia,
                         # Validator OK
-                        logger.info("Gap-type exercise answer file is valid.")
+                        logger.debug("Gap-type exercise answer file is valid.")
                         f1.content = "\n".join(answer_gapcode)
                     else:
                         logger.debug("Gap-type exercise answer not valid.")
