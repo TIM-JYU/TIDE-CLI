@@ -276,13 +276,13 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
 
                     if len(metadata_bycode) == 0:
                         f1.content = answer_content
-                        logger.info("Normal exercise, no gap found.")
+                        logger.debug("Normal exercise, no gap found.")
                         continue
 
                     if validate_answer_file(answer_bycode, metadata_bycode):
                         # TODO: tarvitaan lisää testitapauksia,
                         # Validator OK
-                        logger.info("Gap-type exercise answer file is valid.")
+                        logger.debug("Gap-type exercise answer file is valid.")
                         f1.content = "\n".join(answer_gapcode)
                     else:
                         logger.debug("Gap-type exercise answer not valid.")
@@ -292,6 +292,8 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
                         f1.content = "\n".join(answer_gapcode)
                         # return []
 
+
+    logger.debug(f"Task files being submitted: {task_files}")
     return task_files
 
 
