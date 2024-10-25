@@ -52,7 +52,6 @@ class SupplementaryFile(BaseModel):
 
 _task_type_split_re = re.compile(r"[/,; ]")
 
-
 class TaskData(BaseModel):
     """
     Model for task data.
