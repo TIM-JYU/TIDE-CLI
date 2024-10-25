@@ -276,7 +276,6 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
     #                     f1.content
     #                 )
 
-<<<<<<< HEAD
                     if validate_answer_file(answer_bycode, metadata_bycode):
                         # TODO: tarvitaan lisää testitapauksia,
                         # Validator OK
@@ -284,12 +283,6 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
                         f1.content = "\n".join(answer_gapcode)
                     else:
                         logger.debug("Gap-type exercise answer not valid.")
-=======
-    #                 if len(metadata_bycode) == 0:
-    #                     f1.content = answer_content
-    #                     logger.info("Normal exercise, no gap found.")
-    #                     continue
->>>>>>> 59bc252 (disable metadata validation for gap exercises to allow editing outside gaps (some exercises are designed to allow it))
 
     #                 if validate_answer_file(answer_bycode, metadata_bycode):
     #                     # TODO: tarvitaan lisää testitapauksia,
