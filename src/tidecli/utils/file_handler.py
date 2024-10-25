@@ -276,6 +276,11 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
                         f1.content
                     )
 
+                    if len(metadata_bycode) == 0:
+                        f1.content = answer_content
+                        logger.debug("Normal exercise, no gap found.")
+                        continue
+
                     if validate_answer_file(answer_bycode, metadata_bycode):
                         # TODO: tarvitaan lisää testitapauksia,
                         # Validator OK
@@ -292,6 +297,8 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
                         logger.debug("Gap-type exercise answer not valid.")
     #                     return []
 
+
+    logger.debug(f"Task files being submitted: {task_files}")
     return task_files
 
 
@@ -442,5 +449,5 @@ def answer_with_original_noneditable_sections(answer: str, original: str) -> str
                                      answer_lines[answer_gaps[0] + 1:answer_gaps[1]],
                                      original_lines[original_gaps[1]:]
                                      )
-
+    
     return "\n".join(combined_lines)
