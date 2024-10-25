@@ -260,21 +260,21 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
 
     # Disabling metadata validation for now. Some gap exercises are designed to allow editing outside the gap
 
-    # files_in_dir = [
-    #     f for f in file_path.iterdir() if f.is_file() and not f.suffix == METADATA_NAME
-    # ]
-    # for f1 in task_files:
-    #     for f2 in files_in_dir:
-    #         if f1.file_name == f2.name:
-    #             logger.debug(
-    #                 "Validating {0} against metadata content of task.".format(f2.name))
-    #             with open(f2, "r", encoding="utf-8") as answer_file:
-    #                 answer_content = answer_file.read()
-    #                 answer_bycode, answer_gapcode = split_file_contents(
-    #                     answer_content)
-    #                 metadata_bycode, metadata_gapcode = split_file_contents(
-    #                     f1.content
-    #                 )
+    files_in_dir = [
+        f for f in file_path.iterdir() if f.is_file() and not f.suffix == METADATA_NAME
+    ]
+    for f1 in task_files:
+        for f2 in files_in_dir:
+            if f1.file_name == f2.name:
+                logger.debug(
+                    "Validating {0} against metadata content of task.".format(f2.name))
+                with open(f2, "r", encoding="utf-8") as answer_file:
+                    answer_content = answer_file.read()
+                    answer_bycode, answer_gapcode = split_file_contents(
+                        answer_content)
+                    metadata_bycode, metadata_gapcode = split_file_contents(
+                        f1.content
+                    )
 
                     if validate_answer_file(answer_bycode, metadata_bycode):
                         # TODO: tarvitaan lisää testitapauksia,
@@ -284,12 +284,12 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
                     else:
                         logger.debug("Gap-type exercise answer not valid.")
 
-    #                 if validate_answer_file(answer_bycode, metadata_bycode):
-    #                     # TODO: tarvitaan lisää testitapauksia,
-    #                     logger.info("Gap-type exercise answer file is valid.")
-    #                     f1.content = "\n".join(answer_gapcode)
-    #                 else:
-    #                     logger.debug("Gap-type exercise answer not valid.")
+                    if validate_answer_file(answer_bycode, metadata_bycode):
+                        # TODO: tarvitaan lisää testitapauksia,
+                        logger.info("Gap-type exercise answer file is valid.")
+                        f1.content = "\n".join(answer_gapcode)
+                    else:
+                        logger.debug("Gap-type exercise answer not valid.")
     #                     return []
 
     return task_files
@@ -420,6 +420,7 @@ def find_gaps_in_tasks(lines: list[str]) -> tuple[int, int] | None:
     return gap
 
 
+# TODO: a function for adding removed gap markers
 def answer_with_original_noneditable_sections(answer: str, original: str) -> str:
     """
     Combine answer with original file, keeping non-editable sections from original.
