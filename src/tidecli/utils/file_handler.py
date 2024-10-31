@@ -295,10 +295,8 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
                         f1.content = "\n".join(answer_gapcode)
                     else:
                         logger.debug("Gap-type exercise answer not valid.")
-    #                     return []
+                        return []
 
-
-    logger.debug(f"Task files being submitted: {task_files}")
     return task_files
 
 
