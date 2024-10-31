@@ -7,6 +7,7 @@ __date__ = "11.5.2024"
 import datetime
 
 import click
+import json
 
 from tidecli.api.oauth_login import authenticate
 from tidecli.api.routes import validate_token
@@ -25,6 +26,8 @@ def is_logged_in(jsondata: bool = False, print_errors: bool = True, print_token_
     """
     # TODO: add json formated prints for vscode
 
+    jsondata = click.get_current_context().params["jsondata"]
+
     user_login: User | None = get_signed_in_user()
 
     # If the username exist in credential manager then return the token validity
@@ -36,7 +39,7 @@ def is_logged_in(jsondata: bool = False, print_errors: bool = True, print_token_
             token_validity_time = validate_token()
         except click.ClickException as e:
             delete_token()
-            if print_errors:
+            if print_errors and not jsondata:
                 click.echo(f"Error: {e}\nPlease, login.")
             return False
 
@@ -44,28 +47,32 @@ def is_logged_in(jsondata: bool = False, print_errors: bool = True, print_token_
         expiration_time = token_validity_time.get("exp")
         if expiration_time:
             if print_token_info:
-                click.echo(
-                    "Logged in as "
-                    + user_login.username
-                    + "\nToken is still valid for "
-                    + str(datetime.timedelta(seconds=expiration_time))
-                )
+                if not jsondata:
+                    click.echo(
+                        "Logged in as "
+                        + user_login.username
+                        + "\nToken is still valid for "
+                        + str(datetime.timedelta(seconds=expiration_time))
+                    )
+                else:
+                    click.echo(json.dumps({"login_success": True}))
             return True
         else:
             delete_token()
-            if print_errors:
+            if print_errors and not jsondata:
                 click.echo("Please, login.")
             return False
 
     # If the username does not exist in credential manager
     else:
-        if print_errors:
+        if print_errors and not jsondata:
             click.echo("Please, login.")
         return False
 
 
 def login(jsondata: bool = False):
-    click.echo(f"Logging in...\nPlease, finish authenticating in the browser.")
+    if not jsondata:
+        click.echo(f"Logging in...\nPlease, finish authenticating in the browser.")
     if authenticate():
         if jsondata:
             return {"login_success": True}
