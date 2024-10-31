@@ -138,25 +138,33 @@ def list_tasks(demo_path: str, jsondata: bool) -> None:
 @click.option("--dir", "-d", "dir", type=str, default=None)
 @click.argument("demo_path", type=str)
 @click.argument("ide_task_id", type=str, default=None, required=False)
-def create(demo_path: str, ide_task_id: str, all: bool, force: bool, dir: str) -> None:
+@click.option("--json", "-j", "jsondata", is_flag=True, default=False)
+def create(demo_path: str, ide_task_id: str, all: bool, force: bool, dir: str, jsondata: bool) -> None:
     """Create tasks based on options."""
     if not is_logged_in():
         return
 
+    result = {}
+
     if all:
         # Create all tasks
         tasks: List[TaskData] = get_tasks_by_doc(doc_path=demo_path)
-        create_tasks(tasks=tasks, overwrite=force, user_path=dir)
+        result["success"] = create_tasks(tasks=tasks, overwrite=force, user_path=dir)
 
     elif ide_task_id:
         # Create a single task
         task_data: TaskData = get_task_by_ide_task_id(
             ide_task_id=ide_task_id, doc_path=demo_path
         )
-        create_task(task=task_data, overwrite=force, user_path=dir)
+        # TODO: what happens if some of the tasks are successfully created?
+        result["success"] = create_task(task=task_data, overwrite=force, user_path=dir)
 
     else:
-        click.echo("Please provide either --all or an ide_task_id.")
+        if not jsondata:
+            click.echo("Please provide either --all or an ide_task_id.")
+
+    if jsondata:
+        click.echo(json.dumps(result))
 
 
 @task.command()

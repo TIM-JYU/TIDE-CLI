@@ -41,7 +41,7 @@ def write_file(file_path: Path, content: str | bytes) -> None:
 
 def create_tasks(
     tasks: list[TaskData], overwrite: bool, user_path: str | None = None
-) -> None:
+) -> bool:
     """
     Create multiple tasks.
 
@@ -49,13 +49,16 @@ def create_tasks(
     :param overwrite: Flag if overwrite
     :param user_path: Path to user given folder
 
-    return: True if tasks are created, False if not
+    return: True if all tasks are created, False if not
     """
     combined_tasks = combine_tasks(tasks)
 
+    task_creation_successes: list[bool] = []
     for task in combined_tasks:
-        create_task(task=task, overwrite=overwrite, user_path=user_path)
+        task_creation_successes.append(create_task(task=task, overwrite=overwrite, user_path=user_path))
 
+    return all(task_creation_successes)
+    
 
 def combine_tasks(tasks: list[TaskData]) -> list[TaskData]:
     """
@@ -142,13 +145,11 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
     if task.supplementary_files is not None:
         save_files(task_files=task.supplementary_files, save_path=user_folder, overwrite=overwrite)
 
-    if not saved:
-        return False
-
-    write_metadata(
-        folder_path=user_folder,
-        metadata=task,
-    )
+    if saved:
+        write_metadata(
+            folder_path=user_folder,
+            metadata=task,
+        )
 
     return saved
 
@@ -182,15 +183,18 @@ def save_files(task_files: list[TaskFile] | list[SupplementaryFile], save_path: 
     :param overwrite: Flag if overwrite
     """
     save_path.mkdir(parents=True, exist_ok=True)
+    
+    jsondata = click.get_current_context().params["jsondata"]
 
     for f in task_files:
         file_path = save_path / f.file_name
         if file_path.exists():
             if not overwrite:
-                click.echo(
-                    f"File {file_path} already exists\n"
-                    f"To overwrite give tide task create -f {save_path}\n"
-                )
+                if not jsondata:
+                    click.echo(
+                        f"File {file_path} already exists\n"
+                        f"To overwrite give tide task create -f {save_path}\n"
+                    )
                 return False
         file_path.parent.mkdir(parents=True, exist_ok=True)
         if f.content is not None:
@@ -205,7 +209,8 @@ def save_files(task_files: list[TaskFile] | list[SupplementaryFile], save_path: 
                 file.write(content)
                 file.close()
 
-    click.echo(f"Task created in {save_path}")
+    if not jsondata:
+        click.echo(f"Task created in {save_path}")
     return True
 
 
