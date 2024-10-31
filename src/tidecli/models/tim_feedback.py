@@ -52,7 +52,7 @@ class TimFeedback(BaseModel):
 class PointsData(BaseModel):
     """Model for task points information."""
 
-    current_points: float
+    current_points: float | None
     """Current points awarded for answering the task"""
 
     def pretty_print(self) -> str:
