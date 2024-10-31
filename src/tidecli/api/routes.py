@@ -31,14 +31,14 @@ from tidecli.utils.error_logger import Logger
 from tidecli.utils.handle_token import get_signed_in_user
 
 
-def get_file_content(url: str, is_tim_file: bool=True) -> bytes | Any:
+def get_file_content(url: str, is_tim_file: bool = True) -> bytes | Any:
     """
     Get the content of the file from the URL.
 
     :param url: URL of the file
     return: Content of the file
     """
-    headers=None
+    headers = None
 
     if is_tim_file:
         url = urljoin(TIM_URL, url)
@@ -202,5 +202,9 @@ def submit_task(
 
 
 def get_task_points(ide_task_id: str, doc_path: str) -> PointsData:
-    res = tim_request(endpoint=TASK_POINTS_ENDPOINT, method="GET", params={"ide_task_id": ide_task_id, "doc_path": doc_path})
+    res = tim_request(
+        endpoint=TASK_POINTS_ENDPOINT,
+        method="GET",
+        params={"ide_task_id": ide_task_id, "doc_path": doc_path},
+    )
     return PointsData(**res)
