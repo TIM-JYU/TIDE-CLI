@@ -82,7 +82,9 @@ def combine_tasks(tasks: list[TaskData]) -> list[TaskData]:
                 doc_id=task_list[0].doc_id,
                 ide_task_id=ide_task_id,
                 task_files=[f for t in task_list for f in t.task_files],
-                supplementary_files=[f for t in task_list for f in t.supplementary_files],
+                supplementary_files=[
+                    f for t in task_list for f in t.supplementary_files
+                ],
                 stem=task_list[0].stem,
                 header=task_list[0].header,
             )
@@ -265,14 +267,12 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
         for f2 in files_in_dir:
             if f1.file_name == f2.name:
                 logger.debug(
-                    "Validating {0} against metadata content of task.".format(f2.name))
+                    "Validating {0} against metadata content of task.".format(f2.name)
+                )
                 with open(f2, "r", encoding="utf-8") as answer_file:
                     answer_content = answer_file.read()
-                    answer_bycode, answer_gapcode = split_file_contents(
-                        answer_content)
-                    metadata_bycode, metadata_gapcode = split_file_contents(
-                        f1.content
-                    )
+                    answer_bycode, answer_gapcode = split_file_contents(answer_content)
+                    metadata_bycode, metadata_gapcode = split_file_contents(f1.content)
 
                     if len(metadata_bycode) == 0:
                         f1.content = answer_content
@@ -329,9 +329,9 @@ def split_file_contents(content: str) -> tuple[list[str], list[str]]:
     start, end = gap
 
     # Create list of strings for validation
-    bycodebegin = lines[:start + 1]
-    bycodeend = lines[end :]
-    gap_content = lines[start + 1: end]
+    bycodebegin = lines[: start + 1]
+    bycodeend = lines[end:]
+    gap_content = lines[start + 1 : end]
     bycode = bycodebegin + bycodeend
 
     logger = Logger()
@@ -366,6 +366,10 @@ def validate_answer_file(answer_by: list[str], metadata_by: list[str]) -> bool:
     if clear_answer is None or clear_metadata_content is None:
         return False
 
+    if len(clear_answer) != len(clear_metadata_content):
+        return False
+
+    # Difference helps, when length of the contents are the same.
     bycodediff = clear_answer.difference(clear_metadata_content)
     logger.debug("Diff between cleared answer and .timdata content: \n")
     logger.debug(bycodediff)
@@ -437,9 +441,10 @@ def answer_with_original_noneditable_sections(answer: str, original: str) -> str
         # TODO! add error handling
         return answer
 
-    combined_lines = itertools.chain(original_lines[:original_gaps[0] + 1],
-                                     answer_lines[answer_gaps[0] + 1:answer_gaps[1]],
-                                     original_lines[original_gaps[1]:]
-                                     )
+    combined_lines = itertools.chain(
+        original_lines[: original_gaps[0] + 1],
+        answer_lines[answer_gaps[0] + 1 : answer_gaps[1]],
+        original_lines[original_gaps[1] :],
+    )
 
     return "\n".join(combined_lines)
