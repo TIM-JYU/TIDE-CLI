@@ -2,12 +2,13 @@
 
 import os
 import tim_api
-
+from utils import auth_test_user
 
 USERNAME = os.environ.get("TIM_USERNAME", "testuser1")
 
 def test_get_profile(user_setup):
     """Get user profile, check username correctness."""
+    auth_test_user()
     res = tim_api.get_current_user()
     assert res.user_name == USERNAME
 
