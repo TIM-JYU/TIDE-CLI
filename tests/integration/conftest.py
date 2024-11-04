@@ -17,10 +17,35 @@ user1 = User("testuser1", "test1pass")
 user2 = User("testuser2", "test2pass")
 
 
-@pytest.fixture(autouse=True, scope="module")
-def user_setup():
-    """Set up user login for running tests."""
+# @pytest.fixture(autouse=True, scope="module")
+# def user_setup():
+#     """Set up user login for running tests."""
+#     session = tim_api.get_session()
+#     tim_api.login(user1.username, user1.password, session)
+
+#     # By using tim_api, create some documents for testing purposes into local TIM.
+
+
+def auth_test_user():
     session = tim_api.get_session()
     tim_api.login(user1.username, user1.password, session)
+    
+def setup_tim_test_data():
+    tim_api.create_item(tim_api.ItemType.Document, "/users/test-user-1/kissa/istuu", "foo")
+    # TODO: Luo testidataa/dokumentteja ide clitä varten
+    pass
 
-    # By using tim_api, create some documents for testing purposes into local TIM.
+def teardown_tim_test_data():
+    # TODO: Poista testitapaus dokumentit lokaalista timistä
+    pass
+
+@pytest.fixture(scope="session", autouse=True)
+def tim_test_data():
+    auth_test_user()
+    setup_tim_test_data()
+
+    # wait for tests to run
+    yield
+    
+    # teardown
+
