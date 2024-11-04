@@ -25,13 +25,14 @@ user2 = User("testuser2", "test2pass")
 
 #     # By using tim_api, create some documents for testing purposes into local TIM.
 
+# TODO: install dependencies before tests
 
 def auth_test_user():
     session = tim_api.get_session()
     tim_api.login(user1.username, user1.password, session)
     
 def setup_tim_test_data():
-    tim_api.create_item(tim_api.ItemType.Document, "/users/test-user-1/kissa/istuu", "foo")
+    tim_api.create_or_get_item(tim_api.ItemType.Document, "/users/test-user-1/kissa/istuu")
     # TODO: Luo testidataa/dokumentteja ide clitä varten
     pass
 
@@ -48,4 +49,5 @@ def tim_test_data():
     yield
     
     # teardown
+    teardown_tim_test_data()
 
