@@ -1,5 +1,6 @@
 """Run integration tests either locally or in CI."""
 
+import json
 import os
 
 from selenium.webdriver.common.by import By
@@ -42,6 +43,22 @@ def test_get_courses():
 
     result = runner.invoke(courses)
     assert all([substr in result.output for substr in expected_substrings])
+
+
+def test_get_courses_json():
+    runner = CliRunner()
+    expected_substrings = ["course-1-landing-page", "exercise-1", "exercise-2", "course-2-landing-page", "exercise-a", "exercise-b"]
+
+    result = runner.invoke(courses, ["--json"])
+
+    try:
+        json.loads(result.output)
+    except json.JSONDecodeError:
+        pytest.fail("Output is not valid JSON")
+
+    assert all([substr in result.output for substr in expected_substrings])
+
+
 
 
 def test_submit_answer():
