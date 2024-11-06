@@ -47,7 +47,7 @@ def auth_test_user():
     
 
 def setup_tim_test_data():
-    tim_documents = parse_tim_document_tree(f"/users/test-user-1")
+    tim_documents = parse_tim_document_tree()
     for doc in tim_documents:
         tim_api.create_or_get_item(tim_api.ItemType.Document, doc.path)
         tim_api.upload_markdown(doc.path, doc.markdown)
@@ -66,16 +66,13 @@ class TimDocument:
     markdown: str
 
 
-def parse_tim_document_tree(user_path_root: str) -> List[TimDocument]:
-    # tim task document paths (the user path part) are currently hard coded to the .md -files in tim_document_tree directory
-    user_path_root = "/users/test-user-1"
+def parse_tim_document_tree() -> List[TimDocument]:
     tim_document_tree_root = Path(__file__).parent.joinpath('tim_document_tree')
-    print(tim_document_tree_root)
     parsed_docs: List[TimDocument] = []
     for dirpath, _, filenames in os.walk(tim_document_tree_root):
         for file in filenames:
             with open(Path(dirpath, file), "r") as md_file:
-                doc_path = str(PurePosixPath(user_path_root, PurePosixPath(dirpath).relative_to(tim_document_tree_root), PurePosixPath(file).stem))
+                doc_path = str(PurePosixPath(PurePosixPath(dirpath).relative_to(tim_document_tree_root), PurePosixPath(file).stem))
                 doc_markdown = md_file.read()
                 parsed_docs.append(TimDocument(path=doc_path, markdown=doc_markdown))
 
