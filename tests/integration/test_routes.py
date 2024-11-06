@@ -76,7 +76,7 @@ def test_get_courses_json():
 
 
 def test_create_single_task(tmp_dir):
-    """Check that creating a single task creates the expected task file with expected content in the expected location"""
+    """Check that creating a single task creates the expected task files with expected content in the expected location"""
     runner = CliRunner()
     exercise_id = "exercise-a"
     task_id = "t2"
@@ -95,7 +95,19 @@ def test_create_single_task(tmp_dir):
             content = file.read()
             assert content == "print(\"marsu maiskuttaa\")"
 
+    timdata_file_name = ".timdata"
+    timdata_file_path = Path(tmp_dir_path, exercise_id, task_id, timdata_file_name) 
+    assert timdata_file_path.is_file()
 
+
+
+def test_create_task_supplementary_files(tmp_dir):
+    # TODO: task with supplementary files
+    pass
+
+def test_create_all_tasks_for_exercise(tmp_dir):
+    # TODO: test that creating tasks with --all flag works
+    pass
 
 def test_submit_answer():
     """Submit an answer to a course."""
