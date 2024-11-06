@@ -22,9 +22,7 @@ def test_get_profile():
 
 def test_get_courses():
     """
-    Get all IDE compatible courses.
-
-    Courses has to be set to My courses bookmarks.
+    Check that all the task documents and courses are returned, and that the output is valid JSON.
     """
     # TODO: Implement fetching test, handle the keyring credentials
     # TODO: Keyring might be possible to bypass on testing
@@ -46,6 +44,9 @@ def test_get_courses():
 
 
 def test_get_courses_json():
+    """
+    Check that all the task documents and courses are returned, and that the output is valid JSON.
+    """
     runner = CliRunner()
     expected_substrings = ["course-1-landing-page", "exercise-1", "exercise-2", "course-2-landing-page", "exercise-a", "exercise-b"]
 
