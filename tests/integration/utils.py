@@ -1,4 +1,5 @@
 # from tim_api import ItemType, create_item, login, get_session
+from pathlib import Path
 import pytest
 import tim_api
 
