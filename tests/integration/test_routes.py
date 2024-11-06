@@ -28,7 +28,7 @@ def test_get_courses():
     # TODO: Implement fetching test, handle the keyring credentials
     # TODO: Keyring might be possible to bypass on testing
 
-    # Expected output of the command
+    # Example of expected output of the command, IDs will vary
     # Course: users/test-user-1/course-2/course-2-landing-page, ID: 95
     # - exercise-a, ID: 93, Path: users/test-user-1/course-2/exercise-a
     # - exercise-b, ID: 94, Path: users/test-user-1/course-2/exercise-b
