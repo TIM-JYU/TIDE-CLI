@@ -5,6 +5,7 @@ import os
 from pathlib import Path, PurePosixPath
 from typing import List
 import pytest
+import shutil
 import tim_api
 
 
@@ -65,9 +66,16 @@ def teardown_tim_test_data():
 
 @dataclass
 class TimDocument:
+    """Data used to create a TIM document."""
+
     path: str
+    """TIM path of the document."""
+
     markdown: str
+    """Markdown content of the document."""
+
     is_landing_page: bool
+    """Is the document the main document of a course"""
 
 
 def parse_tim_document_tree() -> List[TimDocument]:
@@ -84,6 +92,27 @@ def parse_tim_document_tree() -> List[TimDocument]:
                 )
                 doc_markdown = md_file.read()
                 is_landing_page = "landing" in filename
-                parsed_docs.append(TimDocument(path=doc_path, markdown=doc_markdown, is_landing_page=is_landing_page))
+                parsed_docs.append(
+                    TimDocument(
+                        path=doc_path,
+                        markdown=doc_markdown,
+                        is_landing_page=is_landing_page,
+                    )
+                )
 
     return parsed_docs
+
+
+tmp_dir_path = "tmp-test-resources"
+
+
+@pytest.fixture(scope="session", autouse=True)
+def resources():
+    """
+    Create and remove temporary directory for task files.
+    """
+    os.makedirs(tmp_dir_path, exist_ok=True)
+
+    yield
+
+    shutil.rmtree(tmp_dir_path)
