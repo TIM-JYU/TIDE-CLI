@@ -28,10 +28,21 @@ def test_get_courses():
     # TODO: Implement fetching test, handle the keyring credentials
     # TODO: Keyring might be possible to bypass on testing
 
+    # Expected output of the command
+    # Course: users/test-user-1/course-2/course-2-landing-page, ID: 95
+    # - exercise-a, ID: 93, Path: users/test-user-1/course-2/exercise-a
+    # - exercise-b, ID: 94, Path: users/test-user-1/course-2/exercise-b
+
+    # Course: users/test-user-1/course-1/course-1-landing-page, ID: 91
+    # - exercise-1, ID: 89, Path: users/test-user-1/course-1/exercise-1
+    # - exercise-2, ID: 90, Path: users/test-user-1/course-1/exercise-2
+
     runner = CliRunner()
+    expected_substrings = ["course-1-landing-page", "exercise-1", "exercise-2", "course-2-landing-page", "exercise-a", "exercise-b"]
+
     result = runner.invoke(courses)
-    print(result.output)
-    assert result.output == "kissa istuu"
+    assert all([substr in result.output for substr in expected_substrings])
+
 
 def test_submit_answer():
     """Submit an answer to a course."""

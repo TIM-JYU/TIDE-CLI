@@ -687,7 +687,7 @@ def add_document_to_my_courses(doc_path: str) -> None:
             f"{TIM_DOMAIN}/bookmarks/add",
             json = {
                 "group": "My courses",
-                "link": f"/view{doc_path}",
+                "link": f"/view/{doc_path}",
                 "name": doc_path
                 }
             )
