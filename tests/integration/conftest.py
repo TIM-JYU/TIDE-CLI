@@ -52,6 +52,8 @@ def setup_tim_test_data():
     for doc in tim_documents:
         tim_api.create_or_get_item(tim_api.ItemType.Document, doc.path)
         tim_api.upload_markdown(doc.path, doc.markdown)
+        if doc.is_landing_page:
+            tim_api.add_document_to_my_courses(doc.path)
     pass
 
 
@@ -65,21 +67,23 @@ def teardown_tim_test_data():
 class TimDocument:
     path: str
     markdown: str
+    is_landing_page: bool
 
 
 def parse_tim_document_tree() -> List[TimDocument]:
     tim_document_tree_root = Path(__file__).parent.joinpath("tim_document_tree")
     parsed_docs: List[TimDocument] = []
     for dirpath, _, filenames in os.walk(tim_document_tree_root):
-        for file in filenames:
-            with open(Path(dirpath, file), "r") as md_file:
+        for filename in filenames:
+            with open(Path(dirpath, filename), "r") as md_file:
                 doc_path = str(
                     PurePosixPath(
                         PurePosixPath(dirpath).relative_to(tim_document_tree_root),
-                        PurePosixPath(file).stem,
+                        PurePosixPath(filename).stem,
                     )
                 )
                 doc_markdown = md_file.read()
-                parsed_docs.append(TimDocument(path=doc_path, markdown=doc_markdown))
+                is_landing_page = "landing" in filename
+                parsed_docs.append(TimDocument(path=doc_path, markdown=doc_markdown, is_landing_page=is_landing_page))
 
     return parsed_docs

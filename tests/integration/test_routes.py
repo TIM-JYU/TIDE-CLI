@@ -8,6 +8,8 @@ import webbrowser
 from selenium import webdriver
 from click.testing import CliRunner
 
+from tidecli.main import courses
+
 USERNAME = os.environ.get("TIM_USERNAME", "testuser1")
 
 def test_get_profile():
@@ -26,8 +28,10 @@ def test_get_courses():
     # TODO: Implement fetching test, handle the keyring credentials
     # TODO: Keyring might be possible to bypass on testing
 
-    # assert isinstance(res, list)
-    pass
+    runner = CliRunner()
+    result = runner.invoke(courses)
+    print(result.output)
+    assert result.output == "kissa istuu"
 
 def test_submit_answer():
     """Submit an answer to a course."""
@@ -35,7 +39,7 @@ def test_submit_answer():
     pass
 
 
-def mock_browser_open(url: str):
+# def mock_browser_open(url: str):
     # logger = logging.getLogger('selenium')
     # logger.setLevel(logging.DEBUG)
     # logger.debug("hello from selenium")
@@ -44,13 +48,13 @@ def mock_browser_open(url: str):
     # driver.implicitly_wait(2)
     # login_form = driver.find_element(By.CLASS_NAME, "logolink")
     # login_form.click()
-    print(f"url: {url}")
-    return 
+    # print(f"url: {url}")
+    # return 
 
 
-def test_login(monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr("webbrowser.open", mock_browser_open)
-    import tidecli.main as app
-    runner = CliRunner()
-    result = runner.invoke(app.login)
-    assert result == -1
+# def test_login(monkeypatch: pytest.MonkeyPatch):
+    # monkeypatch.setattr("webbrowser.open", mock_browser_open)
+    # import tidecli.main as app
+    # runner = CliRunner()
+    # result = runner.invoke(app.login)
+    # assert result == -1

@@ -678,3 +678,19 @@ def upload_markdown(doc_path: str, markdown: str) -> None:
 
     if r.status_code != 200:
         raise Exception(f"Failed to update document: {r.status_code}, {r.text}")
+
+
+def add_document_to_my_courses(doc_path: str) -> None:
+    session = get_session()
+
+    r = session.post(
+            f"{TIM_DOMAIN}/bookmarks/add",
+            json = {
+                "group": "My courses",
+                "link": f"/view{doc_path}",
+                "name": doc_path
+                }
+            )
+
+    if r.status_code != 200:
+        raise Exception(f"Failed to add document to bookmarks: {r.status_code}, {r.text}")
