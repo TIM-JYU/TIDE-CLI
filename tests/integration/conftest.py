@@ -103,11 +103,11 @@ def parse_tim_document_tree() -> List[TimDocument]:
     return parsed_docs
 
 
+# TODO: create a constants file or something?
 tmp_dir_path = "tmp-test-resources"
 
-
-@pytest.fixture(scope="session", autouse=True)
-def resources():
+@pytest.fixture(scope="function")
+def tmp_dir():
     """
     Create and remove temporary directory for task files.
     """
