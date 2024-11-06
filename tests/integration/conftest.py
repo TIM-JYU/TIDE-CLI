@@ -28,7 +28,7 @@ def tim_test_data():
 
     # wait for tests to run
     yield
-    
+
     # teardown
     teardown_tim_test_data()
 
@@ -41,10 +41,11 @@ def tim_test_data():
 
 #     # By using tim_api, create some documents for testing purposes into local TIM.
 
+
 def auth_test_user():
     session = tim_api.get_session()
     tim_api.login(user1.username, user1.password, session)
-    
+
 
 def setup_tim_test_data():
     tim_documents = parse_tim_document_tree()
@@ -67,12 +68,17 @@ class TimDocument:
 
 
 def parse_tim_document_tree() -> List[TimDocument]:
-    tim_document_tree_root = Path(__file__).parent.joinpath('tim_document_tree')
+    tim_document_tree_root = Path(__file__).parent.joinpath("tim_document_tree")
     parsed_docs: List[TimDocument] = []
     for dirpath, _, filenames in os.walk(tim_document_tree_root):
         for file in filenames:
             with open(Path(dirpath, file), "r") as md_file:
-                doc_path = str(PurePosixPath(PurePosixPath(dirpath).relative_to(tim_document_tree_root), PurePosixPath(file).stem))
+                doc_path = str(
+                    PurePosixPath(
+                        PurePosixPath(dirpath).relative_to(tim_document_tree_root),
+                        PurePosixPath(file).stem,
+                    )
+                )
                 doc_markdown = md_file.read()
                 parsed_docs.append(TimDocument(path=doc_path, markdown=doc_markdown))
 
