@@ -1,4 +1,4 @@
-```
+```{settings=""}
 auto_number_headings: 0
 ideCourse:
     - path: users/test-user-1/course-2/exercise-a
