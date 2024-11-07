@@ -1,25 +1,22 @@
 """Run integration tests either locally or in CI."""
 
 import json
+from typing import List
 import pytest
 from click.testing import CliRunner
 from tidecli.main import courses
 
 
-def test_get_courses_outputs_expected_data():
+@pytest.mark.parametrize(
+        'extra_flags', [
+            ([]),
+            (['--json'])
+            ]
+        )
+def test_get_courses_outputs_expected_data(extra_flags: List[str]):
     """
-    Check that all the task documents and courses are returned, and that the output is valid JSON.
+    Check that output includes names of all the courses and task documents.
     """
-
-    # Example of expected output of the command, IDs will vary
-    # Course: users/test-user-1/course-2/course-2-landing-page, ID: 95
-    # - exercise-a, ID: 93, Path: users/test-user-1/course-2/exercise-a
-    # - exercise-b, ID: 94, Path: users/test-user-1/course-2/exercise-b
-
-    # Course: users/test-user-1/course-1/course-1-landing-page, ID: 91
-    # - exercise-1, ID: 89, Path: users/test-user-1/course-1/exercise-1
-    # - exercise-2, ID: 90, Path: users/test-user-1/course-1/exercise-2
-
     runner = CliRunner()
     expected_substrings = [
         "course-1-landing-page",
@@ -30,24 +27,24 @@ def test_get_courses_outputs_expected_data():
         "exercise-b",
     ]
 
-    result = runner.invoke(courses)
-    assert all([substr in result.output for substr in expected_substrings])
+    result = runner.invoke(courses, extra_flags)
+    assert all([substr in result.output for substr in expected_substrings]), f"Output is missing course and/or task names when run with flags {extra_flags}."
 
 
-def test_get_courses_with_json_flag_outputs_expected_data():
-    runner = CliRunner()
-    expected_substrings = [
-        "course-1-landing-page",
-        "exercise-1",
-        "exercise-2",
-        "course-2-landing-page",
-        "exercise-a",
-        "exercise-b",
-    ]
+# def test_get_courses_with_json_flag_outputs_expected_data():
+#     runner = CliRunner()
+#     expected_substrings = [
+#         "course-1-landing-page",
+#         "exercise-1",
+#         "exercise-2",
+#         "course-2-landing-page",
+#         "exercise-a",
+#         "exercise-b",
+#     ]
 
-    result = runner.invoke(courses, ["--json"])
+#     result = runner.invoke(courses, ["--json"])
 
-    assert all([substr in result.output for substr in expected_substrings])
+#     assert all([substr in result.output for substr in expected_substrings])
 
 
 def test_get_courses_with_json_flag_outputs_valid_json():
