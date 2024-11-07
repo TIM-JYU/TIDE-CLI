@@ -30,7 +30,7 @@ postprogram: |!!
 
 ``` {#PythonHelloWorld plugin="csPlugin" ideTask="t2" id="zDLesD5M3Qqg"}
 type: py
-filename: hello.py
+filename: animals.py
 fullprogram: |!!
 print("kissa istuu")
 // BYCODEBEGIN
@@ -39,7 +39,7 @@ print("koira haukkuu")
 print("hevonen nauraa")
 !!
 ide_extra_files:
-  - file_name: kissa.txt
+  - filename: kissa.txt
     content: |!!
     istuu 
     ja 
