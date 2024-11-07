@@ -99,28 +99,23 @@ class ExpectedTaskFile:
             "exercise-1",
             "t3",
             [
-                ExpectedTaskFile(
-                    filename="hello.cs"
-                ),
+                ExpectedTaskFile(filename="hello.cs"),
                 ExpectedTaskFile(filename="t3.csproj"),
                 ExpectedTaskFile(filename=".timdata"),
-
-                ]
-            ),
-        # TODO: task with supplementary files from TIM source
-        # TODO: task with supplementary files from external source
+            ],
+        ),
+        # task with supplementary files from external source
         (
             "users/test-user-1/course-2",
             "exercise-b",
             "t1",
             [
-                ExpectedTaskFile(
-                    filename="hevonen.py"
-                ),
+                ExpectedTaskFile(filename="hevonen.py"),
                 ExpectedTaskFile(filename="logo.svg"),
                 ExpectedTaskFile(filename=".timdata"),
-                ]
-            )
+            ],
+        ),
+        # TODO: task with supplementary files from TIM source
     ],
 )
 def test_create_single_task_creates_files_with_expected_content(
