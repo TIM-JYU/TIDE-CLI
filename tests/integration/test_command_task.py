@@ -106,9 +106,21 @@ class ExpectedTaskFile:
                 ExpectedTaskFile(filename=".timdata"),
 
                 ]
-            )
+            ),
         # TODO: task with supplementary files from TIM source
         # TODO: task with supplementary files from external source
+        (
+            "users/test-user-1/course-2",
+            "exercise-b",
+            "t1",
+            [
+                ExpectedTaskFile(
+                    filename="hevonen.py"
+                ),
+                ExpectedTaskFile(filename="logo.svg"),
+                ExpectedTaskFile(filename=".timdata"),
+                ]
+            )
     ],
 )
 def test_create_single_task_creates_files_with_expected_content(
