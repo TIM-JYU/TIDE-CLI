@@ -128,6 +128,7 @@ def list_tasks(demo_path: str, jsondata: bool) -> None:
 
     if jsondata:
         # Create JSON object list
+        # TODO: the json printed contains a ton of unnecessary information
         tasks_json = [t.to_json() for t in tasks]
         click.echo(json.dumps(tasks_json, ensure_ascii=False, indent=4))
 
