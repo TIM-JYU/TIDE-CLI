@@ -10,8 +10,6 @@ def test_get_courses():
     """
     Check that all the task documents and courses are returned, and that the output is valid JSON.
     """
-    # TODO: Implement fetching test, handle the keyring credentials
-    # TODO: Keyring might be possible to bypass on testing
 
     # Example of expected output of the command, IDs will vary
     # Course: users/test-user-1/course-2/course-2-landing-page, ID: 95
