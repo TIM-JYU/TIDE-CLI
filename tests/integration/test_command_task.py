@@ -21,19 +21,6 @@ def test_task_list_json():
 
 # TASK CREATE
 
-
-def test_create_task_with_supplementary_files_defined_in_csplugin(tmp_dir):
-    pass
-
-
-def test_create_task_with_supplementary_files_from_external_source(tmp_dir):
-    pass
-
-
-def test_create_task_with_supplementary_files_from_tim_source(tmp_dir):
-    pass
-
-
 @dataclass
 class ExpectedTaskFile:
     expected_filename: str
@@ -55,7 +42,7 @@ class ExpectedTaskFile:
                     expected_filename="hello.py",
                     expected_content='print("marsu maiskuttaa")',
                 ),
-                ExpectedTaskFile(expected_filename=".timdata")
+                ExpectedTaskFile(expected_filename=".timdata"),
             ],
         ),
         # task with supplementary files defined in markdown
@@ -69,12 +56,13 @@ class ExpectedTaskFile:
                     # TODO: how to handle file content with BYCODE tags
                 ),
                 ExpectedTaskFile(
-                    expected_filename="kissa.txt", expected_content="istuu\nja\nnaukuu\n"
+                    expected_filename="kissa.txt",
+                    expected_content="istuu\nja\nnaukuu\n",
                 ),
                 ExpectedTaskFile(
                     expected_filename="koira.dat", expected_content="seisoo ja haukkuu"
                 ),
-                ExpectedTaskFile(expected_filename=".timdata")
+                ExpectedTaskFile(expected_filename=".timdata"),
             ],
         ),
         # TODO: task with supplementary files from TIM source
