@@ -6,7 +6,7 @@ from click.testing import CliRunner
 from tidecli.main import courses
 
 
-def test_get_courses():
+def test_get_courses_outputs_expected_data():
     """
     Check that all the task documents and courses are returned, and that the output is valid JSON.
     """
@@ -34,10 +34,7 @@ def test_get_courses():
     assert all([substr in result.output for substr in expected_substrings])
 
 
-def test_get_courses_json():
-    """
-    Check that all the task documents and courses are returned, and that the output is valid JSON.
-    """
+def test_get_courses_with_json_flag_outputs_expected_data():
     runner = CliRunner()
     expected_substrings = [
         "course-1-landing-page",
@@ -50,9 +47,18 @@ def test_get_courses_json():
 
     result = runner.invoke(courses, ["--json"])
 
+    assert all([substr in result.output for substr in expected_substrings])
+
+
+def test_get_courses_with_json_flag_outputs_valid_json():
+    """
+    Check that all the task documents and courses are returned, and that the output is valid JSON.
+    """
+    runner = CliRunner()
+
+    result = runner.invoke(courses, ["--json"])
+
     try:
         json.loads(result.output)
     except json.JSONDecodeError:
         pytest.fail("Output is not valid JSON")
-
-    assert all([substr in result.output for substr in expected_substrings])

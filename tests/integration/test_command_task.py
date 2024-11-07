@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import json
 from pathlib import Path, PurePath
 from typing import List
 
@@ -8,25 +9,57 @@ from conftest import tmp_dir_path
 
 from tidecli.main import task
 
+
 # TASK LIST
 
 
-def test_task_list():
+@pytest.mark.parametrize(
+    "exercise_path, expected_task_ids",
+    [
+        ("users/test-user-1/course-1/exercise-1", ["t1", "t2", "t3"]),
+        ("users/test-user-1/course-1/exercise-2", ["33232123"]),
+        ("users/test-user-1/course-2/exercise-a", ["t1", "t2", "t4"]),
+        ("users/test-user-1/course-2/exercise-b", ["t1"]),
+    ],
+)
+def test_task_list_outputs_expected_data(
+    exercise_path: str, expected_task_ids: List[str]
+):
+    runner = CliRunner()
+    result = runner.invoke(
+        task,
+        ["list", exercise_path],
+    )
+
+    assert all([task_id in result.output for task_id in expected_task_ids])
+
+
+def test_task_list_with_json_flag_outputs_valid_json():
+    runner = CliRunner()
+    result = runner.invoke(
+        task,
+        ["list", "users/test-user-1/course-1/exercise-1", "--json"],
+    )
+
+    try:
+        json.loads(result.output)
+    except json.JSONDecodeError:
+        pytest.fail("Output is not valid JSON")
     pass
 
 
-def test_task_list_json():
+def test_task_list_with_json_flag_outputs_expected_data():
+    # TODO: the current "task list --json" prints tons of unnecessary information
     pass
 
 
 # TASK CREATE
 
+
 @dataclass
 class ExpectedTaskFile:
     filename: str
-    content: str | None = (
-        None  # None is used to ignore the content during tests
-    )
+    content: str | None = None  # None is used to ignore the content during tests
 
 
 @pytest.mark.parametrize(
@@ -59,9 +92,7 @@ class ExpectedTaskFile:
                     filename="kissa.txt",
                     content="istuu\nja\nnaukuu\n",
                 ),
-                ExpectedTaskFile(
-                    filename="koira.dat", content="seisoo ja haukkuu"
-                ),
+                ExpectedTaskFile(filename="koira.dat", content="seisoo ja haukkuu"),
                 ExpectedTaskFile(filename=".timdata"),
             ],
         ),
