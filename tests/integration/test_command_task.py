@@ -23,8 +23,8 @@ def test_task_list_json():
 
 @dataclass
 class ExpectedTaskFile:
-    expected_filename: str
-    expected_content: str | None = (
+    filename: str
+    content: str | None = (
         None  # None is used to ignore the content during tests
     )
 
@@ -39,10 +39,10 @@ class ExpectedTaskFile:
             "t2",
             [
                 ExpectedTaskFile(
-                    expected_filename="hello.py",
-                    expected_content='print("marsu maiskuttaa")',
+                    filename="hello.py",
+                    content='print("marsu maiskuttaa")',
                 ),
-                ExpectedTaskFile(expected_filename=".timdata"),
+                ExpectedTaskFile(filename=".timdata"),
             ],
         ),
         # task with supplementary files defined in markdown
@@ -52,17 +52,17 @@ class ExpectedTaskFile:
             "t2",
             [
                 ExpectedTaskFile(
-                    expected_filename="animals.py"
+                    filename="animals.py"
                     # TODO: how to handle file content with BYCODE tags
                 ),
                 ExpectedTaskFile(
-                    expected_filename="kissa.txt",
-                    expected_content="istuu\nja\nnaukuu\n",
+                    filename="kissa.txt",
+                    content="istuu\nja\nnaukuu\n",
                 ),
                 ExpectedTaskFile(
-                    expected_filename="koira.dat", expected_content="seisoo ja haukkuu"
+                    filename="koira.dat", content="seisoo ja haukkuu"
                 ),
-                ExpectedTaskFile(expected_filename=".timdata"),
+                ExpectedTaskFile(filename=".timdata"),
             ],
         ),
         # TODO: task with supplementary files from TIM source
@@ -93,20 +93,20 @@ def test_create_task_single_creates_task_files_with_expected_content(
 
     for expected_file in expected_files:
         task_file_path = Path(
-            tmp_dir_path, exercise_id, task_id, expected_file.expected_filename
+            tmp_dir_path, exercise_id, task_id, expected_file.filename
         )
 
         try:
             file = open(task_file_path)
         except FileNotFoundError:
             pytest.fail(
-                f'Expected file "{expected_file.expected_filename}" not found in temporary directory.'
+                f'Expected file "{expected_file.filename}" not found in temporary directory.'
             )
         else:
-            if expected_file.expected_content is not None:
+            if expected_file.content is not None:
                 with file:
                     content = file.read()
-                    assert content == expected_file.expected_content
+                    assert content == expected_file.content
 
 
 def test_create_task_single_creates_timdata_file(tmp_dir):
