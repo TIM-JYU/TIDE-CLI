@@ -1,6 +1,5 @@
 """Run integration tests either locally or in CI."""
 
-import json
 from typing import List
 import pytest
 from click.testing import CliRunner
