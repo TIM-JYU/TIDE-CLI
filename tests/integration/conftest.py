@@ -106,6 +106,7 @@ def parse_tim_document_tree() -> List[TimDocument]:
 # TODO: create a constants file or something?
 tmp_dir_path = "tmp-test-resources"
 
+
 @pytest.fixture(scope="function")
 def tmp_dir():
     """
