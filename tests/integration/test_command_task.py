@@ -7,6 +7,7 @@ import pytest
 from click.testing import CliRunner
 from conftest import tmp_dir_path
 
+from utils import validate_json
 from tidecli.main import task
 
 
@@ -41,11 +42,7 @@ def test_task_list_with_json_flag_outputs_valid_json():
         ["list", "users/test-user-1/course-1/exercise-1", "--json"],
     )
 
-    try:
-        json.loads(result.output)
-    except json.JSONDecodeError:
-        pytest.fail("Output is not valid JSON")
-    pass
+    validate_json(result.output)
 
 
 def test_task_list_with_json_flag_outputs_expected_data():
