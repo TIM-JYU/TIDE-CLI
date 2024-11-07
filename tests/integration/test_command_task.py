@@ -20,13 +20,16 @@ def test_task_list_json():
 # TASK CREATE
 
 
-def test_create_task_single(tmp_dir):
+def test_create_task_single_creates_task_file(tmp_dir):
     """Check that creating a single task creates the expected task files with expected content in the expected location"""
     runner = CliRunner()
     exercise_id = "exercise-a"
     task_id = "t2"
+    task_file_name = "hello.py"
+    task_file_path = Path(tmp_dir_path, exercise_id, task_id, task_file_name)
+    expected_file_content = 'print("marsu maiskuttaa")'
 
-    result = runner.invoke(
+    runner.invoke(
         task,
         [
             "create",
@@ -36,10 +39,7 @@ def test_create_task_single(tmp_dir):
             tmp_dir_path,
         ],
     )
-    print(result.output)
 
-    task_file_name = "hello.py"
-    task_file_path = Path(tmp_dir_path, exercise_id, task_id, task_file_name)
     try:
         file = open(task_file_path)
     except FileNotFoundError:
@@ -49,15 +49,44 @@ def test_create_task_single(tmp_dir):
     else:
         with file:
             content = file.read()
-            assert content == 'print("marsu maiskuttaa")'
+            assert content == expected_file_content
 
+
+def test_create_task_single_creates_timdata_file(tmp_dir):
+    exercise_id = "exercise-a"
+    task_id = "t2"
     timdata_file_name = ".timdata"
     timdata_file_path = Path(tmp_dir_path, exercise_id, task_id, timdata_file_name)
+    runner = CliRunner()
+
+    runner.invoke(
+        task,
+        [
+            "create",
+            f"users/test-user-1/course-2/{exercise_id}",
+            task_id,
+            "-d",
+            tmp_dir_path,
+        ],
+    )
+
     assert timdata_file_path.is_file()
 
 
-def test_create_task_with_supplementary_files(tmp_dir):
-    # TODO: task with supplementary files
+# @pytest.mark.parametrize(
+#         'doc_path, task_id, expected_files', [
+            
+#             ]
+#         )
+# def test_create_task_with_supplementary_files_defined_in_csplugin(tmp_dir):
+#     pass
+
+
+def test_create_task_with_supplementary_files_from_external_source(tmp_dir):
+    pass
+
+
+def test_create_task_with_supplementary_files_from_tim_source(tmp_dir):
     pass
 
 
