@@ -213,18 +213,20 @@ def test_task_submit_invalid_meta_data():
 
 
 @pytest.mark.parametrize(
-        "replace_line_idx, expected_to_exist_after_reset, error_msg", [
-            # TODO: change the fail messages to not use "bycode"
-            (0, False, "Changes before bycode tag were not reset"),
-            (-1, False, "Changes after bycode tag were not reset"),
-            (5, True, "Changes between bycode tags were reset"),
-            ]
-        )
-def test_task_reset(tmp_dir, replace_line_idx: int, expected_to_exist_after_reset: bool, error_msg: str):
+    "replace_line_idx, expected_to_exist_after_reset, error_msg",
+    [
+        # TODO: change the fail messages to not use "bycode"
+        (0, False, "Changes before bycode tag were not reset"),
+        (-1, False, "Changes after bycode tag were not reset"),
+        (5, True, "Changes between bycode tags were reset"),
+    ],
+)
+def test_task_reset(
+    tmp_dir, replace_line_idx: int, expected_to_exist_after_reset: bool, error_msg: str
+):
     exercise_id = "exercise-1"
     task_id = "t3"
     inserted_str = "ThIsLiNeWaSeDiTeDwHiLeTeStInG"
-
 
     runner = CliRunner()
 
@@ -241,7 +243,7 @@ def test_task_reset(tmp_dir, replace_line_idx: int, expected_to_exist_after_rese
 
     task_file_path = Path(tmp_dir_path, exercise_id, task_id, "hello.cs")
 
-    with open(task_file_path, 'r+') as f:
+    with open(task_file_path, "r+") as f:
         file_content = f.readlines()
         file_content[replace_line_idx] = inserted_str
 
@@ -254,11 +256,12 @@ def test_task_reset(tmp_dir, replace_line_idx: int, expected_to_exist_after_rese
         [
             "reset",
             str(task_file_path),
-        ]
+        ],
     )
 
-    with open(task_file_path, 'r') as f:
+    with open(task_file_path, "r") as f:
         reset_file_content = f.read()
 
-    assert (inserted_str in reset_file_content) == expected_to_exist_after_reset, error_msg
-
+    assert (
+        inserted_str in reset_file_content
+    ) == expected_to_exist_after_reset, error_msg
