@@ -262,10 +262,3 @@ def test_task_reset(tmp_dir, replace_line_idx: int, expected_to_exist_after_rese
 
     assert (inserted_str in reset_file_content) == expected_to_exist_after_reset, error_msg
 
-
-
-
-
-
-def test_task_reset_does_not_reset_sections_that_are_included_in_submit(tmp_dir):
-    pass
