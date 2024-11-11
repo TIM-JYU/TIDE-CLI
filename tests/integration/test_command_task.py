@@ -1,4 +1,3 @@
-import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
@@ -133,7 +132,7 @@ def test_create_single_task_creates_files_with_expected_content(
         task,
         [
             "create",
-            f"{course_path}/{exercise_id}",
+            str(Path(course_path, exercise_id)),
             task_id,
             "-d",
             tmp_dir_path,
@@ -170,7 +169,7 @@ def test_create_task_single_creates_timdata_file(tmp_dir):
         task,
         [
             "create",
-            f"users/test-user-1/course-2/{exercise_id}",
+            str(Path("users/test-user-1/course-2", exercise_id)),
             task_id,
             "-d",
             tmp_dir_path,
@@ -206,7 +205,7 @@ def test_create_task_with_force_flag(exercise_id: str, course_path: str, task_id
         [
             "create",
             current_exercise,
-           task_id,
+            task_id,
             "-f",
             "-d",
             tmp_dir_path,
@@ -233,7 +232,7 @@ def test_create_all_tasks_for_exercise(exercise: str, exercise_path: str, expect
         task,
         [
             "create",
-            f"{exercise_path}",
+            str(Path(exercise_path)),
             "-a",
             "-d",
             tmp_dir_path,
@@ -293,7 +292,7 @@ def test_task_reset(
         task,
         [
             "create",
-            f"users/test-user-1/course-1/{exercise_id}",
+            str(Path("users/test-user-1/course-1", exercise_id)),
             task_id,
             "-d",
             tmp_dir_path,
