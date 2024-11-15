@@ -24,6 +24,7 @@ task_exercises_params = [
 ]
 
 # TODO: content attributes may have to be match actual content
+# TODO: refactor params structure, to be tested per file
 task_content_params = [
     # task with no supplementary files
     (
@@ -115,7 +116,7 @@ def test_task_list_with_json_flag_outputs_expected_data():
 
 
 # TASK CREATE
-
+# TODO: helpperit omaan luokkaansa, esim. tiedostojen lukeminen tai luominen ym.
 
 @pytest.mark.parametrize("course_path, exercise_id, task_id, expected_files", task_content_params)
 def test_create_single_task_creates_files_with_expected_content(
@@ -179,6 +180,7 @@ def test_create_task_single_creates_timdata_file(tmp_dir):
     assert timdata_file_path.is_file()
 
 
+# TODO: yksinkertaista, tässä riittää testata esim. vain yksi tiedosto
 @pytest.mark.parametrize("course_path, exercise_id, task_id, expected_files", task_content_params)
 def test_create_task_with_force_flag(exercise_id: str, course_path: str, task_id: str, expected_files: list, tmp_dir):
     current_exercise = str(Path(course_path, exercise_id))
@@ -212,6 +214,7 @@ def test_create_task_with_force_flag(exercise_id: str, course_path: str, task_id
         ],
     )
 
+    # TODO: Kommentoi
     for expected_file in expected_files:
         task_file = open(Path(local_path, expected_file.filename), "r")
         content = task_file.read()
@@ -243,6 +246,9 @@ def test_create_all_tasks_for_exercise(exercise: str, exercise_path: str, expect
         assert Path(tmp_dir_path, exercise, task_id).is_dir()
         assert Path(tmp_dir_path, exercise, task_id, ".timdata").is_file()
 
+@pytest.mark.xfailed
+def test_create_a_task_external_source():
+    failll
 
 # TASK SUBMIT
 
