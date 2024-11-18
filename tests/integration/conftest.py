@@ -55,7 +55,6 @@ def setup_tim_test_data():
         tim_api.upload_markdown(doc.path, doc.markdown)
         if doc.is_landing_page:
             tim_api.add_document_to_my_courses(doc.path)
-    pass
 
 
 def teardown_tim_test_data():
