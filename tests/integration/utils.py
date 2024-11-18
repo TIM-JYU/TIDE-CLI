@@ -3,12 +3,12 @@ import json
 import pytest
 
 
-# TODO: make this return bool and rename
-def validate_json(data: str):
+def is_valid_json(data: str) -> bool:
     try:
         json.loads(data)
     except json.JSONDecodeError:
-        pytest.fail("Output is not valid JSON")
+        return False
+    return True
 
 def directory_file_names_match_expected(exercise_id: str, task_id: str | None, temp_dir: str) -> bool:
     pass
