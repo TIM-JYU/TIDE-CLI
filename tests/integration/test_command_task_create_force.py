@@ -52,7 +52,7 @@ def test_create_task_with_force_flag(exercise_id: str, course_path: str, task_id
         # TODO: improve content asserts, now just check the content change
         assert content != "foofoo"
 
-    # TODO: CLI could be improved to return other return codes also than just 0.
+    # TODO:  CLI could be improved to return other return codes also than just 0.
     assert run.exit_code == 0
 
 
