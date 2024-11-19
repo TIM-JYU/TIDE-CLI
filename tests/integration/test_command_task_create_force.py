@@ -1,8 +1,9 @@
 from pathlib import Path
-import pytest
 from click.testing import CliRunner
 from conftest import tmp_dir_path
 from tidecli.main import task
+from utils import directory_file_contents_match_expected
+import shutil
 
 task_content_params = [
     (
@@ -14,38 +15,38 @@ task_content_params = [
 ]
 
 
-# TODO: yksinkertaista, tässä riittää testata esim. vain yksi tiedosto
-@pytest.mark.parametrize("course_path, exercise_id, task_id, expected_files",
-                         task_content_params)
-def test_create_task_with_force_flag(exercise_id: str,
-                                     course_path: str,
-                                     task_id: str,
-                                     expected_files: list,
-                                     tmp_dir):
-    current_exercise = str(Path(course_path, exercise_id))
+def test_create_single_task_with_force_flag(tmp_dir):
+    """
+    Test that the task files are overwritten when the force flag is used.
+
+    param: tmp_dir: Temporary directory for the test as a fixture.
+    """
+
+    # Define variables for paths and file name
+    course_path = "users/test-user-1/course-1/"
+    exercise_id = "exercise-1"
+    task_id = "t1"
+    task_file = "hello.cs"
+    exercise_path = str(Path(course_path, exercise_id))
     local_path = Path(tmp_dir_path, exercise_id, task_id)
+
+    # Copy the expected task files to the local path
+    shutil.copytree(
+        Path("./tests/integration/expected_task_files"),
+        local_path)
+
+    # Modify the file
+    hello = open(Path(local_path, task_file), "w")
+    hello.write("foofoo")
+    hello.close()
+
+    # Run the command to overfrite the task files
     runner = CliRunner()
     runner.invoke(
         task,
         [
             "create",
-            current_exercise,
-            task_id,
-            "-d",
-            tmp_dir_path,
-        ],
-    )
-
-    for expected_file in expected_files:
-        with open(Path(local_path, expected_file.filename), "w") as task_file:
-            task_file.write("foofoo")
-            task_file.close()
-
-    run = runner.invoke(
-        task,
-        [
-            "create",
-            current_exercise,
+            exercise_path,
             task_id,
             "-f",
             "-d",
@@ -53,14 +54,8 @@ def test_create_task_with_force_flag(exercise_id: str,
         ],
     )
 
-    # TODO: Kommentoi
-    for expected_file in expected_files:
-        task_file = open(Path(local_path, expected_file.filename), "r")
-        content = task_file.read()
-        task_file.close()
+    # TODO: CLI could be improved to return other return codes also than just 0.
+    # TODO: Because if returncode will be other than 0, then the test will fail.
 
-        # TODO: improve content asserts, now just check the content change
-        assert content != "foofoo"
-
-    # TODO:  CLI could be improved to return other return codes also than just 0.
-    assert run.exit_code == 0
+    # Check that the file has been overwritten
+    assert directory_file_contents_match_expected(exercise_id, task_id, local_path)

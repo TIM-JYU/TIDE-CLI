@@ -15,5 +15,5 @@ def directory_file_names_match_expected(exercise_id: str, task_id: str | None, t
 
 
 def directory_file_contents_match_expected(exercise_id: str, task_id: str | None, temp_dir: str) -> bool:
-    pass
+    return False
     
