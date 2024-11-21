@@ -1,7 +1,5 @@
 import json
 
-import pytest
-
 
 def is_valid_json(data: str) -> bool:
     try:
@@ -10,10 +8,10 @@ def is_valid_json(data: str) -> bool:
         return False
     return True
 
-def directory_file_names_match_expected(exercise_id: str, task_id: str | None, temp_dir: str) -> bool:
+
+def temporary_directory_file_structure_matches_expected(exercise_id: str, task_id: str | None) -> bool:
     pass
 
 
-def directory_file_contents_match_expected(exercise_id: str, task_id: str | None, temp_dir: str) -> bool:
-    return False
-    
+def temporary_directory_file_contents_match_expected(exercise_id: str, task_id: str | None) -> bool:
+    pass
