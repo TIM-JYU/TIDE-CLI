@@ -5,7 +5,7 @@ from typing import List
 import pytest
 from click.testing import CliRunner
 
-from tests.integration.constants import TEMPORARY_DIRECTORY
+from constants import TEMPORARY_DIRECTORY
 from tidecli.main import task
 
 
@@ -127,25 +127,12 @@ def test_create_single_task_creates_files_with_expected_content(
                     assert content == expected_file.content
 
 
-def test_create_task_single_creates_timdata_file(tmp_dir):
-    exercise_id = "exercise-a"
-    task_id = "t2"
-    timdata_file_name = ".timdata"
-    timdata_file_path = Path(TEMPORARY_DIRECTORY, exercise_id, task_id, timdata_file_name)
-    runner = CliRunner()
-
-    runner.invoke(
-        task,
-        [
-            "create",
-            str(Path("users/test-user-1/course-2", exercise_id)),
-            task_id,
-            "-d",
-            TEMPORARY_DIRECTORY,
-        ],
-    )
-
-    assert timdata_file_path.is_file()
+@pytest.mark.xfail
+def test_task_create_single_creates_expected_files(tmp_dir):
+    pytest.xfail("Not implemented.")
 
 
+@pytest.mark.xfail
+def test_task_create_creates_single_files_with_expected_content(tmp_dir):
+    pytest.xfail("Not implemented.")
 

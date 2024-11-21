@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytest
 from click.testing import CliRunner
-from tests.integration.constants import TEMPORARY_DIRECTORY
+from constants import TEMPORARY_DIRECTORY
 from tidecli.main import task
 
 task_exercises_params = [

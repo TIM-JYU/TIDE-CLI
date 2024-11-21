@@ -1,8 +1,8 @@
 from pathlib import Path
 from click.testing import CliRunner
-from tests.integration.constants import TEMPORARY_DIRECTORY
+from constants import TEMPORARY_DIRECTORY
 from tidecli.main import task
-from utils import directory_file_contents_match_expected
+from utils import temporary_directory_file_contents_match_expected
 import shutil
 
 task_content_params = [
@@ -58,4 +58,4 @@ def test_create_single_task_with_force_flag(tmp_dir):
     # TODO: Because if returncode will be other than 0, then the test will fail.
 
     # Check that the file has been overwritten
-    assert directory_file_contents_match_expected(exercise_id, task_id, local_path)
+    assert temporary_directory_file_contents_match_expected(exercise_id, task_id)

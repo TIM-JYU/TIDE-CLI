@@ -2,7 +2,7 @@ import filecmp
 import json
 from pathlib import Path
 
-from tests.integration.constants import EXPECTED_TASK_FILES_DIRECTORY, TEMPORARY_DIRECTORY
+from constants import EXPECTED_TASK_FILES_DIRECTORY, TEMPORARY_DIRECTORY
 
 
 def is_valid_json(data: str) -> bool:
