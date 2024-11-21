@@ -30,7 +30,7 @@ def temporary_directory_file_structure_matches_expected(exercise_id: str, task_i
 
 def temporary_directory_file_contents_match_expected(exercise_id: str, task_id: str | None) -> bool:
     """
-    Returns true if all COMMON files' contents match. 
+    Returns true if contents of all files COMMON to temporary and expected directories match.
 
     Does not care about files present only in one temporary or expected directory.
     """
