@@ -4,7 +4,7 @@ from typing import List
 import pytest
 from click.testing import CliRunner
 from tidecli.main import courses
-from utils import validate_json
+from utils import is_valid_json
 
 
 @pytest.mark.parametrize("extra_flags", [([]), (["--json"])])
@@ -36,4 +36,4 @@ def test_get_courses_with_json_flag_outputs_valid_json():
 
     result = runner.invoke(courses, ["--json"])
 
-    validate_json(result.output)
+    is_valid_json(result.output)
