@@ -1,6 +1,6 @@
 from pathlib import Path
 from click.testing import CliRunner
-from conftest import tmp_dir_path
+from tests.integration.constants import TEMPORARY_DIRECTORY
 from tidecli.main import task
 from utils import directory_file_contents_match_expected
 import shutil
@@ -28,7 +28,7 @@ def test_create_single_task_with_force_flag(tmp_dir):
     task_id = "t1"
     task_file = "hello.cs"
     exercise_path = str(Path(course_path, exercise_id))
-    local_path = Path(tmp_dir_path, exercise_id, task_id)
+    local_path = Path(TEMPORARY_DIRECTORY, exercise_id, task_id)
 
     # Copy the expected task files to the local path
     shutil.copytree(
@@ -50,7 +50,7 @@ def test_create_single_task_with_force_flag(tmp_dir):
             task_id,
             "-f",
             "-d",
-            tmp_dir_path,
+            TEMPORARY_DIRECTORY,
         ],
     )
 

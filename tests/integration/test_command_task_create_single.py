@@ -4,9 +4,8 @@ from typing import List
 
 import pytest
 from click.testing import CliRunner
-from conftest import tmp_dir_path
 
-from utils import validate_json
+from tests.integration.constants import TEMPORARY_DIRECTORY
 from tidecli.main import task
 
 
@@ -105,13 +104,13 @@ def test_create_single_task_creates_files_with_expected_content(
             str(Path(course_path, exercise_id)),
             task_id,
             "-d",
-            tmp_dir_path,
+            TEMPORARY_DIRECTORY,
         ],
     )
 
     for expected_file in expected_files:
         task_file_path = Path(
-            tmp_dir_path, exercise_id, task_id, expected_file.filename
+            TEMPORARY_DIRECTORY, exercise_id, task_id, expected_file.filename
         )
 
         try:
@@ -132,7 +131,7 @@ def test_create_task_single_creates_timdata_file(tmp_dir):
     exercise_id = "exercise-a"
     task_id = "t2"
     timdata_file_name = ".timdata"
-    timdata_file_path = Path(tmp_dir_path, exercise_id, task_id, timdata_file_name)
+    timdata_file_path = Path(TEMPORARY_DIRECTORY, exercise_id, task_id, timdata_file_name)
     runner = CliRunner()
 
     runner.invoke(
@@ -142,7 +141,7 @@ def test_create_task_single_creates_timdata_file(tmp_dir):
             str(Path("users/test-user-1/course-2", exercise_id)),
             task_id,
             "-d",
-            tmp_dir_path,
+            TEMPORARY_DIRECTORY,
         ],
     )
 

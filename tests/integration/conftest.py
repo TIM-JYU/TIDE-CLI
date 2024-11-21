@@ -7,6 +7,7 @@ from typing import List
 import pytest
 import shutil
 import tim_api
+from constants import TEMPORARY_DIRECTORY
 
 
 class User:
@@ -102,17 +103,13 @@ def parse_tim_document_tree() -> List[TimDocument]:
     return parsed_docs
 
 
-# TODO: create a constants file or something?
-tmp_dir_path = "tmp-test-resources"
-
-
 @pytest.fixture(scope="function")
 def tmp_dir():
     """
     Create and remove temporary directory for task files.
     """
-    os.makedirs(tmp_dir_path, exist_ok=True)
+    os.makedirs(TEMPORARY_DIRECTORY, exist_ok=True)
 
     yield
 
-    shutil.rmtree(tmp_dir_path)
+    shutil.rmtree(TEMPORARY_DIRECTORY)

@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytest
 from click.testing import CliRunner
-from conftest import tmp_dir_path
+from tests.integration.constants import TEMPORARY_DIRECTORY
 from tidecli.main import task
 
 task_exercises_params = [
@@ -28,12 +28,12 @@ def test_create_all_tasks_for_exercise(exercise: str,
             str(Path(exercise_path)),
             "-a",
             "-d",
-            tmp_dir_path,
+            TEMPORARY_DIRECTORY,
         ],
     )
 
     for task_id in expected_task_ids:
-        assert Path(tmp_dir_path, exercise, task_id).is_dir()
-        assert Path(tmp_dir_path, exercise, task_id, ".timdata").is_file()
+        assert Path(TEMPORARY_DIRECTORY, exercise, task_id).is_dir()
+        assert Path(TEMPORARY_DIRECTORY, exercise, task_id, ".timdata").is_file()
 
     assert False

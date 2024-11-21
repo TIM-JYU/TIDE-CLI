@@ -1,13 +1,10 @@
-from dataclasses import dataclass
 from pathlib import Path
-from typing import List
 
 import pytest
 from click.testing import CliRunner
-from conftest import tmp_dir_path
 
-from utils import validate_json
 from tidecli.main import task
+from constants import TEMPORARY_DIRECTORY
 
 @pytest.mark.parametrize(
     "replace_line_idx, expected_to_exist_after_reset, error_msg",
@@ -34,11 +31,11 @@ def test_task_reset(
             str(Path("users/test-user-1/course-1", exercise_id)),
             task_id,
             "-d",
-            tmp_dir_path,
+            TEMPORARY_DIRECTORY,
         ],
     )
 
-    task_file_path = Path(tmp_dir_path, exercise_id, task_id, "hello.cs")
+    task_file_path = Path(TEMPORARY_DIRECTORY, exercise_id, task_id, "hello.cs")
 
     with open(task_file_path, "r+") as f:
         file_content = f.readlines()
