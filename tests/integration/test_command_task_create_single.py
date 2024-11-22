@@ -9,16 +9,6 @@ from tidecli.main import task
 from constants import TEMPORARY_DIRECTORY
 
 
-# task_content_params = [
-#     # task with no supplementary files
-#     (
-#         "users/test-user-1/course-2",
-#         "exercise-a",
-#         "t2",
-#     ),
-# ]
-
-
 def test_task_create_single_creates_expected_files(tmp_dir):
     exercise_id = "exercise-a"
     task_id = "t2"
@@ -55,5 +45,7 @@ def test_task_create_single_creates_files_with_expected_content(tmp_dir):
         ],
     )
      
-    assert temporary_directory_file_contents_match_expected(exercise_id, task_id)
+    mismatches = temporary_directory_file_contents_match_expected(exercise_id, task_id)
+
+    assert len(mismatches) == 0, f"Found mismatching content in the following files: {', '.join(mismatches)}"
 
