@@ -39,7 +39,7 @@ def test_task_create_single_creates_expected_files(tmp_dir):
     
 
 
-def test_task_create_creates_single_files_with_expected_content(tmp_dir):
+def test_task_create_single_creates_files_with_expected_content(tmp_dir):
     exercise_id = "exercise-a"
     task_id = "t2"
 
