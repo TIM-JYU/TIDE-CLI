@@ -4,12 +4,12 @@ from typing import List
 import pytest
 from click.testing import CliRunner
 
-from utils import temporary_directory_file_contents_match_expected, temporary_directory_file_structure_matches_expected
+from utils import temporary_directory_file_contents_match_expected, get_file_structure_differences_in_temporary_and_expected_directories
 from tidecli.main import task
 from constants import TEMPORARY_DIRECTORY
 
 
-def test_task_create_single_creates_expected_files(tmp_dir):
+def test_task_create_single_creates_all_expected_files(tmp_dir):
     exercise_id = "exercise-a"
     task_id = "t2"
 
@@ -25,8 +25,15 @@ def test_task_create_single_creates_expected_files(tmp_dir):
         ],
     )
      
-    assert temporary_directory_file_structure_matches_expected(exercise_id, task_id)
-    
+    structure_differences = get_file_structure_differences_in_temporary_and_expected_directories(exercise_id, task_id)
+
+    errors = []
+    if structure_differences.missing_files:
+        errors.append(f"Missing files/directories: {', '.join(structure_differences.missing_files)}")
+    if structure_differences.unexpected_files:
+        errors.append(f"Unexpected files: {', '.join(structure_differences.unexpected_files)}")
+
+    assert len(errors) == 0, f"File structures do not match. {'. '.join(errors)}"
 
 
 def test_task_create_single_creates_files_with_expected_content(tmp_dir):

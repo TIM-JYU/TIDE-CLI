@@ -1,7 +1,8 @@
+from dataclasses import dataclass
 import filecmp
 import json
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 from constants import EXPECTED_TASK_FILES_DIRECTORY, TEMPORARY_DIRECTORY
 
@@ -13,20 +14,28 @@ def is_valid_json(data: str) -> bool:
         return False
     return True
 
+@dataclass
+class StructureDifferences:
+    missing_files: List[str]
+    unexpected_files: List[str]
 
-def temporary_directory_file_structure_matches_expected(exercise_id: str, task_id: str | None) -> bool:
+def get_file_structure_differences_in_temporary_and_expected_directories(exercise_id: str, task_id: str | None) -> StructureDifferences:
     """
     Returns true if the file structure of temporary and expected directories match.
     """
-    # TODO: info about differences: unexpected file found / expected file not found
     def get_structure(directory: Path):
         base_path = directory.resolve()
         return {path.relative_to(base_path) for path in base_path.rglob('*')}
 
     temporary_structure = get_structure(Path(TEMPORARY_DIRECTORY, exercise_id, task_id if task_id else ''))
     expected_structure = get_structure(Path(EXPECTED_TASK_FILES_DIRECTORY, exercise_id, task_id if task_id else ''))
+
+    missing_files = expected_structure - temporary_structure
+    unexpected_files = temporary_structure - expected_structure
     
-    return temporary_structure == expected_structure
+    return StructureDifferences(
+            missing_files=list(str(p) for p in missing_files), 
+            unexpected_files=list(str(p) for p in unexpected_files))
 
 
 def temporary_directory_file_contents_match_expected(exercise_id: str, task_id: str | None) -> List[str]:
