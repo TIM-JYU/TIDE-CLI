@@ -25,6 +25,7 @@ def test_task_reset(
     runner = CliRunner()
     task_file_path = Path(TEMPORARY_DIRECTORY, exercise_id, task_id, "hello.cs")
 
+    # TODO: should there be a helper function for copying from expected to temporary directory by exercise and/or task id
     shutil.copytree(
             Path(EXPECTED_TASK_FILES_DIRECTORY, exercise_id, task_id), 
             Path(TEMPORARY_DIRECTORY, exercise_id, task_id))
