@@ -5,6 +5,7 @@ from click.testing import CliRunner
 
 from utils import is_valid_json
 from tidecli.main import task
+from tidecli.main import task
 
 task_exercises_params = [
     ("exercise-1", "users/test-user-1/course-1/exercise-1", ["t1", "t2", "t3"]),
