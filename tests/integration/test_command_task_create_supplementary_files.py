@@ -1,3 +1,4 @@
+# TODO: repair the functions in this file. They have not been updated to use the updated file content and structure functions in asserts
 from pathlib import Path
 
 import pytest
@@ -5,7 +6,7 @@ from click.testing import CliRunner
 
 from tidecli.main import task
 from constants import TEMPORARY_DIRECTORY
-from utils import temporary_directory_file_contents_match_expected, temporary_directory_file_structure_matches_expected
+from utils import temporary_directory_file_contents_match_expected, get_file_structure_differences_in_temporary_and_expected_directories
 
 tasks_with_supplementary_files_headers = "course_path, exercise_id, task_id, supplementary_file_description"
 
@@ -45,7 +46,7 @@ def test_task_create_with_supplementary_files_creates_expected_files(course_path
         ],
     )
      
-    assert temporary_directory_file_structure_matches_expected(exercise_id, task_id), f"Unexpected file structure when creating task with supplementary files {supplementary_file_description}"
+    assert get_file_structure_differences_in_temporary_and_expected_directories(exercise_id, task_id), f"Unexpected file structure when creating task with supplementary files {supplementary_file_description}"
 
 
 @pytest.mark.parametrize(tasks_with_supplementary_files_headers, tasks_with_supplementary_files)

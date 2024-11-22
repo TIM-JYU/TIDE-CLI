@@ -19,6 +19,7 @@ class StructureDifferences:
     missing_files: List[str]
     unexpected_files: List[str]
 
+# TODO: make this return an error string so the return value doesnt have to be parsed everywhere
 def get_file_structure_differences_in_temporary_and_expected_directories(exercise_id: str, task_id: str | None) -> StructureDifferences:
     """
     Returns true if the file structure of temporary and expected directories match.
@@ -38,6 +39,7 @@ def get_file_structure_differences_in_temporary_and_expected_directories(exercis
             unexpected_files=list(str(p) for p in unexpected_files))
 
 
+# TODO: make this return an error string so the return value doesnt have to be parsed everywhere
 def temporary_directory_file_contents_match_expected(exercise_id: str, task_id: str | None) -> List[str]:
     """
     Returns true if contents of all files COMMON to temporary and expected directories match.
