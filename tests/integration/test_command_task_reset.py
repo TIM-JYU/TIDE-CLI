@@ -1,10 +1,11 @@
 from pathlib import Path
+import shutil
 
 import pytest
 from click.testing import CliRunner
 
 from tidecli.main import task
-from constants import TEMPORARY_DIRECTORY
+from constants import EXPECTED_TASK_FILES_DIRECTORY, TEMPORARY_DIRECTORY
 
 @pytest.mark.parametrize(
     "replace_line_idx, expected_to_exist_after_reset, error_msg",
@@ -21,22 +22,14 @@ def test_task_reset(
     exercise_id = "exercise-1"
     task_id = "t3"
     inserted_str = "ThIsLiNeWaSeDiTeDwHiLeTeStInG"
-
     runner = CliRunner()
-
-    runner.invoke(
-        task,
-        [
-            "create",
-            str(Path("users/test-user-1/course-1", exercise_id)),
-            task_id,
-            "-d",
-            TEMPORARY_DIRECTORY,
-        ],
-    )
-
     task_file_path = Path(TEMPORARY_DIRECTORY, exercise_id, task_id, "hello.cs")
 
+    shutil.copytree(
+            Path(EXPECTED_TASK_FILES_DIRECTORY, exercise_id, task_id), 
+            Path(TEMPORARY_DIRECTORY, exercise_id, task_id))
+
+    # edit the file to be reset
     with open(task_file_path, "r+") as f:
         file_content = f.readlines()
         file_content[replace_line_idx] = inserted_str
