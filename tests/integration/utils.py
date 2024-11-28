@@ -89,6 +89,9 @@ def temporary_directory_file_contents_match_expected(exercise_id: str, task_id: 
 
 
 def copy_directory_from_expected_to_temporary(exercise_id: str, task_id: str = ""):
+    """
+    Copies an exercise or task directory from expected files to temporary directory. 
+    """
     shutil.copytree(
             Path(EXPECTED_TASK_FILES_DIRECTORY, exercise_id, task_id), 
             Path(TEMPORARY_DIRECTORY, exercise_id, task_id))
