@@ -14,7 +14,7 @@ def test_task_submit(tmp_dir):
 
     exercise_id = "exercise-b"
     task_id = "t1"
-    copy_directory_from_expected_to_temporary(exercise_id)
+    copy_directory_from_expected_to_temporary(exercise_id, task_id)
 
     # edit the file to be submitted
     with open(Path(TEMPORARY_DIRECTORY, exercise_id, task_id, "hevonen.py"), "r+") as f:
