@@ -1,11 +1,11 @@
 from pathlib import Path
-import shutil
 
 import pytest
 from click.testing import CliRunner
 
+from utils import copy_directory_from_expected_to_temporary 
 from tidecli.main import task
-from constants import EXPECTED_TASK_FILES_DIRECTORY, TEMPORARY_DIRECTORY
+from constants import TEMPORARY_DIRECTORY
 
 @pytest.mark.parametrize(
     "replace_line_idx, expected_to_exist_after_reset, error_msg",
@@ -25,10 +25,7 @@ def test_task_reset(
     runner = CliRunner()
     task_file_path = Path(TEMPORARY_DIRECTORY, exercise_id, task_id, "hello.cs")
 
-    # TODO: should there be a helper function for copying from expected to temporary directory by exercise and/or task id
-    shutil.copytree(
-            Path(EXPECTED_TASK_FILES_DIRECTORY, exercise_id, task_id), 
-            Path(TEMPORARY_DIRECTORY, exercise_id, task_id))
+    copy_directory_from_expected_to_temporary(exercise_id, task_id)
 
     # edit the file to be reset
     with open(task_file_path, "r+") as f:

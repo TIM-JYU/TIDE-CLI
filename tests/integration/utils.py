@@ -2,7 +2,8 @@ from dataclasses import dataclass
 import filecmp
 import json
 from pathlib import Path
-from typing import List, Tuple
+import shutil
+from typing import List
 
 from constants import EXPECTED_TASK_FILES_DIRECTORY, TEMPORARY_DIRECTORY
 
@@ -86,3 +87,8 @@ def temporary_directory_file_contents_match_expected(exercise_id: str, task_id: 
 
     return caught_mismatches
 
+
+def copy_directory_from_expected_to_temporary(exercise_id: str, task_id: str = ""):
+    shutil.copytree(
+            Path(EXPECTED_TASK_FILES_DIRECTORY, exercise_id, task_id), 
+            Path(TEMPORARY_DIRECTORY, exercise_id, task_id))
