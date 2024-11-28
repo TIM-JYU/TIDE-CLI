@@ -27,13 +27,7 @@ def test_task_create_single_creates_all_expected_files(tmp_dir):
      
     structure_differences = get_file_structure_differences_in_temporary_and_expected_directories(exercise_id, task_id)
 
-    errors = []
-    if structure_differences.missing_files:
-        errors.append(f"Missing files/directories: {', '.join(structure_differences.missing_files)}")
-    if structure_differences.unexpected_files:
-        errors.append(f"Unexpected files: {', '.join(structure_differences.unexpected_files)}")
-
-    assert len(errors) == 0, f"File structures do not match. {'. '.join(errors)}"
+    assert structure_differences.get_mismatch_count() == 0, f"File structures do not match. {str(structure_differences)}"
 
 
 def test_task_create_single_creates_files_with_expected_content(tmp_dir):

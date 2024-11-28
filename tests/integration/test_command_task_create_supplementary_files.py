@@ -46,7 +46,9 @@ def test_task_create_with_supplementary_files_creates_expected_files(course_path
         ],
     )
      
-    assert get_file_structure_differences_in_temporary_and_expected_directories(exercise_id, task_id), f"Unexpected file structure when creating task with supplementary files {supplementary_file_description}"
+    structure_differences = get_file_structure_differences_in_temporary_and_expected_directories(exercise_id, task_id)
+
+    assert structure_differences.get_mismatch_count() == 0, f"File structures do not match when creating task with supplementary files {supplementary_file_description}. {str(structure_differences)}"
 
 
 @pytest.mark.parametrize(tasks_with_supplementary_files_headers, tasks_with_supplementary_files)

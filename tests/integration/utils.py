@@ -19,7 +19,24 @@ class StructureDifferences:
     missing_files: List[str]
     unexpected_files: List[str]
 
-# TODO: make this return an error string so the return value doesnt have to be parsed everywhere
+    def __str__(self):
+        string = ""
+        if self.missing_files:
+            string += (f"Missing files/directories: {', '.join(self.missing_files)}.")
+        else:
+            string += "No missing files/directories."
+
+        if self.unexpected_files:
+            string += (f"Unexpected files: {', '.join(self.unexpected_files)}.")
+        else:
+            string += "No unexpected files/directories."
+
+        return string
+
+    def get_mismatch_count(self):
+        return len(self.missing_files) + len(self.unexpected_files)
+
+
 def get_file_structure_differences_in_temporary_and_expected_directories(exercise_id: str, task_id: str | None) -> StructureDifferences:
     """
     Returns true if the file structure of temporary and expected directories match.
@@ -39,7 +56,7 @@ def get_file_structure_differences_in_temporary_and_expected_directories(exercis
             unexpected_files=list(str(p) for p in unexpected_files))
 
 
-# TODO: make this return an error string so the return value doesnt have to be parsed everywhere
+# TODO: report file names (and lines) that mismatch
 def temporary_directory_file_contents_match_expected(exercise_id: str, task_id: str | None) -> List[str]:
     """
     Returns true if contents of all files COMMON to temporary and expected directories match.
