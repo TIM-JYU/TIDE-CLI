@@ -3,17 +3,6 @@ from click.testing import CliRunner
 from constants import TEMPORARY_DIRECTORY
 from tidecli.main import task
 from utils import temporary_directory_file_contents_match_expected, copy_directory_from_expected_to_temporary
-import shutil
-
-# TODO: are these used somewhere
-task_content_params = [
-    (
-        "course",
-        "ex",
-        "task",
-        []
-    )
-]
 
 
 def test_create_single_task_with_force_flag(tmp_dir):
@@ -33,7 +22,6 @@ def test_create_single_task_with_force_flag(tmp_dir):
 
     # Copy the expected task files to the local path
     copy_directory_from_expected_to_temporary(exercise_id, task_id)
-
 
     # Modify the file
     hello = open(Path(local_path, task_file), "w")
