@@ -1,39 +1,31 @@
 from pathlib import Path
-import pytest
 from click.testing import CliRunner
 from constants import TEMPORARY_DIRECTORY
 from tidecli.main import task
-
-task_exercises_params = [
-    (
-        "ex",
-        "ex_path",
-        []
-    )
-]
+from utils import get_file_structure_differences_in_temporary_and_expected_directories
 
 
-@pytest.mark.parametrize("exercise, exercise_path, expected_task_ids",
-                         task_exercises_params)
-def test_create_all_tasks_for_exercise(exercise: str,
-                                       exercise_path: str,
-                                       expected_task_ids: list[str],
-                                       tmp_dir):
+def test_create_all_tasks_for_exercise(tmp_dir):
+
+    exercise_id = "exercise-a"
+    tasks = [
+        "t1",
+        "t2",
+        "t4",
+    ]
 
     runner = CliRunner()
     runner.invoke(
         task,
         [
             "create",
-            str(Path(exercise_path)),
+            str(Path("users/test-user-1/course-2", exercise_id)),
             "-a",
             "-d",
             TEMPORARY_DIRECTORY,
         ],
     )
 
-    for task_id in expected_task_ids:
-        assert Path(TEMPORARY_DIRECTORY, exercise, task_id).is_dir()
-        assert Path(TEMPORARY_DIRECTORY, exercise, task_id, ".timdata").is_file()
-
-    assert False
+    for task_id in tasks:
+        structure_differences = get_file_structure_differences_in_temporary_and_expected_directories(exercise_id, task_id)
+        assert structure_differences.get_mismatch_count() == 0,f"Found differences: {structure_differences}"
