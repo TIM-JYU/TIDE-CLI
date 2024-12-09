@@ -138,22 +138,22 @@ def list_tasks(demo_path: str, jsondata: bool) -> None:
 @click.option("--dir", "-d", "dir", type=str, default=None)
 @click.argument("demo_path", type=str)
 @click.argument("ide_task_id", type=str, default=None, required=False)
-def create(demo_path: str, ide_task_id: str, all: bool, force: bool, dir: str) -> None:
+def create(demo_path: str, ide_task_id: str, all_tasks: bool, force: bool, user_dir: str) -> None:
     """Create tasks based on options."""
     if not is_logged_in():
         return
 
-    if all:
+    if all_tasks:
         # Create all tasks
         tasks: List[TaskData] = get_tasks_by_doc(doc_path=demo_path)
-        create_tasks(tasks=tasks, overwrite=force, user_path=dir)
+        create_tasks(tasks=tasks, overwrite=force, user_path=user_dir)
 
     elif ide_task_id:
         # Create a single task
         task_data: TaskData = get_task_by_ide_task_id(
             ide_task_id=ide_task_id, doc_path=demo_path
         )
-        create_task(task=task_data, overwrite=force, user_path=dir)
+        create_task(task=task_data, overwrite=force, user_path=user_dir)
 
     else:
         click.echo("Please provide either --all or an ide_task_id.")
@@ -177,7 +177,7 @@ def reset(file_path_string: str):
     metadata = get_metadata(file_path.parent)
     task_file_contents = next((x.content for x in metadata.task_files if x.file_name == file_path.name), None)
  
-    if task_file_contents == None:
+    if task_file_contents is None:
         raise click.ClickException("File is not part of this task")
     
     combined_contents = answer_with_original_noneditable_sections(file_contents, task_file_contents)

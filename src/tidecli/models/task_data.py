@@ -9,6 +9,7 @@ __license__ = "MIT"
 __date__ = "11.5.2024"
 
 import re
+from typing import Dict
 
 from pydantic import BaseModel
 
@@ -28,6 +29,12 @@ class TaskFile(BaseModel):
     source: str = "editor"
     """Source attribute in TIM. Not used in CLI app."""
 
+    task_directory: str | None = None
+    """Directory of the task."""
+
+    saved_full_path: str | None = None
+    """Full path of the file in the file system."""
+
     user_input: str = ""
     """User input argument for submit."""
 
@@ -45,10 +52,14 @@ class TaskFile(BaseModel):
             "user_args": self.user_args,
         }
 
+
 class SupplementaryFile(BaseModel):
     file_name: str
     content: str | None
     source: str | None
+    task_directory: str | None = None
+    saved_full_path: str | None = None
+
 
 _task_type_split_re = re.compile(r"[/,; ]")
 
@@ -88,6 +99,9 @@ class TaskData(BaseModel):
     stem: str | None = None
     """Stem of the task, may containg a short instructions."""
 
+    task_directory: str | None = None
+    """Directory of the task."""
+
     header: str | None = None
     """Header of the task."""
 
@@ -111,7 +125,23 @@ class TaskData(BaseModel):
 
     def to_json(self) -> dict:
         """Convert to dict."""
-        task_data = self.dict()
-        task_data["task_files"] = [task_file.dict() for task_file in self.task_files]
+        task_data = self.model_dump()
+        task_data["task_files"] = [task_file.model_dump() for task_file in self.task_files]
 
         return task_data
+
+
+class TideWeekData(BaseModel):
+    """
+    Model for Tide week data.
+
+    """
+    tasks: Dict[str, TaskData] = {}
+
+
+class TideCourseData(BaseModel):
+    """
+    Model for Tide course data.
+
+    """
+    weeks: Dict[str, TideWeekData] = {}

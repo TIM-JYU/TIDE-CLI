@@ -11,7 +11,7 @@ import click.exceptions
 from pathlib import Path
 import itertools
 
-from tidecli.models.task_data import SupplementaryFile, TaskData, TaskFile
+from tidecli.models.task_data import SupplementaryFile, TaskData, TaskFile, TideCourseData, TideWeekData
 from tidecli.utils.error_logger import Logger
 from tidecli.api import routes
 
@@ -21,6 +21,7 @@ METADATA_NAME = ".timdata"
 # Search strings for finding the beginning and end of the task content
 BEGIN_MSG_SEARCH_STRING = r"Write your code below this line"
 END_MSG_SEARCH_STRING = r"Write your code above this line"
+
 
 def write_file(file_path: Path, content: str | bytes) -> None:
     """
@@ -82,6 +83,7 @@ def combine_tasks(tasks: list[TaskData]) -> list[TaskData]:
                 doc_id=task_list[0].doc_id,
                 ide_task_id=ide_task_id,
                 task_files=[f for t in task_list for f in t.task_files],
+                task_directory=task_list[0].task_directory,
                 supplementary_files=[f for t in task_list for f in t.supplementary_files],
                 stem=task_list[0].stem,
                 header=task_list[0].header,
@@ -96,7 +98,7 @@ def get_file_content_from_source(source: str) -> bytes | Any:
     Get content of a file from its source address.
     If address does not start with http URL, it is assumed to be a TIM path.
 
-    :param supplementary_file: SupplementaryFile object
+    :param source: file source address
     return: Content of the source
     """
     if source is not None:
@@ -120,33 +122,46 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
     """
     # Sets path to current path or user given path
     if user_path:
-        user_folder = Path.cwd() / user_path
+        user_folder_root = Path.cwd() / user_path
     else:
-        user_folder = Path.cwd()
+        user_folder_root = Path.cwd()
 
     # Add course path to create task path
-    user_folder = user_folder / Path(task.path).name / task.ide_task_id
+    if task.task_directory:
+        user_folder = user_folder_root / task.task_directory
+    else:
+        user_folder = user_folder_root / Path(task.path).name / task.ide_task_id
 
     # Fix for tasks that have file_name without suffix
+    # TODO: Why this, why there can not be files without suffix?
     for f in task.task_files:
         path = Path(f.file_name)
         suffix = path.suffix
-        if suffix != "":
-            continue
-        f.file_name = add_suffix(f.file_name, task.run_type)
+        if suffix == "":
+            f.file_name = add_suffix(f.file_name, task.run_type)
+        if f.task_directory:
+            f.saved_full_path = str(user_folder_root / f.task_directory / f.file_name)
+        else:
+            f.saved_full_path = str(user_folder / f.file_name)
 
     saved = save_files(
         task_files=task.task_files, save_path=user_folder, overwrite=overwrite
     )
- 
+
     if task.supplementary_files is not None:
+        for f in task.supplementary_files:
+            if f.task_directory:
+                f.saved_full_path = str(user_folder_root / f.task_directory / f.file_name)
+            else:
+                f.saved_full_path = str(user_folder / f.file_name)
+
         save_files(task_files=task.supplementary_files, save_path=user_folder, overwrite=overwrite)
 
     if not saved:
         return False
 
     write_metadata(
-        folder_path=user_folder,
+        folder_path=user_folder_root,
         metadata=task,
     )
 
@@ -181,10 +196,15 @@ def save_files(task_files: list[TaskFile] | list[SupplementaryFile], save_path: 
     :param save_path: Path to exercises in TIM
     :param overwrite: Flag if overwrite
     """
-    save_path.mkdir(parents=True, exist_ok=True)
+    # save_path.mkdir(parents=True, exist_ok=True)
+
+    names = []
 
     for f in task_files:
-        file_path = save_path / f.file_name
+        if f.saved_full_path:
+            file_path = Path(f.saved_full_path)
+        else:
+            file_path = save_path / f.file_name
         if file_path.exists():
             if not overwrite:
                 click.echo(
@@ -204,8 +224,10 @@ def save_files(task_files: list[TaskFile] | list[SupplementaryFile], save_path: 
             with open(file_path, "wb") as file:
                 file.write(content)
                 file.close()
+        names.append(f.file_name)
 
-    click.echo(f"Task created in {save_path}")
+    if names:
+        click.echo(f"Task created in {save_path}: {names}")
     return True
 
 
@@ -218,10 +240,21 @@ def write_metadata(folder_path: Path, metadata: TaskData) -> None:
     """
     metadata_path = Path(folder_path) / METADATA_NAME
     write_mode = "w"
+    course_metadata: TideCourseData = TideCourseData()
+    weekname = metadata.path
+    taskname = metadata.ide_task_id
     if metadata_path.exists():
-        write_mode = "w"
+        try:
+            with open(metadata_path, "r", encoding="utf-8") as file:
+                smetadata = json.load(file)
+                course_metadata = TideCourseData(**smetadata)
+        except Exception as e:
+            raise click.ClickException(f"Error reading metadata: {e}")
     with open(metadata_path, write_mode, encoding="utf-8") as file:
-        content = metadata.model_dump_json()
+        week = course_metadata.weeks.setdefault(weekname, TideWeekData())
+        week.tasks.setdefault(taskname, metadata)
+
+        content = course_metadata.model_dump_json(indent=4)
         file.write(content)
         file.close()
 
@@ -349,8 +382,8 @@ def validate_answer_file(answer_by: list[str], metadata_by: list[str]) -> bool:
     than the task content lines. The task content lines are marked with
     comments/messages
 
-    :param answerfile: Path to the answer file
-    :param metadata_taskfile: Path to the metadata task file
+    :param answer_by: list of answers
+    :param metadata_by: list of metedatas
     :return: True if the file is valid, False if not
     """
     logger = Logger()
@@ -380,7 +413,7 @@ def clear_contents(lines_by: list[str]) -> set[str] | None:
     """
     Clear the contents of the answer file.
 
-    :param lines: List of lines in the file
+    :param lines_by: List of lines in the file
     :return: Set of lines in the file
     """
     logger = Logger()
@@ -403,7 +436,6 @@ def find_gaps_in_tasks(lines: list[str]) -> tuple[int, int] | None:
     :param lines: List of lines in the file
     """
     # TODO: Find multiple gaps, store tuples into a list
-    gap = None
     start: int | None = None
     end: int | None = None
 

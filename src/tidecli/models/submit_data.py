@@ -9,7 +9,6 @@ __license__ = "MIT"
 __date__ = "11.5.2024"
 
 from pydantic import BaseModel
-import re
 
 from tidecli.models.task_data import TaskFile
 
