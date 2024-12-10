@@ -5,9 +5,9 @@ This module contains the main command group for the Tide CLI.
 The whole CLI app may be located in different module.
 """
 
-__authors__ = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
+__authors__ = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki, Vesa Lappalainen"]
 __license__ = "MIT"
-__date__ = "11.5.2024"
+__date__ = "10.12.2024"
 
 import json
 from pathlib import Path
@@ -133,9 +133,9 @@ def list_tasks(demo_path: str, jsondata: bool) -> None:
 
 
 @task.command()
-@click.option("--all", "-a", "all", is_flag=True, default=False)
+@click.option("--all", "-a", "all_tasks", is_flag=True, default=False)
 @click.option("--force", "-f", "force", is_flag=True, default=False)
-@click.option("--dir", "-d", "dir", type=str, default=None)
+@click.option("--dir", "-d", "user_dir", type=str, default=None)
 @click.argument("demo_path", type=str)
 @click.argument("ide_task_id", type=str, default=None, required=False)
 def create(demo_path: str, ide_task_id: str, all_tasks: bool, force: bool, user_dir: str) -> None:
@@ -187,39 +187,44 @@ def reset(file_path_string: str):
 
 @tim_ide.command()
 @click.argument("path", type=str, required=True)
-@click.argument("file_name", type=str, required=False)
-def submit(path: str, file_name: str) -> None:
+@click.option("--all", "-a", "all_files", is_flag=True, default=False)
+def submit(path: str, all_files: bool = False) -> None:
     """
     Enter the path of the task folder to submit the task/tasks to TIM.
 
     Path must be inserted in the following format: "/path/to/task/folder".
+    param path: Path to the task folder in the local file system. Or path to the task file.
+    param all_files: If True, submits all files in the task folder.
     """
     if not is_logged_in():
         return
 
-    path = Path(path)
+    path = Path(path).resolve()
     if not path.exists():
         raise click.ClickException(
-            "Invalid path. Give an absolute path to the task folder \
-            in the local file system"
+            "Invalid path. Give a path to the task folder "
+            "in the local file system or existing filename."
         )
+    if not path.is_dir():
+        file_dir = path.parent
+        file_path = path
+    else:
+        file_dir = path
+        file_path = None
 
     # Get metadata from the task folder
-    metadata = get_metadata(path)
+    metadata = get_metadata(file_dir)
     if not metadata:
         raise click.ClickException("Invalid metadata")
 
-    answer_files = get_task_file_data(path, metadata)
+    answer_files = get_task_file_data(file_path, file_dir, metadata, all_files)
     if not answer_files:
         raise click.ClickException("Invalid task file")
 
     for f in answer_files:
-        if file_name and f.file_name != file_name:
-            continue
-
         t = SubmitData(
             code_files=[f],
-            code_language=metadata.run_type,
+            code_language=f.task_type
         )
         feedback = submit_task(t)
         click.echo(feedback.console_output())

@@ -32,6 +32,9 @@ class TaskFile(BaseModel):
     task_directory: str | None = None
     """Directory of the task."""
 
+    task_type: str | None = None
+    """Type of the task."""
+
     saved_full_path: str | None = None
     """Full path of the file in the file system."""
 

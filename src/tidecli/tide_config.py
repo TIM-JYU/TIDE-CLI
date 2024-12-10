@@ -1,5 +1,5 @@
 import os
-os.environ["DEV"] = "true"  # remove this from production
+
 # Configuration for the TIM /oauth
 CLIENT_ID = "oauth2_tide"
 TIM_URL = "http://localhost" if os.getenv("DEV") else "https://tim.jyu.fi"
