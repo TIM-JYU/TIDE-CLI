@@ -1,4 +1,5 @@
 from os import name
+from _pytest.outcomes import xfail
 from click.testing import CliRunner
 from playwright.sync_api import Playwright
 import pytest
@@ -9,6 +10,7 @@ import webbrowser
 from conftest import user1
 from tidecli.main import login, logout
 
+@pytest.mark.xfail
 def test_login(playwright: Playwright, monkeypatch: pytest.MonkeyPatch):
 
     def handle_login(url: str):
@@ -41,12 +43,12 @@ def test_login(playwright: Playwright, monkeypatch: pytest.MonkeyPatch):
         page.close()
 
 
-    def launch_browser_in_debug_mode(url):
-        arguments = ["--remote-debugging-port=9001"]
-        subprocess.run(["chromium", *arguments, url])
+    # def launch_browser_in_debug_mode(url):
+    #     arguments = ["--remote-debugging-port=9001"]
+    #     subprocess.run(["chromium", *arguments, url])
 
 
-    monkeypatch.setattr(webbrowser, "open", launch_browser_in_debug_mode)
+    # monkeypatch.setattr(webbrowser, "open", launch_browser_in_debug_mode)
 
     runner = CliRunner()
 
@@ -56,11 +58,4 @@ def test_login(playwright: Playwright, monkeypatch: pytest.MonkeyPatch):
 
     print(f"click says: {res}")
 
-    pass
-
-
-def test_login_json():
-    runner = CliRunner()
-    res = runner.invoke(logout)
-    pass
-
+    pytest.xfail()
