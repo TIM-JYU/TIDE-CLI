@@ -2,22 +2,21 @@ from os import name
 from click.testing import CliRunner
 from playwright.sync_api import Playwright
 import pytest
+import subprocess
+import threading
 import webbrowser
 
 from conftest import user1
 from tidecli.main import login, logout
 
 def test_login(playwright: Playwright, monkeypatch: pytest.MonkeyPatch):
-    # TODO: server.handle_request() @ oauth_login.py is blocked by playwright
 
     def handle_login(url: str):
-        browser = playwright.chromium.launch(headless=False)
-        ctx = browser.new_context()
+        # attach to existing browser
+        browser = playwright.chromium.connect_over_cdp("http://localhost:9222")
+        ctx = browser.contexts[0]
         # ctx.set_default_timeout(5000)
-        page = ctx.new_page()
-
-        # Navigate to the auth page
-        page.goto(url)
+        page = ctx.pages[0]
 
         # Click login button
         page.get_by_role("button", name="Log in").click()
@@ -35,24 +34,26 @@ def test_login(playwright: Playwright, monkeypatch: pytest.MonkeyPatch):
 
         # Click the authentication button
         page.click("tim-oauth-button[ng-reflect-name='Authenticate to TIDE']")
-
-        # page.wait_for_url("http://192.168.122.102/oauth/authorize")
-
-        # def handle_redirect(res):
-        #     print(f"asd {res}")
-
-        # page.on("response", handle_redirect)
         
         # Wait for auth success
         page.locator("text='Login successful! You can now close this tab.'").wait_for()
 
         page.close()
 
-    monkeypatch.setattr(webbrowser, "open", handle_login)
+
+    def launch_browser_in_debug_mode(url):
+        arguments = ["--remote-debugging-port=9001"]
+        subprocess.run(["chromium", *arguments, url])
+
+
+    monkeypatch.setattr(webbrowser, "open", launch_browser_in_debug_mode)
 
     runner = CliRunner()
 
     res = runner.invoke(login)
+    # TODO: run handle_login function after invoking the click command.
+    # Both invoke and handle_login are blocking so threading is necessary.
+
     print(f"click says: {res}")
 
     pass
