@@ -11,7 +11,8 @@ import click.exceptions
 from pathlib import Path
 import itertools
 
-from tidecli.models.task_data import SupplementaryFile, TaskData, TaskFile, TideCourseData, TideWeekData
+from tidecli.models.task_data import SupplementaryFile, TaskData, TaskFile, TideCourseData, TideCoursePartData, \
+    RootFolders
 from tidecli.utils.error_logger import Logger
 from tidecli.api import routes
 
@@ -41,7 +42,7 @@ def write_file(file_path: Path, content: str | bytes) -> None:
 
 
 def create_tasks(
-    tasks: list[TaskData], overwrite: bool, user_path: str | None = None
+        tasks: list[TaskData], overwrite: bool, user_path: str | None = None
 ) -> None:
     """
     Create multiple tasks.
@@ -126,93 +127,54 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
     else:
         user_folder_root = Path.cwd()
 
-    # Add course path to create task path
-    if task.task_directory is not None:
-        user_folder = user_folder_root / task.task_directory
-    else:
-        user_folder = user_folder_root / Path(task.path).name / task.ide_task_id
+    root_folders = RootFolders(with_task_directory=user_folder_root,
+                               without_task_directory=user_folder_root / Path(task.path).name / task.ide_task_id)
 
-    # Fix for tasks that have file_name without suffix
-    # TODO: Why this, why there can not be files without suffix?
-    for f in task.task_files:
-        path = Path(f.file_name)
-        suffix = path.suffix
-        if suffix == "":
-            f.file_name = add_suffix(f.file_name, task.run_type)
-        if f.task_directory:
-            f.saved_full_path = str(user_folder_root / f.task_directory / f.file_name)
-        else:
-            f.saved_full_path = str(user_folder / f.file_name)
-
-    saved = save_files(
-        task_files=task.task_files, save_path=user_folder, overwrite=overwrite
-    )
+    saved = save_files(task_files=task.task_files, folders=root_folders,
+                       msg='Task created in', overwrite=overwrite)
 
     if task.supplementary_files is not None:
-        for f in task.supplementary_files:
-            if f.task_directory:
-                f.saved_full_path = str(user_folder_root / f.task_directory / f.file_name)
-            else:
-                f.saved_full_path = str(user_folder / f.file_name)
-
-        save_files(task_files=task.supplementary_files, save_path=user_folder,
-                   overwrite=overwrite, msg="Supplementary files")
+        save_files(task_files=task.supplementary_files, folders=root_folders,
+                   msg="  supplementary files", overwrite=overwrite)
 
     if not saved:
         return False
 
-    write_metadata(
-        folder_path=user_folder_root,
-        metadata=task,
-    )
+    write_metadata(folder_path=user_folder_root, metadata=task)
 
     return saved
 
 
-def add_suffix(file_name: str, file_type: str) -> str:
+def save_files(task_files: list[TaskFile] | list[SupplementaryFile], folders: RootFolders,
+               msg: str, overwrite: bool = False) -> bool:
     """
-    Add suffix to file name if it is missing. Fix for C++ and C files.
-
-    TODO: Support more file types, should this be done in TIM?
-
-    :param file_name: Name of the file
-    :param file_type: Type of the file
-    :return: File name with suffix
-    """
-    if file_type == "c++" or file_type == "cpp":
-        return file_name + ".cpp"
-
-    if file_type == "cc":
-        return file_name + ".c"
-
-    return file_name
-
-
-def save_files(task_files: list[TaskFile] | list[SupplementaryFile], save_path: Path,
-               overwrite: bool = False, msg: str | None = None) -> bool:
-    """
-    Create files of tasks in the given path.
+    Save task files in the given path.
 
     :param task_files: Dict or list of dicts.
     Contain name with file extension (.eg .py or .txt ...) and content
-    :param save_path: Path to exercises in TIM
+    :param folders: Paths different scenarios (with or without task directory)
+    :param msg: Message to print when files are saved
     :param overwrite: Flag if overwrite
-    :param msg: Message to print if default is not ok
+    :return: True if files are saved, False if not
     """
-    # save_path.mkdir(parents=True, exist_ok=True)
 
     names = []
+    root_path = None  # None is never used, but it is needed to avoid linter error
 
     for f in task_files:
-        if f.saved_full_path:
-            file_path = Path(f.saved_full_path)
+        if f.task_directory:
+            root_path = folders.with_task_directory / f.task_directory
         else:
-            file_path = save_path / f.file_name
+            root_path = folders.without_task_directory
+
+        file_path = root_path / f.file_name
+        f.saved_absolute_file_name = str(file_path)
+
         if file_path.exists():
             if not overwrite:
                 click.echo(
                     f"File {file_path} already exists\n"
-                    f"To overwrite give tide task create -f {save_path}\n"
+                    f"To overwrite give add -f to previous command\n"
                 )
                 return False
         file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -229,8 +191,8 @@ def save_files(task_files: list[TaskFile] | list[SupplementaryFile], save_path: 
                 file.close()
         names.append(f.file_name)
 
-    if names:
-        click.echo(f"{msg or 'Task created in'} {save_path}: {names}")
+    if names and msg:
+        click.echo(f"{msg} {root_path.relative_to(Path.cwd())}: {', '.join(names)}")
     return True
 
 
@@ -244,18 +206,18 @@ def write_metadata(folder_path: Path, metadata: TaskData) -> None:
     metadata_path = Path(folder_path) / METADATA_NAME
     write_mode = "w"
     course_metadata: TideCourseData = TideCourseData()
-    weekname = metadata.path
+    course_part_name = metadata.path
     taskname = metadata.ide_task_id
     if metadata_path.exists():
         try:
             with open(metadata_path, "r", encoding="utf-8") as file:
-                smetadata = json.load(file)
-                course_metadata = TideCourseData(**smetadata)
+                metadata_str = json.load(file)
+                course_metadata = TideCourseData(**metadata_str)
         except Exception as e:
             raise click.ClickException(f"Error reading metadata: {e}")
     with open(metadata_path, write_mode, encoding="utf-8") as file:
-        week = course_metadata.weeks.setdefault(weekname, TideWeekData())
-        week.tasks.setdefault(taskname, metadata)
+        course_part = course_metadata.course_parts.setdefault(course_part_name, TideCoursePartData())
+        course_part.tasks.setdefault(taskname, metadata)
 
         content = course_metadata.model_dump_json(indent=4)
         file.write(content)
@@ -283,7 +245,7 @@ def create_file(item: dict, folder_path: Path, overwrite=False):
         file.close()
 
 
-def inlucde_user_ansewr_to_task_file(f1: TaskFile, f2: Path) -> bool:
+def include_user_ansewr_to_task_file(f1: TaskFile, f2: Path) -> bool:
     logger = Logger()
     logger.debug(f"Validating {f2.name} against metadata content of task.")
     with open(f2, "r", encoding="utf-8") as answer_file:
@@ -311,7 +273,8 @@ def inlucde_user_ansewr_to_task_file(f1: TaskFile, f2: Path) -> bool:
         # Validator complains about answer.
         # Answer is submitted despite of complains.
         f1.content = "\n".join(answer_gapcode)
-        return False
+        # return False
+        return True  # Do not be so spesisfic about the validation
 
 
 def get_task_file_data(file_path: Path | None, file_dir: Path,
@@ -328,73 +291,28 @@ def get_task_file_data(file_path: Path | None, file_dir: Path,
 
     result = []
     tasks = set()
-    for week in metadata.weeks.values():
-        for task in week.tasks.values():
+    for course_part in metadata.course_parts.values():
+        for task in course_part.tasks.values():
             for f in task.task_files:
-                saved_file = Path(f.saved_full_path)
+                saved_file = Path(f.saved_absolute_file_name)
                 saved_dir = saved_file.parent
-                if file_path and send_all:          # if should send all files in the same task
-                    if saved_file == file_path:     # if file is the same as the one given
+                if file_path and send_all:  # if should send all files in the same task
+                    if saved_file == file_path:  # if file is the same as the one given
                         for tf in task.task_files:  # add all files in the same task
-                            if inlucde_user_ansewr_to_task_file(tf, Path(tf.saved_full_path)):
+                            if include_user_ansewr_to_task_file(tf, Path(tf.saved_absolute_file_name)):
                                 result.append(tf)
-                        return result               # and do not look any more
-                    continue                        # try next file
+                        return result  # and do not look any more
+                    continue  # try next file
                 if saved_dir == file_dir:
                     if file_path is None or saved_file == file_path:
-                        if not inlucde_user_ansewr_to_task_file(f, Path(f.saved_full_path)):
+                        if not include_user_ansewr_to_task_file(f, Path(f.saved_absolute_file_name)):
                             continue
                         result.append(f)
                         tasks.add(task.ide_task_id)
                         if len(tasks) > 1:
                             raise click.ClickException(
                                 "Multiple tasks found in the same directory. Give exact file name.")
-    if result:
-        return result
     return result
-
-
-"""
-def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
-
-    task_files = metadata.task_files
-    
-    files_in_dir = [
-        f for f in file_path.iterdir() if f.is_file() and not f.suffix == METADATA_NAME
-    ]
-    for f1 in task_files:
-        for f2 in files_in_dir:
-            if f1.file_name == f2.name:
-                logger.debug(
-                    "Validating {0} against metadata content of task.".format(f2.name))
-                with open(f2, "r", encoding="utf-8") as answer_file:
-                    answer_content = answer_file.read()
-                    answer_bycode, answer_gapcode = split_file_contents(
-                        answer_content)
-                    metadata_bycode, metadata_gapcode = split_file_contents(
-                        f1.content
-                    )
-    
-                    if len(metadata_bycode) == 0:
-                        f1.content = answer_content
-                        logger.info("Normal exercise, no gap found.")
-                        continue
-    
-                    if validate_answer_file(answer_bycode, metadata_bycode):
-                        # TODO: tarvitaan lisää testitapauksia,
-                        # Validator OK
-                        logger.info("Gap-type exercise answer file is valid.")
-                        f1.content = "\n".join(answer_gapcode)
-                    else:
-                        logger.debug("Gap-type exercise answer not valid.")
-    
-                        # Validator complains about answer.
-                        # Answer is submitted despite of complains.
-                        f1.content = "\n".join(answer_gapcode)
-                        # return []
-    
-    return task_files
-"""
 
 
 def get_metadata(metadata_dir: Path) -> TideCourseData:
@@ -437,7 +355,7 @@ def split_file_contents(content: str) -> tuple[list[str], list[str]]:
 
     # Create list of strings for validation
     bycodebegin = lines[:start + 1]
-    bycodeend = lines[end :]
+    bycodeend = lines[end:]
     gap_content = lines[start + 1: end]
     bycode = bycodebegin + bycodeend
 

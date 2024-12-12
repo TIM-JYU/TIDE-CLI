@@ -222,10 +222,8 @@ def submit(path: str, all_files: bool = False) -> None:
         raise click.ClickException("Invalid task file")
 
     for f in answer_files:
-        t = SubmitData(
-            code_files=[f],
-            code_language=f.task_type
-        )
+        click.echo(f"Submitting: {f.file_name}, wait...")
+        t = SubmitData(code_files=[f], code_language=f.task_type)
         feedback = submit_task(t)
         click.echo(feedback.console_output())
 

@@ -9,6 +9,7 @@ __license__ = "MIT"
 __date__ = "11.5.2024"
 
 import re
+from pathlib import Path
 from typing import Dict
 
 from pydantic import BaseModel
@@ -35,7 +36,7 @@ class TaskFile(BaseModel):
     task_type: str | None = None
     """Type of the task."""
 
-    saved_full_path: str | None = None
+    saved_absolute_file_name: str | None = None
     """Full path of the file in the file system."""
 
     user_input: str = ""
@@ -134,9 +135,9 @@ class TaskData(BaseModel):
         return task_data
 
 
-class TideWeekData(BaseModel):
+class TideCoursePartData(BaseModel):
     """
-    Model for Tide week data.
+    Model for Tide course part data. Could be like a week or something else
 
     """
     tasks: Dict[str, TaskData] = {}
@@ -147,4 +148,12 @@ class TideCourseData(BaseModel):
     Model for Tide course data.
 
     """
-    weeks: Dict[str, TideWeekData] = {}
+    course_parts: Dict[str, TideCoursePartData] = {}
+
+
+class RootFolders:
+    """Root folders for different scenarious."""
+
+    def __init__(self, with_task_directory: Path, without_task_directory: Path):
+        self.with_task_directory = with_task_directory
+        self.without_task_directory = without_task_directory
