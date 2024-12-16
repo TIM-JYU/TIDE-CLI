@@ -174,7 +174,7 @@ def save_files(task_files: list[TaskFile] | list[SupplementaryFile], folders: Ro
             if not overwrite:
                 click.echo(
                     f"File {file_path} already exists\n"
-                    f"To overwrite give add -f to previous command\n"
+                    f"To overwrite add -f to previous command\n"
                 )
                 return False
         file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -249,7 +249,7 @@ def create_file(item: dict, folder_path: Path, overwrite=False):
         file.close()
 
 
-def include_user_ansewr_to_task_file(f1: TaskFile, f2: Path) -> bool:
+def include_user_answer_to_task_file(f1: TaskFile, f2: Path) -> bool:
     logger = Logger()
     logger.debug(f"Validating {f2.name} against metadata content of task.")
     with open(f2, "r", encoding="utf-8") as answer_file:
@@ -303,13 +303,13 @@ def get_task_file_data(file_path: Path | None, file_dir: Path,
                 if file_path and send_all:  # if should send all files in the same task
                     if saved_file == file_path:  # if file is the same as the one given
                         for tf in task.task_files:  # add all files in the same task
-                            if include_user_ansewr_to_task_file(tf, Path(tf.saved_absolute_file_name)):
+                            if include_user_answer_to_task_file(tf, Path(tf.saved_absolute_file_name)):
                                 result.append(tf)
                         return result  # and do not look any more
                     continue  # try next file
                 if saved_dir == file_dir:
                     if file_path is None or saved_file == file_path:
-                        if not include_user_ansewr_to_task_file(f, Path(f.saved_absolute_file_name)):
+                        if not include_user_answer_to_task_file(f, Path(f.saved_absolute_file_name)):
                             continue
                         result.append(f)
                         tasks.add(task.ide_task_id)

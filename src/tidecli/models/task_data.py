@@ -152,7 +152,7 @@ class TideCourseData(BaseModel):
 
 
 class RootFolders:
-    """Root folders for different scenarious."""
+    """Root folders for different scenarios."""
 
     def __init__(self, with_task_directory: Path, without_task_directory: Path):
         self.with_task_directory = with_task_directory
