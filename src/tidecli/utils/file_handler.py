@@ -6,6 +6,7 @@ __date__ = "11.5.2024"
 
 import re
 import json
+from collections import defaultdict
 from typing import Any
 import click.exceptions
 from pathlib import Path
@@ -133,7 +134,7 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
     saved = save_files(task_files=task.task_files, folders=root_folders,
                        msg='Task created in', overwrite=overwrite)
 
-    if task.supplementary_files is not None:
+    if task.supplementary_files:
         save_files(task_files=task.supplementary_files, folders=root_folders,
                    msg="  supplementary files", overwrite=overwrite)
 
@@ -158,11 +159,10 @@ def save_files(task_files: list[TaskFile] | list[SupplementaryFile], folders: Ro
     :return: True if files are saved, False if not
     """
 
-    names = []
-    root_path = None  # None is never used, but it is needed to avoid linter error
+    saved_files = defaultdict(list)
 
     for f in task_files:
-        if f.task_directory:
+        if f.task_directory is not None:
             root_path = folders.with_task_directory / f.task_directory
         else:
             root_path = folders.without_task_directory
@@ -189,10 +189,13 @@ def save_files(task_files: list[TaskFile] | list[SupplementaryFile], folders: Ro
             with open(file_path, "wb") as file:
                 file.write(content)
                 file.close()
-        names.append(f.file_name)
+        saved_files[str(root_path.relative_to(Path.cwd()))].append(f.file_name)
 
-    if names and msg:
-        click.echo(f"{msg} {root_path.relative_to(Path.cwd())}: {', '.join(names)}")
+    if saved_files and msg:
+        output = f"{msg}"
+        for root, names in saved_files.items():
+            output += f" {root}: {', '.join(names)}"
+        click.echo(output)
     return True
 
 
@@ -211,10 +214,11 @@ def write_metadata(folder_path: Path, metadata: TaskData) -> None:
     if metadata_path.exists():
         try:
             with open(metadata_path, "r", encoding="utf-8") as file:
-                metadata_str = json.load(file)
-                course_metadata = TideCourseData(**metadata_str)
+                old_metadata = json.load(file)
+                course_metadata = TideCourseData(**old_metadata)
         except Exception as e:
-            raise click.ClickException(f"Error reading metadata: {e}")
+            # raise click.ClickException(f"Error reading metadata: {e}")
+            click.echo(f"Error reading metadata: {e}")  # Try to recover
     with open(metadata_path, write_mode, encoding="utf-8") as file:
         course_part = course_metadata.course_parts.setdefault(course_part_name, TideCoursePartData())
         course_part.tasks.setdefault(taskname, metadata)

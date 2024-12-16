@@ -62,7 +62,7 @@ class SupplementaryFile(BaseModel):
     content: str | None
     source: str | None
     task_directory: str | None = None
-    saved_full_path: str | None = None
+    saved_absolute_file_name: str | None = None
 
 
 _task_type_split_re = re.compile(r"[/,; ]")
