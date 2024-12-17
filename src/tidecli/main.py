@@ -199,7 +199,7 @@ def submit(path: str, all_files: bool = False) -> None:
     if not is_logged_in():
         return
 
-    path = Path(path).resolve()
+    path = Path(path).absolute()
     if not path.exists():
         raise click.ClickException(
             "Invalid path. Give a path to the task folder "
