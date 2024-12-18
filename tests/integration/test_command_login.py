@@ -56,4 +56,3 @@ def test_login(playwright: Playwright, monkeypatch: pytest.MonkeyPatch):
     # Both invoke and handle_login are blocking so threading is necessary.
 
     print(f"click says: {res}")
-
