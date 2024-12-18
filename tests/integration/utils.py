@@ -64,6 +64,9 @@ def temporary_directory_file_contents_match_expected(exercise_id: str, task_id: 
 
     Does not care about files present only in one temporary or expected directory.
     """
+    # TODO: Ignoraa .timdata
+    # TODO: Kehitä .timdatalle oma match tarkistin, ja ingoraa doc_id tarkistaminen.
+
     temporary_files_path = Path(TEMPORARY_DIRECTORY, exercise_id, task_id if task_id else '').resolve()
     expected_files_path = Path(EXPECTED_TASK_FILES_DIRECTORY, exercise_id, task_id if task_id else '').resolve()
     caught_mismatches: List[str] = []

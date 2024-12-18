@@ -22,6 +22,7 @@ METADATA_NAME = ".timdata"
 BEGIN_MSG_SEARCH_STRING = r"Write your code below this line"
 END_MSG_SEARCH_STRING = r"Write your code above this line"
 
+
 def write_file(file_path: Path, content: str | bytes) -> None:
     """
     Write content to a file.
@@ -140,9 +141,13 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
     saved = save_files(
         task_files=task.task_files, save_path=user_folder, overwrite=overwrite
     )
- 
+
     if task.supplementary_files is not None:
-        save_files(task_files=task.supplementary_files, save_path=user_folder, overwrite=overwrite)
+        save_files(
+            task_files=task.supplementary_files,
+            save_path=user_folder,
+            overwrite=overwrite,
+        )
 
     if not saved:
         return False
@@ -174,7 +179,11 @@ def add_suffix(file_name: str, file_type: str) -> str:
     return file_name
 
 
-def save_files(task_files: list[TaskFile] | list[SupplementaryFile], save_path: Path, overwrite=False) -> bool:
+def save_files(
+    task_files: list[TaskFile] | list[SupplementaryFile],
+    save_path: Path,
+    overwrite=False,
+) -> bool:
     """
     Create files of tasks in the given path.
 

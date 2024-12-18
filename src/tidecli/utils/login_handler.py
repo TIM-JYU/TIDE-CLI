@@ -14,12 +14,14 @@ from tidecli.models.user import User
 from tidecli.utils.handle_token import delete_token, get_signed_in_user
 
 
-def is_logged_in(jsondata: bool = False, print_errors: bool = True, print_token_info: bool = False):
+def is_logged_in(
+    jsondata: bool = False, print_errors: bool = True, print_token_info: bool = False
+):
     """
     TODO: description doesn't match the actual functionality
 
     Get the login details for the user.
-    
+
     If the user is already logged in then return the token validity time.
     If the user is not logged in then return the login link
     """

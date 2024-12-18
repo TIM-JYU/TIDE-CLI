@@ -64,5 +64,5 @@ def test_task_create_with_supplementary_files_creates_files_with_expected_conten
             TEMPORARY_DIRECTORY,
         ],
     )
-     
+
     assert temporary_directory_file_contents_match_expected(exercise_id, task_id), f"Unexpected file content when creating task with supplementary files {supplementary_file_description}"
