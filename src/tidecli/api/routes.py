@@ -29,14 +29,14 @@ from tidecli.tide_config import (
 from tidecli.utils.handle_token import get_signed_in_user
 
 
-def get_file_content(url: str, is_tim_file: bool = True) -> bytes | Any:
+def get_file_content(url: str, is_tim_file: bool=True) -> bytes | Any:
     """
     Get the content of the file from the URL.
 
     :param url: URL of the file
     return: Content of the file
     """
-    headers = None
+    headers=None
 
     if is_tim_file:
         url = urljoin(TIM_URL, url)

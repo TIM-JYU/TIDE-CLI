@@ -21,7 +21,7 @@ class Logger:
         except Exception as e:
             TIDECLI_LOG_LEVEL = 50
             print(e)
-            print("TIDECLI_LOG_LEVEL environment variable set incorrectly.")
+            print('TIDECLI_LOG_LEVEL environment variable set incorrectly.')
 
         self.level = TIDECLI_LOG_LEVEL
         self.internal_logger = logging.getLogger(__name__)
