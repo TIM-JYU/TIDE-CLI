@@ -50,3 +50,15 @@ After cloning and starting the Poetry environment:
 Step 1: Navigate to test folder `cd tests`
 
 Step 2: Run unit tests with command `python -m unittest`
+
+## Running integration tests
+
+Step 1: Start up TIM dev server (for instructions on this, see https://github.com/TIM-JYU/TIM)
+
+Step 2: Log in to TIM to with username "testuser1" and password "test1pass"
+
+Step 3: Log in to TIDE-CLI with same credentials using `DEV=true poetry run python src/tidecli/main.py login` (development setup steps 4-6 should be done first)
+
+Step 4: Navigate to integration test folder `cd tests/integration`
+
+Step 5: Run `DEV=true poetry run pytest`
