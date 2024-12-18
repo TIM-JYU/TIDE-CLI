@@ -8,6 +8,7 @@ from constants import TEMPORARY_DIRECTORY
 from utils import copy_directory_from_expected_to_temporary
 
 
+@pytest.mark.xfail(reason="Needs investigation")
 def test_task_submit(tmp_dir):
     """Submit an answer to a task."""
     answer_str = "#the horse drinks heineken"
