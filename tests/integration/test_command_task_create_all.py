@@ -27,5 +27,11 @@ def test_create_all_tasks_for_exercise(tmp_dir):
     )
 
     for task_id in tasks:
-        structure_differences = get_file_structure_differences_in_temporary_and_expected_directories(exercise_id, task_id)
-        assert structure_differences.get_mismatch_count() == 0,f"Found differences: {structure_differences}"
+        structure_differences = (
+            get_file_structure_differences_in_temporary_and_expected_directories(
+                exercise_id, task_id
+            )
+        )
+        assert (
+            structure_differences.get_mismatch_count() == 0
+        ), f"Found differences: {structure_differences}"

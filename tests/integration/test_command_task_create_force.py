@@ -2,7 +2,10 @@ from pathlib import Path
 from click.testing import CliRunner
 from constants import TEMPORARY_DIRECTORY
 from tidecli.main import task
-from utils import temporary_directory_file_contents_match_expected, copy_directory_from_expected_to_temporary
+from utils import (
+    temporary_directory_file_contents_match_expected,
+    copy_directory_from_expected_to_temporary,
+)
 
 
 def test_create_single_task_with_force_flag(tmp_dir):

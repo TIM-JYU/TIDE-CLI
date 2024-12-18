@@ -14,10 +14,13 @@ task_exercises_params = [
     ("exercise-b", "users/test-user-1/course-2/exercise-b", ["t1"]),
 ]
 
-@pytest.mark.parametrize("exercise, exercise_path, expected_task_ids", task_exercises_params)
-def test_task_list_outputs_expected_data(exercise: str,
-                                         exercise_path: str,
-                                         expected_task_ids: List[str]):
+
+@pytest.mark.parametrize(
+    "exercise, exercise_path, expected_task_ids", task_exercises_params
+)
+def test_task_list_outputs_expected_data(
+    exercise: str, exercise_path: str, expected_task_ids: List[str]
+):
     runner = CliRunner()
     result = runner.invoke(
         task,

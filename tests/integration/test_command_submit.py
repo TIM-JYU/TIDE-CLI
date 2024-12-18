@@ -10,7 +10,7 @@ from utils import copy_directory_from_expected_to_temporary
 
 def test_task_submit(tmp_dir):
     """Submit an answer to a task."""
-    answer_str = "#the horse drinks heineken" 
+    answer_str = "#the horse drinks heineken"
 
     exercise_id = "exercise-b"
     task_id = "t1"

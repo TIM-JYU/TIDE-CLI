@@ -3,9 +3,10 @@ from pathlib import Path
 import pytest
 from click.testing import CliRunner
 
-from utils import copy_directory_from_expected_to_temporary 
+from utils import copy_directory_from_expected_to_temporary
 from tidecli.main import task
 from constants import TEMPORARY_DIRECTORY
+
 
 @pytest.mark.parametrize(
     "replace_line_idx, expected_to_exist_after_reset, error_msg",

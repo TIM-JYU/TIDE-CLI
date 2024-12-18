@@ -10,6 +10,7 @@ import webbrowser
 from conftest import user1
 from tidecli.main import login, logout
 
+
 @pytest.mark.xfail
 def test_login(playwright: Playwright, monkeypatch: pytest.MonkeyPatch):
 
@@ -33,20 +34,17 @@ def test_login(playwright: Playwright, monkeypatch: pytest.MonkeyPatch):
         # Click "Log in"
         page.locator("tim-login-dialog").get_by_role("button", name="Log in").click()
 
-
         # Click the authentication button
         page.click("tim-oauth-button[ng-reflect-name='Authenticate to TIDE']")
-        
+
         # Wait for auth success
         page.locator("text='Login successful! You can now close this tab.'").wait_for()
 
         page.close()
 
-
     # def launch_browser_in_debug_mode(url):
     #     arguments = ["--remote-debugging-port=9001"]
     #     subprocess.run(["chromium", *arguments, url])
-
 
     # monkeypatch.setattr(webbrowser, "open", launch_browser_in_debug_mode)
 
