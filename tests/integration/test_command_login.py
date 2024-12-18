@@ -11,7 +11,8 @@ from conftest import user1
 from tidecli.main import login, logout
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail(reason="Under development")
+@pytest.mark.skip(reason="Under development")
 def test_login(playwright: Playwright, monkeypatch: pytest.MonkeyPatch):
 
     def handle_login(url: str):
@@ -56,4 +57,3 @@ def test_login(playwright: Playwright, monkeypatch: pytest.MonkeyPatch):
 
     print(f"click says: {res}")
 
-    pytest.xfail()
