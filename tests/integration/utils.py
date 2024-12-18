@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import shutil
 from typing import List
+from difflib import unified_diff
 
 from constants import EXPECTED_TASK_FILES_DIRECTORY, TEMPORARY_DIRECTORY
 
@@ -43,7 +44,7 @@ def get_file_structure_differences_in_temporary_and_expected_directories(
     exercise_id: str, task_id: str | None
 ) -> StructureDifferences:
     """
-    Returns true if the file structure of temporary and expected directories match.
+    Returns a StructureDifferences object containing missing and unexpected files in temporary directory compared to expected directory. Ignores .timdata differences.
     """
 
     def get_structure(directory: Path):
@@ -67,13 +68,15 @@ def get_file_structure_differences_in_temporary_and_expected_directories(
 
 
 # TODO: report file names (and lines) that mismatch
-def temporary_directory_file_contents_match_expected(
-    exercise_id: str, task_id: str | None
-) -> List[str]:
+def temporary_directory_file_contents_mismatches(
+    exercise_id: str, task_id: str | None, ignore_timdata=True
+) -> dict[str, list[str]]:
     """
     Returns true if contents of all files COMMON to temporary and expected directories match.
 
     Does not care about files present only in one temporary or expected directory.
+
+    Ignores .timdata differences.
     """
     temporary_files_path = Path(
         TEMPORARY_DIRECTORY, exercise_id, task_id if task_id else ""
@@ -81,8 +84,7 @@ def temporary_directory_file_contents_match_expected(
     expected_files_path = Path(
         EXPECTED_TASK_FILES_DIRECTORY, exercise_id, task_id if task_id else ""
     ).resolve()
-
-    caught_mismatches: List[str] = []
+    caught_mismatches: dict[str, list[str]] = {}
 
     def dir_files_contents_match(dir1: Path, dir2: Path):
         dir_cmp = filecmp.dircmp(dir1, dir2)
@@ -90,7 +92,20 @@ def temporary_directory_file_contents_match_expected(
             dir_cmp.left, dir_cmp.right, dir_cmp.common_files, shallow=False
         )
 
-        caught_mismatches.extend(mismatch)
+        if len(mismatch) > 0:
+            # Get diff of mismatching files
+            for file in mismatch:
+
+                if ignore_timdata and file == ".timdata":
+                    continue
+
+                with open(Path(dir_cmp.left, file), "r") as left_file:
+                    left_file_contents = left_file.readlines()
+                with open(Path(dir_cmp.right, file), "r") as right_file:
+                    right_file_contents = right_file.readlines()
+                diff = list(unified_diff(left_file_contents, right_file_contents))
+
+                caught_mismatches[file] = diff
 
         # Compare subdirectories recursively
         for sub_dir in dir_cmp.subdirs.values():

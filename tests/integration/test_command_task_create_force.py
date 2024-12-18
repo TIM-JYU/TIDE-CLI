@@ -3,7 +3,7 @@ from click.testing import CliRunner
 from constants import TEMPORARY_DIRECTORY
 from tidecli.main import task
 from utils import (
-    temporary_directory_file_contents_match_expected,
+    temporary_directory_file_contents_mismatches,
     copy_directory_from_expected_to_temporary,
 )
 
@@ -49,5 +49,5 @@ def test_create_single_task_with_force_flag(tmp_dir):
     # TODO: Because if returncode will be other than 0, then the test will fail.
 
     # Check that the file has been overwritten
-    mismatches = temporary_directory_file_contents_match_expected(exercise_id, task_id)
+    mismatches = temporary_directory_file_contents_mismatches(exercise_id, task_id)
     assert len(mismatches) == 0

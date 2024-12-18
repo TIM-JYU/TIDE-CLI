@@ -7,7 +7,7 @@ from click.testing import CliRunner
 from tidecli.main import task
 from constants import TEMPORARY_DIRECTORY
 from utils import (
-    temporary_directory_file_contents_match_expected,
+    temporary_directory_file_contents_mismatches,
     get_file_structure_differences_in_temporary_and_expected_directories,
 )
 
@@ -70,6 +70,7 @@ def test_task_create_with_supplementary_files_creates_files_with_expected_conten
         ],
     )
 
-    assert temporary_directory_file_contents_match_expected(
-        exercise_id, task_id
+    mismatches = temporary_directory_file_contents_mismatches(exercise_id, task_id)
+    assert (
+        len(mismatches) == 0
     ), f"Unexpected file content when creating task with supplementary files {supplementary_file_description}"
