@@ -1,13 +1,16 @@
 # TIDE-CLI
 
 ## Development
+
 Use following in your local repo:
+
 ```
 git config core.eol native
 git config core.autocrlf true
 ```
 
 ## Usage as python application
+
 Step 1: Clone TIDE-CLI repository https://github.com/TIDE-project/TIDE-CLI
 
 Step 2: Modify src/tidecli/tide_config.py BASE_URL to correspond the TIM-server being used
@@ -16,7 +19,7 @@ Step 3: Python 3.10 or higher is required
 
 Step 4: Run `pip install poetry` to install Poetry tool for dependency management and packaging
 
-Step 5: Run `poetry shell` to enter virtual environment 
+Step 5: Run `poetry shell` to enter virtual environment
 
 Step 6: Run `poetry install` to install dependencies. If Poetry install fails, run first `poetry lock`
 
@@ -27,6 +30,7 @@ Step 8: To run the application, run `python main.py login` to login to the appli
 Step 9: Run `python main.py` to see the list of commands available
 
 ## Building CLI tool to executable
+
 There may be a need for build the CLI tool into an executable using user's own operating system. If that is the case, please follow these after above steps are completed untill `Step 6`.
 
 **Build the CLI tool**
@@ -40,8 +44,21 @@ Step 3: Move app named 'main' as 'tide' to some folder that is in PATH. E.g. `mv
 Step 4: Start use, please refer user instructions in TIM.
 
 ## Running unit tests
+
 After cloning and starting the Poetry environment:
 
 Step 1: Navigate to test folder `cd tests`
 
 Step 2: Run unit tests with command `python -m unittest`
+
+## Running integration tests
+
+Step 1: Start up TIM dev server (for instructions on this, see https://github.com/TIM-JYU/TIM)
+
+Step 2: Log in to TIM to with username "testuser1" and password "test1pass"
+
+Step 3: Log in to TIDE-CLI with same credentials using `DEV=true poetry run python src/tidecli/main.py login` (development setup steps 4-6 should be done first)
+
+Step 4: Navigate to integration test folder `cd tests/integration`
+
+Step 5: Run `DEV=true poetry run pytest`

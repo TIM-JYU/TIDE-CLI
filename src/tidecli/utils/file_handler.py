@@ -361,6 +361,7 @@ def split_file_contents(content: str) -> tuple[list[str], list[str]]:
     bycodebegin = lines[:start + 1]
     bycodeend = lines[end:]
     gap_content = lines[start + 1: end]
+
     bycode = bycodebegin + bycodeend
 
     logger = Logger()
@@ -395,6 +396,10 @@ def validate_answer_file(answer_by: list[str], metadata_by: list[str]) -> bool:
     if clear_answer is None or clear_metadata_content is None:
         return False
 
+    if len(clear_answer) != len(clear_metadata_content):
+        return False
+
+    # Difference helps, when length of the contents are the same.
     bycodediff = clear_answer.difference(clear_metadata_content)
     logger.debug("Diff between cleared answer and .timdata content: \n")
     logger.debug(bycodediff)
@@ -465,9 +470,10 @@ def answer_with_original_noneditable_sections(answer: str, original: str) -> str
         # TODO! add error handling
         return answer
 
-    combined_lines = itertools.chain(original_lines[:original_gaps[0] + 1],
-                                     answer_lines[answer_gaps[0] + 1:answer_gaps[1]],
-                                     original_lines[original_gaps[1]:]
-                                     )
+    combined_lines = itertools.chain(
+        original_lines[: original_gaps[0] + 1],
+        answer_lines[answer_gaps[0] + 1 : answer_gaps[1]],
+        original_lines[original_gaps[1] :],
+    )
 
     return "\n".join(combined_lines)

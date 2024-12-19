@@ -128,6 +128,7 @@ def list_tasks(demo_path: str, jsondata: bool) -> None:
 
     if jsondata:
         # Create JSON object list
+        # TODO: the json printed contains a ton of unnecessary information
         tasks_json = [t.to_json() for t in tasks]
         click.echo(json.dumps(tasks_json, ensure_ascii=False, indent=4))
 
@@ -175,13 +176,17 @@ def reset(file_path_string: str):
     file_contents = file_path.read_text()
 
     metadata = get_metadata(file_path.parent)
-    task_file_contents = next((x.content for x in metadata.task_files if x.file_name == file_path.name), None)
- 
+
+    task_file_contents = next(
+        (x.content for x in metadata.task_files if x.file_name == file_path.name), None
+    )
     if task_file_contents is None:
         raise click.ClickException("File is not part of this task")
-    
-    combined_contents = answer_with_original_noneditable_sections(file_contents, task_file_contents)
-    
+
+    combined_contents = answer_with_original_noneditable_sections(
+        file_contents, task_file_contents
+    )
+
     file_path.write_text(combined_contents)
 
 

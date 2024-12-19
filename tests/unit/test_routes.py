@@ -1,4 +1,6 @@
+import os
 import unittest
+import pytest
 from unittest.mock import patch, MagicMock
 
 import click
