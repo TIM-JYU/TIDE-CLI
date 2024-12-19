@@ -6,12 +6,14 @@ __date__ = "11.5.2024"
 
 import re
 import json
+from collections import defaultdict
 from typing import Any
 import click.exceptions
 from pathlib import Path
 import itertools
 
-from tidecli.models.task_data import SupplementaryFile, TaskData, TaskFile
+from tidecli.models.task_data import SupplementaryFile, TaskData, TaskFile, TideCourseData, TideCoursePartData, \
+    RootFolders
 from tidecli.utils.error_logger import Logger
 from tidecli.api import routes
 
@@ -21,6 +23,7 @@ METADATA_NAME = ".timdata"
 # Search strings for finding the beginning and end of the task content
 BEGIN_MSG_SEARCH_STRING = r"Write your code below this line"
 END_MSG_SEARCH_STRING = r"Write your code above this line"
+
 
 def write_file(file_path: Path, content: str | bytes) -> None:
     """
@@ -40,7 +43,7 @@ def write_file(file_path: Path, content: str | bytes) -> None:
 
 
 def create_tasks(
-    tasks: list[TaskData], overwrite: bool, user_path: str | None = None
+        tasks: list[TaskData], overwrite: bool, user_path: str | None = None
 ) -> None:
     """
     Create multiple tasks.
@@ -82,9 +85,8 @@ def combine_tasks(tasks: list[TaskData]) -> list[TaskData]:
                 doc_id=task_list[0].doc_id,
                 ide_task_id=ide_task_id,
                 task_files=[f for t in task_list for f in t.task_files],
-                supplementary_files=[
-                    f for t in task_list for f in t.supplementary_files
-                ],
+                task_directory=task_list[0].task_directory,
+                supplementary_files=[f for t in task_list for f in t.supplementary_files],
                 stem=task_list[0].stem,
                 header=task_list[0].header,
             )
@@ -98,7 +100,7 @@ def get_file_content_from_source(source: str) -> bytes | Any:
     Get content of a file from its source address.
     If address does not start with http URL, it is assumed to be a TIM path.
 
-    :param supplementary_file: SupplementaryFile object
+    :param source: file source address
     return: Content of the source
     """
     if source is not None:
@@ -122,76 +124,57 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
     """
     # Sets path to current path or user given path
     if user_path:
-        user_folder = Path.cwd() / user_path
+        user_folder_root = Path.cwd() / user_path
     else:
-        user_folder = Path.cwd()
+        user_folder_root = Path.cwd()
 
-    # Add course path to create task path
-    user_folder = user_folder / Path(task.path).name / task.ide_task_id
+    root_folders = RootFolders(with_task_directory=user_folder_root,
+                               without_task_directory=user_folder_root / Path(task.path).name / task.ide_task_id)
 
-    # Fix for tasks that have file_name without suffix
-    for f in task.task_files:
-        path = Path(f.file_name)
-        suffix = path.suffix
-        if suffix != "":
-            continue
-        f.file_name = add_suffix(f.file_name, task.run_type)
+    saved = save_files(task_files=task.task_files, folders=root_folders,
+                       msg='Task created in', overwrite=overwrite)
 
-    saved = save_files(
-        task_files=task.task_files, save_path=user_folder, overwrite=overwrite
-    )
- 
-    if task.supplementary_files is not None:
-        save_files(task_files=task.supplementary_files, save_path=user_folder, overwrite=overwrite)
+    if task.supplementary_files:
+        save_files(task_files=task.supplementary_files, folders=root_folders,
+                   msg="  supplementary files", overwrite=overwrite)
 
     if not saved:
         return False
 
-    write_metadata(
-        folder_path=user_folder,
-        metadata=task,
-    )
+    write_metadata(folder_path=user_folder_root, metadata=task)
 
     return saved
 
 
-def add_suffix(file_name: str, file_type: str) -> str:
+def save_files(task_files: list[TaskFile] | list[SupplementaryFile], folders: RootFolders,
+               msg: str, overwrite: bool = False) -> bool:
     """
-    Add suffix to file name if it is missing. Fix for C++ and C files.
-
-    TODO: Support more file types, should this be done in TIM?
-
-    :param file_name: Name of the file
-    :param file_type: Type of the file
-    :return: File name with suffix
-    """
-    if file_type == "c++" or file_type == "cpp":
-        return file_name + ".cpp"
-
-    if file_type == "cc":
-        return file_name + ".c"
-
-    return file_name
-
-
-def save_files(task_files: list[TaskFile] | list[SupplementaryFile], save_path: Path, overwrite=False) -> bool:
-    """
-    Create files of tasks in the given path.
+    Save task files in the given path.
 
     :param task_files: Dict or list of dicts.
     Contain name with file extension (.eg .py or .txt ...) and content
-    :param save_path: Path to exercises in TIM
+    :param folders: Paths different scenarios (with or without task directory)
+    :param msg: Message to print when files are saved
     :param overwrite: Flag if overwrite
+    :return: True if files are saved, False if not
     """
-    save_path.mkdir(parents=True, exist_ok=True)
+
+    saved_files = defaultdict(list)
 
     for f in task_files:
-        file_path = save_path / f.file_name
+        if f.task_directory is not None:
+            root_path = folders.with_task_directory / f.task_directory
+        else:
+            root_path = folders.without_task_directory
+
+        file_path = root_path / f.file_name
+        f.saved_absolute_file_name = str(file_path)
+
         if file_path.exists():
             if not overwrite:
                 click.echo(
                     f"File {file_path} already exists\n"
-                    f"To overwrite give tide task create -f {save_path}\n"
+                    f"To overwrite add -f to previous command\n"
                 )
                 return False
         file_path.parent.mkdir(parents=True, exist_ok=True)
@@ -206,8 +189,13 @@ def save_files(task_files: list[TaskFile] | list[SupplementaryFile], save_path: 
             with open(file_path, "wb") as file:
                 file.write(content)
                 file.close()
+        saved_files[str(root_path.relative_to(Path.cwd()))].append(f.file_name)
 
-    click.echo(f"Task created in {save_path}")
+    if saved_files and msg:
+        output = f"{msg}"
+        for root, names in saved_files.items():
+            output += f" {root}: {', '.join(names)}"
+        click.echo(output)
     return True
 
 
@@ -220,10 +208,22 @@ def write_metadata(folder_path: Path, metadata: TaskData) -> None:
     """
     metadata_path = Path(folder_path) / METADATA_NAME
     write_mode = "w"
+    course_metadata: TideCourseData = TideCourseData()
+    course_part_name = metadata.path
+    taskname = metadata.ide_task_id
     if metadata_path.exists():
-        write_mode = "w"
+        try:
+            with open(metadata_path, "r", encoding="utf-8") as file:
+                old_metadata = json.load(file)
+                course_metadata = TideCourseData(**old_metadata)
+        except Exception as e:
+            # raise click.ClickException(f"Error reading metadata: {e}")
+            click.echo(f"Error reading metadata: {e}")  # Try to recover
     with open(metadata_path, write_mode, encoding="utf-8") as file:
-        content = metadata.model_dump_json()
+        course_part = course_metadata.course_parts.setdefault(course_part_name, TideCoursePartData())
+        course_part.tasks.setdefault(taskname, metadata)
+
+        content = course_metadata.model_dump_json(indent=4)
         file.write(content)
         file.close()
 
@@ -249,68 +249,97 @@ def create_file(item: dict, folder_path: Path, overwrite=False):
         file.close()
 
 
-def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
+def include_user_answer_to_task_file(f1: TaskFile, f2: Path) -> bool:
+    logger = Logger()
+    logger.debug(f"Validating {f2.name} against metadata content of task.")
+    with open(f2, "r", encoding="utf-8") as answer_file:
+        answer_content = answer_file.read()
+        answer_bycode, answer_gapcode = split_file_contents(
+            answer_content)
+        metadata_bycode, metadata_gapcode = split_file_contents(
+            f1.content
+        )
+
+        if len(metadata_bycode) == 0:
+            f1.content = answer_content
+            logger.info("Normal exercise, no gap found.")
+            return True
+
+        if validate_answer_file(answer_bycode, metadata_bycode):
+            # TODO: tarvitaan lisää testitapauksia,
+            # Validator OK
+            logger.info("Gap-type exercise answer file is valid.")
+            f1.content = "\n".join(answer_gapcode)
+            return True
+
+        logger.debug("Gap-type exercise answer not valid.")
+
+        # Validator complains about answer.
+        # Answer is submitted despite of complains.
+        f1.content = "\n".join(answer_gapcode)
+        # return False
+        return True  # Do not be so spesisfic about the validation
+
+
+def get_task_file_data(file_path: Path | None, file_dir: Path,
+                       metadata: TideCourseData, send_all: bool = False) -> list[TaskFile]:
     """
     Get file data from the given path excluding .json files.
 
     :param metadata: TaskData object
-    :param file_path: Path to the directory containing the files.
-    :return: File data
+    :param file_path: Path to file to search for
+    :param file_dir: Path to the file directory containing the files.
+    :param send_all: Flag to send all files in the same task
+    :return: List of TaskFile objects
     """
-    logger = Logger()
-    task_files = metadata.task_files
 
-    files_in_dir = [
-        f for f in file_path.iterdir() if f.is_file() and not f.suffix == METADATA_NAME
-    ]
-    for f1 in task_files:
-        for f2 in files_in_dir:
-            if f1.file_name == f2.name:
-                logger.debug(
-                    "Validating {0} against metadata content of task.".format(f2.name)
-                )
-                with open(f2, "r", encoding="utf-8") as answer_file:
-                    answer_content = answer_file.read()
-                    answer_bycode, answer_gapcode = split_file_contents(answer_content)
-                    metadata_bycode, metadata_gapcode = split_file_contents(f1.content)
-
-                    if len(metadata_bycode) == 0:
-                        f1.content = answer_content
-                        logger.info("Normal exercise, no gap found.")
-                        continue
-
-                    if validate_answer_file(answer_bycode, metadata_bycode):
-                        # TODO: tarvitaan lisää testitapauksia,
-                        # Validator OK
-                        logger.info("Gap-type exercise answer file is valid.")
-                        f1.content = "\n".join(answer_gapcode)
-                    else:
-                        logger.debug("Gap-type exercise answer not valid.")
-
-                        # Validator complains about answer.
-                        # Answer is submitted despite of complains.
-                        f1.content = "\n".join(answer_gapcode)
-                        # return []
-
-    return task_files
+    result = []
+    tasks = set()
+    for course_part in metadata.course_parts.values():
+        for task in course_part.tasks.values():
+            for f in task.task_files:
+                saved_file = Path(f.saved_absolute_file_name)
+                saved_dir = saved_file.parent
+                if file_path and send_all:  # if should send all files in the same task
+                    if saved_file == file_path:  # if file is the same as the one given
+                        for tf in task.task_files:  # add all files in the same task
+                            if include_user_answer_to_task_file(tf, Path(tf.saved_absolute_file_name)):
+                                result.append(tf)
+                        return result  # and do not look any more
+                    continue  # try next file
+                if saved_dir == file_dir:
+                    if file_path is None or saved_file == file_path:
+                        if not include_user_answer_to_task_file(f, Path(f.saved_absolute_file_name)):
+                            continue
+                        result.append(f)
+                        tasks.add(task.ide_task_id)
+                        if len(tasks) > 1:
+                            raise click.ClickException(
+                                "Multiple tasks found in the same directory. Give exact file name.")
+    return result
 
 
-def get_metadata(metadata_path: Path) -> TaskData:
+def get_metadata(metadata_dir: Path) -> TideCourseData:
     """
     Get metadata from the given path.
 
-    :param metadata_path: Path to the directory containing the
+    :param metadata_dir: Path to the directory containing the
     metadata.json file.
     :return: Metadata
     :raises: ClickException if metadata not found
     """
-    metadata_path = metadata_path / METADATA_NAME
-    if not metadata_path.exists():
-        raise click.ClickException(f"Metadata not found in {metadata_path}")
+    while True:
+        metadata_path = metadata_dir / METADATA_NAME
+        if metadata_path.exists():
+            break
+        if metadata_dir == metadata_dir.root:
+            raise click.ClickException(f"Metadata not found in {metadata_path}")
+        metadata_dir = metadata_dir.parent
+
     try:
         with open(metadata_path, "r", encoding="utf-8") as file:
             metadata = json.load(file)
-            return TaskData(**metadata)
+            return TideCourseData(**metadata)
     except Exception as e:
         raise click.ClickException(f"Error reading metadata: {e}")
 
@@ -329,9 +358,10 @@ def split_file_contents(content: str) -> tuple[list[str], list[str]]:
     start, end = gap
 
     # Create list of strings for validation
-    bycodebegin = lines[: start + 1]
+    bycodebegin = lines[:start + 1]
     bycodeend = lines[end:]
-    gap_content = lines[start + 1 : end]
+    gap_content = lines[start + 1: end]
+
     bycode = bycodebegin + bycodeend
 
     logger = Logger()
@@ -349,8 +379,8 @@ def validate_answer_file(answer_by: list[str], metadata_by: list[str]) -> bool:
     than the task content lines. The task content lines are marked with
     comments/messages
 
-    :param answerfile: Path to the answer file
-    :param metadata_taskfile: Path to the metadata task file
+    :param answer_by: list of answers
+    :param metadata_by: list of metedatas
     :return: True if the file is valid, False if not
     """
     logger = Logger()
@@ -384,7 +414,7 @@ def clear_contents(lines_by: list[str]) -> set[str] | None:
     """
     Clear the contents of the answer file.
 
-    :param lines: List of lines in the file
+    :param lines_by: List of lines in the file
     :return: Set of lines in the file
     """
     logger = Logger()
@@ -407,7 +437,6 @@ def find_gaps_in_tasks(lines: list[str]) -> tuple[int, int] | None:
     :param lines: List of lines in the file
     """
     # TODO: Find multiple gaps, store tuples into a list
-    gap = None
     start: int | None = None
     end: int | None = None
 

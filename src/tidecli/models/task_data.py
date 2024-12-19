@@ -9,6 +9,8 @@ __license__ = "MIT"
 __date__ = "11.5.2024"
 
 import re
+from pathlib import Path
+from typing import Dict
 
 from pydantic import BaseModel
 
@@ -27,6 +29,15 @@ class TaskFile(BaseModel):
 
     source: str = "editor"
     """Source attribute in TIM. Not used in CLI app."""
+
+    task_directory: str | None = None
+    """Directory of the task."""
+
+    task_type: str | None = None
+    """Type of the task."""
+
+    saved_absolute_file_name: str | None = None
+    """Full path of the file in the file system."""
 
     user_input: str = ""
     """User input argument for submit."""
@@ -50,6 +61,9 @@ class SupplementaryFile(BaseModel):
     file_name: str
     content: str | None
     source: str | None
+    task_directory: str | None = None
+    saved_absolute_file_name: str | None = None
+
 
 
 _task_type_split_re = re.compile(r"[/,; ]")
@@ -90,6 +104,9 @@ class TaskData(BaseModel):
     stem: str | None = None
     """Stem of the task, may containg a short instructions."""
 
+    task_directory: str | None = None
+    """Directory of the task."""
+
     header: str | None = None
     """Header of the task."""
 
@@ -113,7 +130,31 @@ class TaskData(BaseModel):
 
     def to_json(self) -> dict:
         """Convert to dict."""
-        task_data = self.dict()
-        task_data["task_files"] = [task_file.dict() for task_file in self.task_files]
+        task_data = self.model_dump()
+        task_data["task_files"] = [task_file.model_dump() for task_file in self.task_files]
 
         return task_data
+
+
+class TideCoursePartData(BaseModel):
+    """
+    Model for Tide course part data. Could be like a week or something else
+
+    """
+    tasks: Dict[str, TaskData] = {}
+
+
+class TideCourseData(BaseModel):
+    """
+    Model for Tide course data.
+
+    """
+    course_parts: Dict[str, TideCoursePartData] = {}
+
+
+class RootFolders:
+    """Root folders for different scenarios."""
+
+    def __init__(self, with_task_directory: Path, without_task_directory: Path):
+        self.with_task_directory = with_task_directory
+        self.without_task_directory = without_task_directory
