@@ -307,7 +307,6 @@ test_path = os.path.join(user_home, "Desktop", "Ohjelmointikurssi 1/Demo1/Tehtä
 #         shutil.rmtree(os.path.join(user_home, "Desktop", "Ohjelmointikurssi"))
 
 
-# TODO: Refactor/update tests above. Tests below are updated.
 class TestValidateAnswerFile(unittest.TestCase):
     """
     Test the validation of answer file.

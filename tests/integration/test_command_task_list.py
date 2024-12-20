@@ -37,10 +37,10 @@ def test_task_list_with_json_flag_outputs_valid_json():
         ["list", "users/test-user-1/course-1/exercise-1", "--json"],
     )
 
-    # TODO: is_valid_json ja assert tassa
     assert is_valid_json(result.output), "Output is not valid JSON."
 
 
+@pytest.mark.xfail
 def test_task_list_with_json_flag_outputs_expected_data():
     # TODO: the current "task list --json" prints tons of unnecessary information
     pass

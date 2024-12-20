@@ -59,8 +59,12 @@ def setup_tim_test_data():
 
 
 def teardown_tim_test_data():
-    # TODO: Poista testitapaus dokumentit lokaalista timistä
-    # ei valttamatonta, koska setup ylikirjoittaa edellisella ajolla luomiensa dokumenttien markdownit (?)
+    """
+    Tear the test setup down.
+
+    Currently, no necessarya actions needed here.
+    May be improved to remove generated test data in local tim.
+    """
     pass
 
 

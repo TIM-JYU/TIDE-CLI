@@ -37,7 +37,6 @@ class Logger:
 
     def log(self, LEVEL, msg):
         """Log events with specified level."""
-        # TODO: Implement this generic logger function with specified level
         self.internal_logger.log(LEVEL, msg)
         click.echo("Event was logged into {0}.".format(self.logfile))
 

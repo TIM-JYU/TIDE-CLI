@@ -159,8 +159,6 @@ def add_suffix(file_name: str, file_type: str) -> str:
     """
     Add suffix to file name if it is missing. Fix for C++ and C files.
 
-    TODO: Support more file types, should this be done in TIM?
-
     :param file_name: Name of the file
     :param file_type: Type of the file
     :return: File name with suffix
@@ -200,8 +198,7 @@ def save_files(task_files: list[TaskFile] | list[SupplementaryFile], save_path: 
                 file.write(f.content)
                 file.close()
         elif f.source is not None:
-            # TODO: Handle potential errors from API call (allow errors so that consequent files are saved)
-            # Currently, only files that in the list before an error are saved
+            # TODO: Handle potential errors from API call (allow errors so that consequent files are saved), currently, only files that in the list before an error are saved
             content = get_file_content_from_source(f.source)
             with open(file_path, "wb") as file:
                 file.write(content)
@@ -280,7 +277,6 @@ def get_task_file_data(file_path: Path, metadata: TaskData) -> list[TaskFile]:
                         continue
 
                     if validate_answer_file(answer_bycode, metadata_bycode):
-                        # TODO: tarvitaan lisää testitapauksia,
                         # Validator OK
                         logger.debug("Gap-type exercise answer file is valid.")
                         f1.content = "\n".join(answer_gapcode)
@@ -440,7 +436,6 @@ def answer_with_original_noneditable_sections(answer: str, original: str) -> str
     original_gaps = find_gaps_in_tasks(original_lines)
 
     if answer_gaps is None or original_gaps is None:
-        # TODO! add error handling
         return answer
 
     combined_lines = itertools.chain(
