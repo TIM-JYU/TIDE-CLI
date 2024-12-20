@@ -36,7 +36,7 @@ class TaskFile(BaseModel):
     task_type: str | None = None
     """Type of the task."""
 
-    saved_absolute_file_name: str | None = None
+    absolute_file_path: str | None = None
     """Full path of the file in the file system."""
 
     user_input: str = ""
@@ -62,7 +62,7 @@ class SupplementaryFile(BaseModel):
     content: str | None
     source: str | None
     task_directory: str | None = None
-    saved_absolute_file_name: str | None = None
+    absolute_file_path: str | None = None
 
 
 
@@ -152,9 +152,3 @@ class TideCourseData(BaseModel):
     course_parts: Dict[str, TideCoursePartData] = {}
 
 
-class RootFolders:
-    """Root folders for different scenarios."""
-
-    def __init__(self, with_task_directory: Path, without_task_directory: Path):
-        self.with_task_directory = with_task_directory
-        self.without_task_directory = without_task_directory

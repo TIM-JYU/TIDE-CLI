@@ -12,8 +12,7 @@ import click.exceptions
 from pathlib import Path
 import itertools
 
-from tidecli.models.task_data import SupplementaryFile, TaskData, TaskFile, TideCourseData, TideCoursePartData, \
-    RootFolders
+from tidecli.models.task_data import SupplementaryFile, TaskData, TaskFile, TideCourseData, TideCoursePartData
 from tidecli.utils.error_logger import Logger
 from tidecli.api import routes
 
@@ -124,30 +123,40 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
     """
     # Sets path to current path or user given path
     if user_path:
-        user_folder_root = Path.cwd() / user_path
+        save_path = Path.cwd() / user_path
     else:
-        user_folder_root = Path.cwd()
+        save_path = Path.cwd()
 
-    root_folders = RootFolders(with_task_directory=user_folder_root,
-                               without_task_directory=user_folder_root / Path(task.path).name / task.ide_task_id)
+    default_task_directory = Path(Path(task.path).name) / task.ide_task_id
 
-    saved = save_files(task_files=task.task_files, folders=root_folders,
-                       msg='Task created in', overwrite=overwrite)
+    saved = save_files(task_files=task.task_files,
+                       save_path=save_path,
+                       msg='Task created in',
+                       default_task_directory=default_task_directory,
+                       overwrite=overwrite)
 
     if task.supplementary_files:
-        save_files(task_files=task.supplementary_files, folders=root_folders,
-                   msg="  supplementary files", overwrite=overwrite)
+        save_files(task_files=task.supplementary_files,
+                   save_path=save_path,
+                   default_task_directory=default_task_directory,
+                   msg="  supplementary files",
+                   overwrite=overwrite)
 
     if not saved:
         return False
 
-    write_metadata(folder_path=user_folder_root, metadata=task)
+    write_metadata(folder_path=save_path, metadata=task)
 
     return saved
 
 
-def save_files(task_files: list[TaskFile] | list[SupplementaryFile], folders: RootFolders,
-               msg: str, overwrite: bool = False) -> bool:
+def save_files(
+    task_files: list[TaskFile] | list[SupplementaryFile],
+    save_path: Path,
+    default_task_directory: Path,
+    msg: str,
+    overwrite: bool = False
+) -> bool:
     """
     Save task files in the given path.
 
@@ -161,14 +170,14 @@ def save_files(task_files: list[TaskFile] | list[SupplementaryFile], folders: Ro
 
     saved_files = defaultdict(list)
 
-    for f in task_files:
-        if f.task_directory is not None:
-            root_path = folders.with_task_directory / f.task_directory
+    for task_file in task_files:
+        if task_file.task_directory is not None:
+            save_dir = save_path / task_file.task_directory
         else:
-            root_path = folders.without_task_directory
+            save_dir = save_path / default_task_directory
 
-        file_path = root_path / f.file_name
-        f.saved_absolute_file_name = str(file_path)
+        file_path = save_dir / task_file.file_name
+        task_file.absolute_file_path = str(file_path.absolute())
 
         if file_path.exists():
             if not overwrite:
@@ -178,18 +187,18 @@ def save_files(task_files: list[TaskFile] | list[SupplementaryFile], folders: Ro
                 )
                 return False
         file_path.parent.mkdir(parents=True, exist_ok=True)
-        if f.content is not None:
+        if task_file.content is not None:
             with open(file_path, "w", encoding="utf-8") as file:
-                file.write(f.content)
+                file.write(task_file.content)
                 file.close()
-        elif f.source is not None:
+        elif task_file.source is not None:
             # TODO: Handle potential errors from API call (allow errors so that consequent files are saved)
             # Currently, only files that in the list before an error are saved
-            content = get_file_content_from_source(f.source)
+            content = get_file_content_from_source(task_file.source)
             with open(file_path, "wb") as file:
                 file.write(content)
                 file.close()
-        saved_files[str(root_path.relative_to(Path.cwd()))].append(f.file_name)
+        saved_files[str(save_dir.relative_to(Path.cwd()))].append(task_file.file_name)
 
     if saved_files and msg:
         output = f"{msg}"
@@ -281,36 +290,61 @@ def include_user_answer_to_task_file(f1: TaskFile, f2: Path) -> bool:
         return True  # Do not be so spesisfic about the validation
 
 
-def get_task_file_data(file_path: Path | None, file_dir: Path,
-                       metadata: TideCourseData, send_all: bool = False) -> list[TaskFile]:
+def get_task_file_data(file_path: Path, metadata: TideCourseData) -> TaskFile:
+    """
+    Get file data from the given path.
+
+    :param metadata: TaskData object
+    :param file_path: Path to file to search for
+    :return: TaskFile object
+    """
+    for course_part in metadata.course_parts.values():
+        for task in course_part.tasks.values():
+            for task_file in task.task_files:
+                if task_file.absolute_file_path == str(file_path):
+                    return task_file
+    raise click.ClickException(f"File {file_path} not found in metadata")
+
+
+def get_task_file_data(file_path: Path | None,
+                       file_dir: Path,
+                       metadata: TideCourseData,
+                       with_starter_content: bool = False,
+                       send_all: bool = False
+                       ) -> list[TaskFile]:
     """
     Get file data from the given path excluding .json files.
 
     :param metadata: TaskData object
     :param file_path: Path to file to search for
     :param file_dir: Path to the file directory containing the files.
+    :param with_starter_content: Flag to use starter content instead of user answer
     :param send_all: Flag to send all files in the same task
     :return: List of TaskFile objects
     """
+    # TODO: refactor
 
     result = []
     tasks = set()
     for course_part in metadata.course_parts.values():
         for task in course_part.tasks.values():
             for f in task.task_files:
-                saved_file = Path(f.saved_absolute_file_name)
-                saved_dir = saved_file.parent
+                absolute_file_path = Path(f.absolute_file_path)
+                save_dir = absolute_file_path.parent
                 if file_path and send_all:  # if should send all files in the same task
-                    if saved_file == file_path:  # if file is the same as the one given
-                        for tf in task.task_files:  # add all files in the same task
-                            if include_user_answer_to_task_file(tf, Path(tf.saved_absolute_file_name)):
-                                result.append(tf)
+                    if absolute_file_path == file_path:  # if file is the same as the one given
+                        for task_file in task.task_files:  # add all files in the same task
+                            if with_starter_content:
+                                result.append(task_file)
+                            elif include_user_answer_to_task_file(task_file, Path(task_file.absolute_file_path)):
+                                result.append(task_file)
                         return result  # and do not look any more
                     continue  # try next file
-                if saved_dir == file_dir:
-                    if file_path is None or saved_file == file_path:
-                        if not include_user_answer_to_task_file(f, Path(f.saved_absolute_file_name)):
-                            continue
+                if save_dir == file_dir:
+                    if file_path is None or absolute_file_path == file_path:
+                        if not with_starter_content:
+                            if not include_user_answer_to_task_file(f, absolute_file_path):
+                                continue
                         result.append(f)
                         tasks.add(task.ide_task_id)
                         if len(tasks) > 1:

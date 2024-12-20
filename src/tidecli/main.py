@@ -162,26 +162,39 @@ def create(demo_path: str, ide_task_id: str, all_tasks: bool, force: bool, user_
 
 @task.command()
 @click.argument("file_path_string", type=str, required=True)
-def reset(file_path_string: str):
+def reset(file_path_string: str) -> None:
     """
     Enter the path of the task file to reset.
+
+    param file_path_string: Path to the task file in the local file system.
     """
+    # TODO: currently resets only non-gap parts, should reset all parts or be renamed
     if not is_logged_in():
         return
 
-    file_path = Path(file_path_string)
+    file_path = Path(file_path_string).absolute()
     if not file_path.exists() or not file_path.is_file():
-        raise click.ClickException("Invalid path.")
+        raise click.ClickException("Invalid path. Please provide a valid path to the task file you want to reset.")
 
     file_contents = file_path.read_text()
 
     metadata = get_metadata(file_path.parent)
 
+    file_dir = file_path.parent
+
+    task_files = get_task_file_data(file_path, file_dir, metadata, send_all=all_files, with_starter_content=True)
+    if not task_files:
+        raise click.ClickException("Invalid task file")
+
+    print(task_files)
+
     task_file_contents = next(
-        (x.content for x in metadata.task_files if x.file_name == file_path.name), None
+        (x.content for x in task_files if x.file_name == file_path.name), None
     )
     if task_file_contents is None:
         raise click.ClickException("File is not part of this task")
+
+    file_path.write_text(task_file_contents)
 
     combined_contents = answer_with_original_noneditable_sections(
         file_contents, task_file_contents
