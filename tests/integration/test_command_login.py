@@ -43,11 +43,13 @@ def test_login(playwright: Playwright, monkeypatch: pytest.MonkeyPatch):
 
         page.close()
 
-    # def launch_browser_in_debug_mode(url):
-    #     arguments = ["--remote-debugging-port=9001"]
-    #     subprocess.run(["chromium", *arguments, url])
 
-    # monkeypatch.setattr(webbrowser, "open", launch_browser_in_debug_mode)
+    def launch_browser_in_debug_mode(url):
+        arguments = ["--remote-debugging-port=9001"]
+        subprocess.run(["chromium", *arguments, url])
+
+
+    monkeypatch.setattr(webbrowser, "open", launch_browser_in_debug_mode)
 
     runner = CliRunner()
 

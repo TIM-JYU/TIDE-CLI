@@ -30,9 +30,9 @@ class StructureDifferences:
             string += "No missing files/directories."
 
         if self.unexpected_files:
-            string += f"Unexpected files: {', '.join(self.unexpected_files)}."
+            string += (f" Unexpected files: {', '.join(self.unexpected_files)}.")
         else:
-            string += "No unexpected files/directories."
+            string += " No unexpected files/directories."
 
         return string
 
