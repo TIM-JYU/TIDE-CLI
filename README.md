@@ -81,13 +81,17 @@ webbrowser.open is followed by a code that has to be running while the user
 interacts with the browser, thus the mock would have to be non-blocking like
 the original function. This proved to be too complex of a problem to tackle.
 
-A solution to the problem of authenticating the user automatically may lie in not mocking the webbrowser.open function and instead getting it to launch Chromium with --remote-debugging-port flag and attaching to it. See [connect over cdp in Playwright documentation](https://playwright.dev/python/docs/api/class-browsertype#browser-type-connect-over-cdp)
+A solution to the problem of authenticating the user automatically may lie in not mocking the webbrowser.open function and instead getting it to launch Chromium with --remote-debugging-port flag and attaching to it. See [connect over cdp in Playwright documentation](https://playwright.dev/python/docs/api/class-browsertype#browser-type-connect-over-cdp).
 
 #### TIM document IDs and file content comparison
 
-As it currently stands, the TIM document ID is hard-coded into the files inside the `expected_task_files` directory. However, these hard-coded values do not (except with extreme luck) match the ones TIM generates for the documents when they are created for the test session.
+As it currently stands, the TIM document ID is hard-coded into the files inside
+the `expected_task_files` directory. However, these hard-coded values do not
+(except with extreme luck) match the ones TIM generates for the documents when
+they are created for the test session.
 
-Possible solutions to the problem, from the fastest one to implement to the most solid one.
+Possible solutions to the problem, from the fastest one to implement to the
+most solid one.
 
 1. Ignore .timdata during file content comparison
 2. Ignore the doc_id inside .timdata during file content comparison
