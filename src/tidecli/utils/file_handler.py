@@ -332,7 +332,7 @@ def get_metadata(metadata_dir: Path) -> TideCourseData:
         metadata_path = metadata_dir / METADATA_NAME
         if metadata_path.exists():
             break
-        if metadata_dir == metadata_dir.root:
+        if str(metadata_dir) == metadata_dir.root:
             raise click.ClickException(f"Metadata not found in {metadata_path}")
         metadata_dir = metadata_dir.parent
 
