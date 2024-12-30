@@ -148,12 +148,14 @@ def points(doc_path: str, ide_task_id: str, print_json: bool):
 
 
 @task.command()
+@click.option("--json", "-j", "print_json", is_flag=True, default=False)
 @click.option("--all", "-a", "all", is_flag=True, default=False)
 @click.option("--force", "-f", "force", is_flag=True, default=False)
 @click.option("--dir", "-d", "dir", type=str, default=None)
 @click.argument("demo_path", type=str)
 @click.argument("ide_task_id", type=str, default=None, required=False)
-def create(demo_path: str, ide_task_id: str, all: bool, force: bool, dir: str) -> None:
+def create(demo_path: str, ide_task_id: str, all: bool, force: bool, dir: str, print_json: bool) -> None:
+    # TODO: json print
     """Create tasks based on options."""
     if not is_logged_in():
         return
