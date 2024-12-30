@@ -1,0 +1,37 @@
+name: Check formatting
+
+on: [push, pull_request]
+
+jobs:
+  skip_check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+        - id: skip_check
+          uses: fkirc/skip-duplicate-actions@v5
+          with:
+              concurrent_skipping: 'same_content_newer'
+              skip_after_successful_duplicate: 'true'
+
+  py_format:
+    name: Check Python formatting
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_VERSION: "3.12"
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "${{ env.PYTHON_VERSION }}"
+          cache: poetry
+      - name: Install dependencies
+        run: |
+          poetry env use "${{ env.PYTHON_VERSION }}"
+          poetry install --only=dev
+      - name: Run format
+        run: .venv/bin/black --check src/tidecli

@@ -1,6 +1,5 @@
 venv/
 .idea/
-poetry.lock
 .env
 __pycache__
 *.log
@@ -8,3 +7,4 @@ __pycache__
 /build/
 /dist/
 /src/tidecli/courses/
+.dmypy.json

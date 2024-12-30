@@ -36,6 +36,7 @@ def get_file_content(url: str, is_tim_file: bool = True) -> bytes | Any:
     Get the content of the file from the URL.
 
     :param url: URL of the file
+    :param is_tim_file: If the file is from TIM
     return: Content of the file
     """
     headers = None
@@ -60,9 +61,9 @@ def get_file_content(url: str, is_tim_file: bool = True) -> bytes | Any:
 
 
 def tim_request(
-    endpoint: str,
-    method: str = "GET",
-    params: dict[str, str | None] | None = None,
+        endpoint: str,
+        method: str = "GET",
+        params: dict[str, str | None] | None = None,
 ) -> dict:
     """
     Make a request to the TIM API.
@@ -156,8 +157,8 @@ def get_tasks_by_doc(doc_path: str) -> list[TaskData]:
 
 
 def get_task_by_ide_task_id(
-    ide_task_id: str,
-    doc_path: str,
+        ide_task_id: str,
+        doc_path: str,
 ) -> TaskData:
     """
     Get the tasks by ideTask id and demo document path or id.
@@ -181,7 +182,7 @@ def get_task_by_ide_task_id(
 
 
 def submit_task(
-    task_files: SubmitData,
+        task_files: SubmitData,
 ) -> TimFeedback:
     """
     Submit the task by task id, document id and paragraph id.

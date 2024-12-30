@@ -205,4 +205,3 @@ class TestMainFileAccess(TestCase):
         self.assertTrue(os.path.exists(test_path1))
         self.assertTrue(os.path.exists(test_metadata1))
         self.assertTrue(os.path.exists(test_file1))
-

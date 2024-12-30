@@ -307,7 +307,6 @@ test_path = os.path.join(user_home, "Desktop", "Ohjelmointikurssi 1/Demo1/Tehtä
 #         shutil.rmtree(os.path.join(user_home, "Desktop", "Ohjelmointikurssi"))
 
 
-# TODO: Refactor/update tests above. Tests below are updated.
 class TestValidateAnswerFile(unittest.TestCase):
     """
     Test the validation of answer file.
@@ -329,42 +328,50 @@ class TestValidateAnswerFile(unittest.TestCase):
 
         Answer file cannot be submitted unless validated.
         """
-        answer_bycode, answer_gapcode = file_handler.split_file_contents(
-            self.answercs)
+        answer_bycode, answer_gapcode = file_handler.split_file_contents(self.answercs)
         metadata_bycode, metadata_gapcode = file_handler.split_file_contents(
-            self.answercs_metadata)
+            self.answercs_metadata
+        )
 
-        self.assertTrue(file_handler.validate_answer_file(
-            answer_bycode, metadata_bycode))
+        self.assertTrue(
+            file_handler.validate_answer_file(answer_bycode, metadata_bycode)
+        )
 
-        answer_bycode, answer_gapcode = file_handler.split_file_contents(
-            self.answerpy)
+        answer_bycode, answer_gapcode = file_handler.split_file_contents(self.answerpy)
         metadata_bycode, metadata_gapcode = file_handler.split_file_contents(
-            self.answerpy_metadata)
+            self.answerpy_metadata
+        )
 
-        self.assertTrue(file_handler.validate_answer_file(
-            answer_bycode, metadata_bycode))
+        self.assertTrue(
+            file_handler.validate_answer_file(answer_bycode, metadata_bycode)
+        )
 
     def test_validate_answer_file_broken(self):
         """Validate broken answer file against metadata."""
         answer_bycode, answer_gapcode = file_handler.split_file_contents(
-            self.answercs_broken)
+            self.answercs_broken
+        )
         metadata_bycode, metadata_gapcode = file_handler.split_file_contents(
-            self.answercs_metadata)
+            self.answercs_metadata
+        )
 
-        self.assertFalse(file_handler.validate_answer_file(
-            answer_bycode, metadata_bycode))
+        self.assertFalse(
+            file_handler.validate_answer_file(answer_bycode, metadata_bycode)
+        )
 
     def test_validate_answer_file_none(self):
         """Validate answer file with None metadata."""
         answer_bycode, answer_gapcode = file_handler.split_file_contents(
-            self.answerpy_none)
+            self.answerpy_none
+        )
         metadata_bycode, metadata_gapcode = file_handler.split_file_contents(
-            self.answerpy_metadata)
+            self.answerpy_metadata
+        )
 
         # None cases needs more testing.
-        self.assertFalse(file_handler.validate_answer_file(
-            answer_bycode, metadata_bycode))
+        self.assertFalse(
+            file_handler.validate_answer_file(answer_bycode, metadata_bycode)
+        )
 
     def tearDownClass():
         """Remove temporary files."""
@@ -402,7 +409,8 @@ class TestResetNoneditableSections(unittest.TestCase):
         console.log(a + b)
         """
 
-        result = file_handler.answer_with_original_noneditable_sections(answer, original)
+        result = file_handler.answer_with_original_noneditable_sections(
+            answer, original
+        )
 
         self.assertEqual(result, expected)
-
