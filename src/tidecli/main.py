@@ -182,11 +182,9 @@ def reset(file_path_string: str) -> None:
 
     file_dir = file_path.parent
 
-    task_files = get_task_file_data(file_path, file_dir, metadata, send_all=all_files, with_starter_content=True)
+    task_files = get_task_file_data(file_path, file_dir, metadata, with_starter_content=True)
     if not task_files:
         raise click.ClickException("Invalid task file")
-
-    print(task_files)
 
     task_file_contents = next(
         (x.content for x in task_files if x.file_name == file_path.name), None
