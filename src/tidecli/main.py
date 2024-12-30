@@ -5,9 +5,9 @@ This module contains the main command group for the Tide CLI.
 The whole CLI app may be located in different module.
 """
 
-__authors__ = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki"]
+__authors__ = ["Olli-Pekka Riikola, Olli Rutanen, Joni Sinokki, Vesa Lappalainen"]
 __license__ = "MIT"
-__date__ = "11.5.2024"
+__date__ = "10.12.2024"
 
 import json
 from pathlib import Path
@@ -134,27 +134,27 @@ def list_tasks(demo_path: str, jsondata: bool) -> None:
 
 
 @task.command()
-@click.option("--all", "-a", "all", is_flag=True, default=False)
+@click.option("--all", "-a", "all_tasks", is_flag=True, default=False)
 @click.option("--force", "-f", "force", is_flag=True, default=False)
-@click.option("--dir", "-d", "dir", type=str, default=None)
+@click.option("--dir", "-d", "user_dir", type=str, default=None)
 @click.argument("demo_path", type=str)
 @click.argument("ide_task_id", type=str, default=None, required=False)
-def create(demo_path: str, ide_task_id: str, all: bool, force: bool, dir: str) -> None:
+def create(demo_path: str, ide_task_id: str, all_tasks: bool, force: bool, user_dir: str) -> None:
     """Create tasks based on options."""
     if not is_logged_in():
         return
 
-    if all:
+    if all_tasks:
         # Create all tasks
         tasks: List[TaskData] = get_tasks_by_doc(doc_path=demo_path)
-        create_tasks(tasks=tasks, overwrite=force, user_path=dir)
+        create_tasks(tasks=tasks, overwrite=force, user_path=user_dir)
 
     elif ide_task_id:
         # Create a single task
         task_data: TaskData = get_task_by_ide_task_id(
             ide_task_id=ide_task_id, doc_path=demo_path
         )
-        create_task(task=task_data, overwrite=force, user_path=dir)
+        create_task(task=task_data, overwrite=force, user_path=user_dir)
 
     else:
         click.echo("Please provide either --all or an ide_task_id.")
@@ -162,26 +162,37 @@ def create(demo_path: str, ide_task_id: str, all: bool, force: bool, dir: str) -
 
 @task.command()
 @click.argument("file_path_string", type=str, required=True)
-def reset(file_path_string: str):
+def reset(file_path_string: str) -> None:
     """
     Enter the path of the task file to reset.
+
+    param file_path_string: Path to the task file in the local file system.
     """
+    # TODO: currently resets only non-gap parts, should reset all parts or be renamed
     if not is_logged_in():
         return
 
-    file_path = Path(file_path_string)
+    file_path = Path(file_path_string).absolute()
     if not file_path.exists() or not file_path.is_file():
-        raise click.ClickException("Invalid path.")
+        raise click.ClickException("Invalid path. Please provide a valid path to the task file you want to reset.")
 
     file_contents = file_path.read_text()
 
     metadata = get_metadata(file_path.parent)
-    task_file_contents = next(
-        (x.content for x in metadata.task_files if x.file_name == file_path.name), None
-    )
 
+    file_dir = file_path.parent
+
+    task_files = get_task_file_data(file_path, file_dir, metadata, with_starter_content=True)
+    if not task_files:
+        raise click.ClickException("Invalid task file")
+
+    task_file_contents = next(
+        (x.content for x in task_files if x.file_name == file_path.name), None
+    )
     if task_file_contents is None:
         raise click.ClickException("File is not part of this task")
+
+    file_path.write_text(task_file_contents)
 
     combined_contents = answer_with_original_noneditable_sections(
         file_contents, task_file_contents
@@ -192,40 +203,43 @@ def reset(file_path_string: str):
 
 @tim_ide.command()
 @click.argument("path", type=str, required=True)
-@click.argument("file_name", type=str, required=False)
-def submit(path: str, file_name: str) -> None:
+@click.option("--all", "-a", "all_files", is_flag=True, default=False)
+def submit(path: str, all_files: bool = False) -> None:
     """
     Enter the path of the task folder to submit the task/tasks to TIM.
 
     Path must be inserted in the following format: "/path/to/task/folder".
+    param path: Path to the task folder in the local file system. Or path to the task file.
+    param all_files: If True, submits all files in the task folder.
     """
     if not is_logged_in():
         return
 
-    path = Path(path)
+    path: Path = Path(path).absolute()
     if not path.exists():
         raise click.ClickException(
-            "Invalid path. Give an absolute path to the task folder \
-            in the local file system"
+            "Invalid path. Give a path to the task folder "
+            "in the local file system or existing filename."
         )
+    if not path.is_dir():
+        file_dir = path.parent
+        file_path = path
+    else:
+        file_dir = path
+        file_path = None
 
     # Get metadata from the task folder
-    metadata = get_metadata(path)
+    metadata = get_metadata(file_dir)
     if not metadata:
         raise click.ClickException("Invalid metadata")
 
-    answer_files = get_task_file_data(path, metadata)
+    answer_files = get_task_file_data(file_path, file_dir, metadata, all_files)
     if not answer_files:
         raise click.ClickException("Invalid task file")
 
     for f in answer_files:
-        if file_name and f.file_name != file_name:
-            continue
-
-        t = SubmitData(
-            code_files=[f],
-            code_language=metadata.run_type,
-        )
+        click.echo(f"Submitting: {f.file_name}, wait...")
+        t = SubmitData(code_files=[f], code_language=f.task_type)
         feedback = submit_task(t)
         click.echo(feedback.console_output())
 

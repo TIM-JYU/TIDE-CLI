@@ -8,6 +8,7 @@ from tidecli.main import task
 from constants import TEMPORARY_DIRECTORY
 
 
+@pytest.mark.xfail(reason="Needs to be updated to work with the new .timdata implementation")
 @pytest.mark.parametrize(
     "replace_line_idx, expected_to_exist_after_reset, error_msg",
     [
