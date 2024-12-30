@@ -157,6 +157,7 @@ def save_files(
     msg: str,
     overwrite: bool = False
 ) -> bool:
+
     """
     Save task files in the given path.
 
@@ -271,13 +272,13 @@ def include_user_answer_to_task_file(f1: TaskFile, f2: Path) -> bool:
 
         if len(metadata_bycode) == 0:
             f1.content = answer_content
-            logger.info("Normal exercise, no gap found.")
+            logger.debug("Normal exercise, no gap found.")
             return True
 
         if validate_answer_file(answer_bycode, metadata_bycode):
             # TODO: tarvitaan lisää testitapauksia,
             # Validator OK
-            logger.info("Gap-type exercise answer file is valid.")
+            logger.debug("Gap-type exercise answer file is valid.")
             f1.content = "\n".join(answer_gapcode)
             return True
 
@@ -287,7 +288,7 @@ def include_user_answer_to_task_file(f1: TaskFile, f2: Path) -> bool:
         # Answer is submitted despite of complains.
         f1.content = "\n".join(answer_gapcode)
         # return False
-        return True  # Do not be so spesisfic about the validation
+        return True  # Do not be so spesific about the validation
 
 
 def get_task_file_data(file_path: Path, metadata: TideCourseData) -> TaskFile:
@@ -513,7 +514,6 @@ def answer_with_original_noneditable_sections(answer: str, original: str) -> str
     original_gaps = find_gaps_in_tasks(original_lines)
 
     if answer_gaps is None or original_gaps is None:
-        # TODO! add error handling
         return answer
 
     combined_lines = itertools.chain(
