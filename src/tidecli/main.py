@@ -203,19 +203,18 @@ def reset(file_path_string: str) -> None:
 
 @tim_ide.command()
 @click.argument("path", type=str, required=True)
-@click.option("--all", "-a", "all_files", is_flag=True, default=False)
-def submit(path: str, all_files: bool = False) -> None:
+def submit(path: str) -> None:
     """
-    Enter the path of the task folder to submit the task/tasks to TIM.
+    Enter the path of a task folder or a file to submit the task/tasks to TIM.
+    If the path is a folder, all tasks in the folder will be submitted.
+    If the path is a file, only that task will be submitted.
 
-    Path must be inserted in the following format: "/path/to/task/folder".
-    param path: Path to the task folder in the local file system. Or path to the task file.
-    param all_files: If True, submits all files in the task folder.
+    param path: Path to a task folder or a file.
     """
     if not is_logged_in():
         return
 
-    path: Path = Path(path).absolute()
+    path: Path = Path(path)
     if not path.exists():
         raise click.ClickException(
             "Invalid path. Give a path to the task folder "
@@ -230,10 +229,10 @@ def submit(path: str, all_files: bool = False) -> None:
 
     # Get metadata from the task folder
     metadata = get_metadata(file_dir)
+
     if not metadata:
         raise click.ClickException("Invalid metadata")
-
-    answer_files = get_task_file_data(file_path, file_dir, metadata, all_files)
+    answer_files = get_task_file_data(file_path, file_dir, metadata)
     if not answer_files:
         raise click.ClickException("Invalid task file")
 
