@@ -36,9 +36,6 @@ class TaskFile(BaseModel):
     task_type: str | None = None
     """Type of the task."""
 
-    absolute_file_path: str | None = None
-    """Full path of the file in the file system."""
-
     user_input: str = ""
     """User input argument for submit."""
 
@@ -108,6 +105,17 @@ class TaskData(BaseModel):
 
     header: str | None = None
     """Header of the task."""
+
+    def get_default_task_directory(self) -> Path:
+        """Return default task directory."""
+        return Path(Path(self.path).name) / self.ide_task_id
+
+    def get_task_directory(self) -> Path:
+        """Return the directory to which task files will be save."""
+        if self.task_directory is not None:
+            return Path(self.task_directory)
+        else:
+            return self.get_default_task_directory()
 
     @property
     def run_type(self) -> str:
