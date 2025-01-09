@@ -59,7 +59,6 @@ class SupplementaryFile(BaseModel):
     content: str | None
     source: str | None
     task_directory: str | None = None
-    absolute_file_path: str | None = None
 
 
 
