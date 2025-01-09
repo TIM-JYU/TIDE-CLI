@@ -350,10 +350,6 @@ def get_metadata(metadata_dir: Path) -> TideCourseData:
             if "course_parts" not in metadata:
                 task_data = TaskData(**metadata)
                 for task_file_data in task_data.task_files:
-                    if task_file_data.absolute_file_path is None:
-                        task_file_data.absolute_file_path = str(
-                            metadata_dir / task_file_data.file_name
-                        )
                     if task_file_data.task_type is None:
                         task_file_data.task_type = task_data.type
 
