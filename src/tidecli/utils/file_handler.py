@@ -198,10 +198,12 @@ def save_task_files(
     """
 
     task_files = task.task_files + task.supplementary_files
-    save_path = save_path / task.get_task_directory()
+    save_dir = save_path / task.get_task_directory()
 
     for task_file in task_files:
-        save_task_file(task_file, save_path, overwrite)
+        if task_file.task_directory is not None:
+            save_dir = save_path / task_file.task_directory
+        save_task_file(task_file, save_dir, overwrite)
 
     return True
 
@@ -312,22 +314,27 @@ def get_task_file_data(file_path: Path | None,
     for course_part in metadata.course_parts.values():
         for task in course_part.tasks.values():
             for task_file in task.task_files:
-
-                timdata_file_path = (metadata_dir / task.get_task_directory() / task_file.file_name).absolute()
+                timdata_task_directory = task_file.task_directory if task_file.task_directory is not None else task.get_task_directory()
+                timdata_file_path = (
+                    metadata_dir / timdata_task_directory / task_file.file_name).absolute()
                 timdata_file_dir = (metadata_dir / timdata_file_path.parent).absolute()
 
-                if timdata_file_dir == file_dir:
-                    if file_path is None or timdata_file_path == file_path:
-                        if not with_starter_content:
-                            if not include_user_answer_to_task_file(task_file, timdata_file_path):
-                                continue
-                        result.append(task_file)
-                        tasks.add(task.ide_task_id)
-                        if len(tasks) > 1:
-                            # Prompt user for which tasks to submit?
-                            raise click.ClickException(
-                                "Multiple tasks found in the same directory. Give exact file name."
-                            )
+                if file_path is not None:
+                    path_match = timdata_file_path == file_path
+                else:
+                    path_match = file_dir == timdata_file_dir or file_dir in timdata_file_dir.parents
+
+                if path_match:
+                    if not with_starter_content:
+                        if not include_user_answer_to_task_file(task_file, timdata_file_path):
+                            continue
+                    result.append(task_file)
+                    tasks.add(task.ide_task_id)
+
+                    if len(tasks) > 1:
+                        # Prompt user for which tasks to submit?
+                        raise click.ClickException(
+                            "Multiple tasks found in the same directory. Give exact file name.")
     return result
 
 
