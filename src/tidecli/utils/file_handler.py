@@ -283,6 +283,7 @@ def include_user_answer_to_task_file(f1: TaskFile, f2: Path) -> bool:
 
 def get_task_file_data(file_path: Path | None,
                        file_dir: Path,
+                       metadata_dir: Path,
                        metadata: TideCourseData,
                        with_starter_content: bool = False,
                        ) -> list[TaskFile]:
@@ -299,12 +300,15 @@ def get_task_file_data(file_path: Path | None,
 
     result = []
     tasks = set()
+    file_path = file_path.absolute() if file_path is not None else None
+    file_dir = file_dir.absolute()
+
     for course_part in metadata.course_parts.values():
         for task in course_part.tasks.values():
             for task_file in task.task_files:
 
-                timdata_file_path = (task.get_task_directory() / task_file.file_name)
-                timdata_file_dir = timdata_file_path.parent
+                timdata_file_path = (metadata_dir / task.get_task_directory() / task_file.file_name).absolute()
+                timdata_file_dir = (metadata_dir / timdata_file_path.parent).absolute()
 
                 if timdata_file_dir == file_dir:
                     if file_path is None or timdata_file_path == file_path:
@@ -320,15 +324,16 @@ def get_task_file_data(file_path: Path | None,
     return result
 
 
-def get_metadata(metadata_dir: Path) -> TideCourseData:
+def get_metadata(metadata_dir: Path) -> tuple[TideCourseData, Path]:
     """
     Get metadata from the given path.
 
     :param metadata_dir: Path to the directory containing the
     metadata.json file.
-    :return: Metadata
+    :return: Tuple of metadata and metadata directory
     :raises: ClickException if metadata not found
     """
+    metadata_dir = metadata_dir.absolute()
     while True:
         metadata_path = metadata_dir / METADATA_NAME
         if metadata_path.exists():
@@ -349,8 +354,8 @@ def get_metadata(metadata_dir: Path) -> TideCourseData:
                 return TideCourseData(
                     course_parts={task_data.path: TideCoursePartData(
                         tasks={task_data.ide_task_id: task_data})}
-                )
-            return TideCourseData(**metadata)
+                ), metadata_dir
+            return TideCourseData(**metadata), metadata_dir
     except Exception as e:
         raise click.ClickException(f"Error reading metadata: {e}")
 
