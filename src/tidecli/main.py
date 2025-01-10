@@ -206,8 +206,8 @@ def reset(file_path_string: str) -> None:
 def submit(path: str) -> None:
     """
     Enter the path of a task folder or a file to submit the task/tasks to TIM.
-    If the path is a folder, all tasks in the folder will be submitted.
-    If the path is a file, only that task will be submitted.
+    If the path is a folder, all task files in the folder will be submitted.
+    If the path is a file, only that task file will be submitted.
 
     param path: Path to a task folder or a file.
     """
