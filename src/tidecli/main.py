@@ -174,7 +174,7 @@ def reset(file_path_string: str) -> None:
     if not is_logged_in():
         return
 
-    file_path = Path(file_path_string).absolute()
+    file_path = Path(file_path_string)
     if not file_path.exists() or not file_path.is_file():
         raise click.ClickException(
             "Invalid path. Please provide a valid path to the task file you want to reset."
@@ -182,13 +182,11 @@ def reset(file_path_string: str) -> None:
 
     file_contents = file_path.read_text()
 
-    metadata = get_metadata(file_path.parent)
+    metadata, metadata_dir = get_metadata(file_path.parent)
 
     file_dir = file_path.parent
 
-    task_files = get_task_file_data(
-        file_path, file_dir, metadata, with_starter_content=True
-    )
+    task_files = get_task_file_data(file_path, file_dir, metadata_dir, metadata, with_starter_content=True)
     if not task_files:
         raise click.ClickException("Invalid task file")
 
@@ -234,11 +232,11 @@ def submit(path: str) -> None:
         file_path = None
 
     # Get metadata from the task folder
-    metadata = get_metadata(file_dir)
+    metadata, metadata_dir = get_metadata(file_dir)
 
     if not metadata:
         raise click.ClickException("Invalid metadata")
-    answer_files = get_task_file_data(file_path, file_dir, metadata)
+    answer_files = get_task_file_data(file_path, file_dir, metadata_dir, metadata)
     if not answer_files:
         raise click.ClickException("Invalid task file")
 
