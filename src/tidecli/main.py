@@ -139,7 +139,9 @@ def list_tasks(demo_path: str, jsondata: bool) -> None:
 @click.option("--dir", "-d", "user_dir", type=str, default=None)
 @click.argument("demo_path", type=str)
 @click.argument("ide_task_id", type=str, default=None, required=False)
-def create(demo_path: str, ide_task_id: str, all_tasks: bool, force: bool, user_dir: str) -> None:
+def create(
+    demo_path: str, ide_task_id: str, all_tasks: bool, force: bool, user_dir: str
+) -> None:
     """Create tasks based on options."""
     if not is_logged_in():
         return
@@ -174,7 +176,9 @@ def reset(file_path_string: str) -> None:
 
     file_path = Path(file_path_string)
     if not file_path.exists() or not file_path.is_file():
-        raise click.ClickException("Invalid path. Please provide a valid path to the task file you want to reset.")
+        raise click.ClickException(
+            "Invalid path. Please provide a valid path to the task file you want to reset."
+        )
 
     file_contents = file_path.read_text()
 
@@ -182,7 +186,9 @@ def reset(file_path_string: str) -> None:
 
     file_dir = file_path.parent
 
-    task_files = get_task_file_data(file_path, file_dir, metadata_dir, metadata, with_starter_content=True)
+    task_files = get_task_file_data(
+        file_path, file_dir, metadata_dir, metadata, with_starter_content=True
+    )
     if not task_files:
         raise click.ClickException("Invalid task file")
 
