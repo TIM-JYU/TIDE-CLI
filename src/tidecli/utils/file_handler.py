@@ -135,9 +135,7 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
     else:
         save_path = Path.cwd()
 
-    saved = save_task_files(task,
-                       save_path=save_path,
-                       overwrite=overwrite)
+    saved = save_task_files(task, save_path=save_path, overwrite=overwrite)
 
     if not saved:
         return False
@@ -146,10 +144,9 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
 
     return saved
 
+
 def save_task_file(
-    task_file: TaskFile | SupplementaryFile,
-    save_path: Path,
-    overwrite: bool = False
+    task_file: TaskFile | SupplementaryFile, save_path: Path, overwrite: bool = False
 ) -> None:
     """
     Save task file in the given path.
@@ -183,11 +180,8 @@ def save_task_file(
             file.close()
     click.echo(f"Wrote file {save_path.relative_to(Path.cwd())}: {task_file.file_name}")
 
-def save_task_files(
-    task: TaskData,
-    save_path: Path,
-    overwrite: bool = False
-) -> bool:
+
+def save_task_files(task: TaskData, save_path: Path, overwrite: bool = False) -> bool:
     """
     Save task files in the given path.
 
@@ -289,12 +283,13 @@ def include_user_answer_to_task_file(f1: TaskFile, f2: Path) -> bool:
         return True  # Do not be so spesific about the validation
 
 
-def get_task_file_data(file_path: Path | None,
-                       file_dir: Path,
-                       metadata_dir: Path,
-                       metadata: TideCourseData,
-                       with_starter_content: bool = False,
-                       ) -> list[TaskFile]:
+def get_task_file_data(
+    file_path: Path | None,
+    file_dir: Path,
+    metadata_dir: Path,
+    metadata: TideCourseData,
+    with_starter_content: bool = False,
+) -> list[TaskFile]:
     """
     Get file data from the given path excluding .json files.
 
@@ -314,19 +309,29 @@ def get_task_file_data(file_path: Path | None,
     for course_part in metadata.course_parts.values():
         for task in course_part.tasks.values():
             for task_file in task.task_files:
-                timdata_task_directory = task_file.task_directory if task_file.task_directory is not None else task.get_task_directory()
+                timdata_task_directory = (
+                    task_file.task_directory
+                    if task_file.task_directory is not None
+                    else task.get_task_directory()
+                )
                 timdata_file_path = (
-                    metadata_dir / timdata_task_directory / task_file.file_name).absolute()
+                    metadata_dir / timdata_task_directory / task_file.file_name
+                ).absolute()
                 timdata_file_dir = (metadata_dir / timdata_file_path.parent).absolute()
 
                 if file_path is not None:
                     path_match = timdata_file_path == file_path
                 else:
-                    path_match = file_dir == timdata_file_dir or file_dir in timdata_file_dir.parents
+                    path_match = (
+                        file_dir == timdata_file_dir
+                        or file_dir in timdata_file_dir.parents
+                    )
 
                 if path_match:
                     if not with_starter_content:
-                        if not include_user_answer_to_task_file(task_file, timdata_file_path):
+                        if not include_user_answer_to_task_file(
+                            task_file, timdata_file_path
+                        ):
                             continue
                     result.append(task_file)
                     tasks.add(task.ide_task_id)
@@ -334,7 +339,8 @@ def get_task_file_data(file_path: Path | None,
                     if len(tasks) > 1:
                         # Prompt user for which tasks to submit?
                         raise click.ClickException(
-                            "Multiple tasks found in the same directory. Give exact file name.")
+                            "Multiple tasks found in the same directory. Give exact file name."
+                        )
     return result
 
 
@@ -352,7 +358,10 @@ def get_metadata(metadata_dir: Path) -> tuple[TideCourseData, Path]:
         metadata_path = metadata_dir / METADATA_NAME
         if metadata_path.exists():
             break
-        if str(metadata_dir) == metadata_dir.root or metadata_dir == metadata_dir.parent:
+        if (
+            str(metadata_dir) == metadata_dir.root
+            or metadata_dir == metadata_dir.parent
+        ):
             raise click.ClickException(f"Metadata not found in {metadata_path}")
         metadata_dir = metadata_dir.parent
 
@@ -365,10 +374,16 @@ def get_metadata(metadata_dir: Path) -> tuple[TideCourseData, Path]:
                     if task_file_data.task_type is None:
                         task_file_data.task_type = task_data.type
 
-                return TideCourseData(
-                    course_parts={task_data.path: TideCoursePartData(
-                        tasks={task_data.ide_task_id: task_data})}
-                ), metadata_dir
+                return (
+                    TideCourseData(
+                        course_parts={
+                            task_data.path: TideCoursePartData(
+                                tasks={task_data.ide_task_id: task_data}
+                            )
+                        }
+                    ),
+                    metadata_dir,
+                )
             return TideCourseData(**metadata), metadata_dir
     except Exception as e:
         raise click.ClickException(f"Error reading metadata: {e}")
