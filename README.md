@@ -1,31 +1,35 @@
 # TIDE-CLI
 
+A command line interface for completing TIM programming exercises
+
 ## Development
 
+### Requirements
 
-## Usage as python application
+- Python 3.10 or higher
+- [Poetry](https://python-poetry.org/docs/#installation) and [Poetry shell plugin](https://github.com/python-poetry/poetry-plugin-shell) for dependency management, see the links for installation instructions
+
+For managing multiple versions of Python see e.g. [pyenv](https://github.com/pyenv/pyenv) (or [pyenv-win](https://github.com/pyenv-win/pyenv-win) for Windows systems)
+
+### Usage as python application
 
 Step 1: Clone TIDE-CLI repository https://github.com/TIDE-project/TIDE-CLI
 
 Step 2: Modify src/tidecli/tide_config.py BASE_URL to correspond the TIM-server being used
 
-Step 3: Python 3.10 or higher is required
+Step 3: Run `poetry shell` to enter virtual environment
 
-Step 4: Run `pip install poetry` to install Poetry tool for dependency management and packaging
+Step 4: Run `poetry install` to install dependencies. If Poetry install fails, run first `poetry lock`
 
-Step 5: Run `poetry shell` to enter virtual environment
+Step 5: Go to correct folder: `cd src/tidecli`
 
-Step 6: Run `poetry install` to install dependencies. If Poetry install fails, run first `poetry lock`
+Step 6: To run the application, run `python main.py login` to login to the application
 
-Step 7: Go to correct folder: `cd src/tidecli`
+Step 7: Run `python main.py` to see the list of available commands
 
-Step 8: To run the application, run `python main.py login` to login to the application
+### Building the CLI tool as an executable
 
-Step 9: Run `python main.py` to see the list of commands available
-
-## Building CLI tool to executable
-
-There may be a need for build the CLI tool into an executable using user's own operating system. If that is the case, please follow these after above steps are completed untill `Step 6`.
+There may be a need for build the CLI tool into an executable using user's own operating system. If that is the case, please follow these after above steps are completed until `Step 4`.
 
 **Build the CLI tool**
 
@@ -37,7 +41,9 @@ Step 3: Move app named 'main' as 'tide' to some folder that is in PATH. E.g. `mv
 
 Step 4: Start use, please refer user instructions in TIM.
 
-## Running unit tests
+## Testing
+
+### Running unit tests
 
 After cloning and starting the Poetry environment:
 
@@ -45,7 +51,7 @@ Step 1: Navigate to test folder `cd tests`
 
 Step 2: Run unit tests with command `python -m unittest`
 
-## Running integration tests
+### Running integration tests
 
 Step 1: Start up TIM dev server (for instructions on this, see https://github.com/TIM-JYU/TIM)
 
@@ -55,7 +61,7 @@ Step 2: Navigate to integration test folder `cd tests/integration`
 
 Step 3: Run `poetry run pytest`. If the TIM instance used for tests is not running in localhost, set the correct address to TIM_DOMAIN environmental variable, e.g. `TIM_DOMAIN=192.168.148.69 poetry run pytest`
 
-### Current state of intergration tests
+### Current state of integration tests
 
 This section covers the current state of integration tests, and running them.
 
@@ -77,16 +83,3 @@ the original function. This proved to be too complex of a problem to tackle.
 
 A solution to the problem of authenticating the user automatically may lie in not mocking the webbrowser.open function and instead getting it to launch Chromium with --remote-debugging-port flag and attaching to it. See [connect over cdp in Playwright documentation](https://playwright.dev/python/docs/api/class-browsertype#browser-type-connect-over-cdp).
 
-#### TIM document IDs and file content comparison
-
-As it currently stands, the TIM document ID is hard-coded into the files inside
-the `expected_task_files` directory. However, these hard-coded values do not
-(except with extreme luck) match the ones TIM generates for the documents when
-they are created for the test session.
-
-Possible solutions to the problem, from the fastest one to implement to the
-most solid one.
-
-1. Ignore .timdata during file content comparison
-2. Ignore the doc_id inside .timdata during file content comparison
-3. Get the document ID dynamically while setting up the test documents
