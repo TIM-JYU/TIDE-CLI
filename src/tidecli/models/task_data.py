@@ -65,7 +65,6 @@ class SupplementaryFile(BaseModel):
     absolute_file_path: str | None = None
 
 
-
 _task_type_split_re = re.compile(r"[/,; ]")
 
 
@@ -131,7 +130,9 @@ class TaskData(BaseModel):
     def to_json(self) -> dict:
         """Convert to dict."""
         task_data = self.model_dump()
-        task_data["task_files"] = [task_file.model_dump() for task_file in self.task_files]
+        task_data["task_files"] = [
+            task_file.model_dump() for task_file in self.task_files
+        ]
 
         return task_data
 
@@ -141,6 +142,7 @@ class TideCoursePartData(BaseModel):
     Model for Tide course part data. Could be like a week or something else
 
     """
+
     tasks: Dict[str, TaskData] = {}
 
 
@@ -149,6 +151,5 @@ class TideCourseData(BaseModel):
     Model for Tide course data.
 
     """
+
     course_parts: Dict[str, TideCoursePartData] = {}
-
-

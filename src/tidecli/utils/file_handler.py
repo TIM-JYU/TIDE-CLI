@@ -12,7 +12,13 @@ import click.exceptions
 from pathlib import Path
 import itertools
 
-from tidecli.models.task_data import SupplementaryFile, TaskData, TaskFile, TideCourseData, TideCoursePartData
+from tidecli.models.task_data import (
+    SupplementaryFile,
+    TaskData,
+    TaskFile,
+    TideCourseData,
+    TideCoursePartData,
+)
 from tidecli.utils.error_logger import Logger
 from tidecli.api import routes
 
@@ -42,7 +48,7 @@ def write_file(file_path: Path, content: str | bytes) -> None:
 
 
 def create_tasks(
-        tasks: list[TaskData], overwrite: bool, user_path: str | None = None
+    tasks: list[TaskData], overwrite: bool, user_path: str | None = None
 ) -> None:
     """
     Create multiple tasks.
@@ -85,7 +91,9 @@ def combine_tasks(tasks: list[TaskData]) -> list[TaskData]:
                 ide_task_id=ide_task_id,
                 task_files=[f for t in task_list for f in t.task_files],
                 task_directory=task_list[0].task_directory,
-                supplementary_files=[f for t in task_list for f in t.supplementary_files],
+                supplementary_files=[
+                    f for t in task_list for f in t.supplementary_files
+                ],
                 stem=task_list[0].stem,
                 header=task_list[0].header,
             )
@@ -129,18 +137,22 @@ def create_task(task: TaskData, overwrite: bool, user_path: str | None = None) -
 
     default_task_directory = Path(Path(task.path).name) / task.ide_task_id
 
-    saved = save_files(task_files=task.task_files,
-                       save_path=save_path,
-                       msg='Task created in',
-                       default_task_directory=default_task_directory,
-                       overwrite=overwrite)
+    saved = save_files(
+        task_files=task.task_files,
+        save_path=save_path,
+        msg="Task created in",
+        default_task_directory=default_task_directory,
+        overwrite=overwrite,
+    )
 
     if task.supplementary_files:
-        save_files(task_files=task.supplementary_files,
-                   save_path=save_path,
-                   default_task_directory=default_task_directory,
-                   msg="  supplementary files",
-                   overwrite=overwrite)
+        save_files(
+            task_files=task.supplementary_files,
+            save_path=save_path,
+            default_task_directory=default_task_directory,
+            msg="  supplementary files",
+            overwrite=overwrite,
+        )
 
     if not saved:
         return False
@@ -155,9 +167,8 @@ def save_files(
     save_path: Path,
     default_task_directory: Path,
     msg: str,
-    overwrite: bool = False
+    overwrite: bool = False,
 ) -> bool:
-
     """
     Save task files in the given path.
 
@@ -230,7 +241,9 @@ def write_metadata(folder_path: Path, metadata: TaskData) -> None:
             # raise click.ClickException(f"Error reading metadata: {e}")
             click.echo(f"Error reading metadata: {e}")  # Try to recover
     with open(metadata_path, write_mode, encoding="utf-8") as file:
-        course_part = course_metadata.course_parts.setdefault(course_part_name, TideCoursePartData())
+        course_part = course_metadata.course_parts.setdefault(
+            course_part_name, TideCoursePartData()
+        )
         course_part.tasks.setdefault(taskname, metadata)
 
         content = course_metadata.model_dump_json(indent=4)
@@ -264,11 +277,8 @@ def include_user_answer_to_task_file(f1: TaskFile, f2: Path) -> bool:
     logger.debug(f"Validating {f2.name} against metadata content of task.")
     with open(f2, "r", encoding="utf-8") as answer_file:
         answer_content = answer_file.read()
-        answer_bycode, answer_gapcode = split_file_contents(
-            answer_content)
-        metadata_bycode, metadata_gapcode = split_file_contents(
-            f1.content
-        )
+        answer_bycode, answer_gapcode = split_file_contents(answer_content)
+        metadata_bycode, metadata_gapcode = split_file_contents(f1.content)
 
         if len(metadata_bycode) == 0:
             f1.content = answer_content
@@ -307,12 +317,13 @@ def get_task_file_data(file_path: Path, metadata: TideCourseData) -> TaskFile:
     raise click.ClickException(f"File {file_path} not found in metadata")
 
 
-def get_task_file_data(file_path: Path | None,
-                       file_dir: Path,
-                       metadata: TideCourseData,
-                       with_starter_content: bool = False,
-                       send_all: bool = False
-                       ) -> list[TaskFile]:
+def get_task_file_data(
+    file_path: Path | None,
+    file_dir: Path,
+    metadata: TideCourseData,
+    with_starter_content: bool = False,
+    send_all: bool = False,
+) -> list[TaskFile]:
     """
     Get file data from the given path excluding .json files.
 
@@ -333,24 +344,33 @@ def get_task_file_data(file_path: Path | None,
                 absolute_file_path = Path(f.absolute_file_path)
                 save_dir = absolute_file_path.parent
                 if file_path and send_all:  # if should send all files in the same task
-                    if absolute_file_path == file_path:  # if file is the same as the one given
-                        for task_file in task.task_files:  # add all files in the same task
+                    if (
+                        absolute_file_path == file_path
+                    ):  # if file is the same as the one given
+                        for (
+                            task_file
+                        ) in task.task_files:  # add all files in the same task
                             if with_starter_content:
                                 result.append(task_file)
-                            elif include_user_answer_to_task_file(task_file, Path(task_file.absolute_file_path)):
+                            elif include_user_answer_to_task_file(
+                                task_file, Path(task_file.absolute_file_path)
+                            ):
                                 result.append(task_file)
                         return result  # and do not look any more
                     continue  # try next file
                 if save_dir == file_dir:
                     if file_path is None or absolute_file_path == file_path:
                         if not with_starter_content:
-                            if not include_user_answer_to_task_file(f, absolute_file_path):
+                            if not include_user_answer_to_task_file(
+                                f, absolute_file_path
+                            ):
                                 continue
                         result.append(f)
                         tasks.add(task.ide_task_id)
                         if len(tasks) > 1:
                             raise click.ClickException(
-                                "Multiple tasks found in the same directory. Give exact file name.")
+                                "Multiple tasks found in the same directory. Give exact file name."
+                            )
     return result
 
 
@@ -378,13 +398,18 @@ def get_metadata(metadata_dir: Path) -> TideCourseData:
                 task_data = TaskData(**metadata)
                 for task_file_data in task_data.task_files:
                     if task_file_data.absolute_file_path is None:
-                        task_file_data.absolute_file_path = str(metadata_dir / task_file_data.file_name)
+                        task_file_data.absolute_file_path = str(
+                            metadata_dir / task_file_data.file_name
+                        )
                     if task_file_data.task_type is None:
                         task_file_data.task_type = task_data.type
 
                 return TideCourseData(
-                    course_parts={task_data.path: TideCoursePartData(
-                        tasks={task_data.ide_task_id: task_data})}
+                    course_parts={
+                        task_data.path: TideCoursePartData(
+                            tasks={task_data.ide_task_id: task_data}
+                        )
+                    }
                 )
             return TideCourseData(**metadata)
     except Exception as e:
@@ -405,9 +430,9 @@ def split_file_contents(content: str) -> tuple[list[str], list[str]]:
     start, end = gap
 
     # Create list of strings for validation
-    bycodebegin = lines[:start + 1]
+    bycodebegin = lines[: start + 1]
     bycodeend = lines[end:]
-    gap_content = lines[start + 1: end]
+    gap_content = lines[start + 1 : end]
 
     bycode = bycodebegin + bycodeend
 
