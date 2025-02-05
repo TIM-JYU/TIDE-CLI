@@ -45,6 +45,34 @@ def tim_ide() -> None:
 
 @tim_ide.command()
 @click.option("--json", "-j", "jsondata", is_flag=True, default=False)
+def check_login(jsondata: bool) -> None:
+    """
+    Check login status, prints the username when logged in.
+
+    If the --json flag is used, the output is printed in JSON format.
+    """
+    user = login_handler.get_signed_in_user()
+    if not is_logged_in(print_errors=False, print_token_info=False) or not user:
+        if jsondata:
+            click.echo(json.dumps({"logged in": None}, ensure_ascii=False, indent=4))
+        else:
+            click.echo("Not logged in.")
+        return
+
+    if jsondata:
+        click.echo(
+            json.dumps(
+                {"logged in": user.username},
+                ensure_ascii=False,
+                indent=4,
+            )
+        )
+    else:
+        click.echo(f"Logged in as {user.username}")
+
+
+@tim_ide.command()
+@click.option("--json", "-j", "jsondata", is_flag=True, default=False)
 def login(jsondata: bool) -> None:
     """
     Log in the user and saves the token to the keyring.
