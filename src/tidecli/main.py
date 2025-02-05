@@ -54,7 +54,7 @@ def check_login(jsondata: bool) -> None:
     user = login_handler.get_signed_in_user()
     if not is_logged_in(print_errors=False, print_token_info=False) or not user:
         if jsondata:
-            click.echo(json.dumps({"logged in": None}, ensure_ascii=False, indent=4))
+            click.echo(json.dumps({"logged_in": None}, ensure_ascii=False, indent=4))
         else:
             click.echo("Not logged in.")
         return
@@ -62,7 +62,7 @@ def check_login(jsondata: bool) -> None:
     if jsondata:
         click.echo(
             json.dumps(
-                {"logged in": user.username},
+                {"logged_in": user.username},
                 ensure_ascii=False,
                 indent=4,
             )
