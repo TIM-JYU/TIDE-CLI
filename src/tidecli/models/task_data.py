@@ -63,6 +63,7 @@ class SupplementaryFile(BaseModel):
 
 _task_type_split_re = re.compile(r"[/,; ]")
 
+
 class TaskData(BaseModel):
     """
     Model for task data.
@@ -106,6 +107,7 @@ class TaskData(BaseModel):
 
     max_points: float | None = None
     """Maximum points for the task"""
+
     def get_default_task_directory(self) -> Path:
         """Return default task directory."""
         return Path(Path(self.path).name) / self.ide_task_id
