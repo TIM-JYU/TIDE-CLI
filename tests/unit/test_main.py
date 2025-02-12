@@ -1,5 +1,4 @@
 import os
-import sys
 import unittest
 from pathlib import Path
 
@@ -15,9 +14,9 @@ from unit.test_data import (
     get_task_by_ide_task_id_test_response,
 )
 from unit.test_routes import _create_mock_request
-from src.tidecli.main import login, logout, courses, task
-from src.tidecli.models.course import Course
-from src.tidecli.models.user import User
+from tidecli.main import login, logout, courses, task
+from tidecli.models.course import Course
+from tidecli.models.user import User
 
 
 class TestMain(unittest.TestCase):
@@ -74,7 +73,7 @@ class TestMain(unittest.TestCase):
             "Please try to log in again.\nLogin successful!\n",
         )
 
-    @patch("src.tidecli.main.delete_token")
+    @patch("tidecli.main.delete_token")
     def test_logout(self, mock_delete_token):
         return_value = "Token for test deleted successfully!"
         mock_delete_token.return_value = return_value
