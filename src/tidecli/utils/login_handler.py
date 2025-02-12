@@ -14,7 +14,9 @@ from tidecli.models.user import User
 from tidecli.utils.handle_token import delete_token, get_signed_in_user
 
 
-def is_logged_in(jsondata: bool = False, print_errors: bool = True, print_token_info: bool = False):
+def is_logged_in(
+    jsondata: bool = False, print_errors: bool = True, print_token_info: bool = False
+) -> bool:
     """
     Check if the user is logged in by checking if the user is in the credential manager.
     """

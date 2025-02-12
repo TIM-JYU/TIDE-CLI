@@ -36,9 +36,6 @@ class TaskFile(BaseModel):
     task_type: str | None = None
     """Type of the task."""
 
-    absolute_file_path: str | None = None
-    """Full path of the file in the file system."""
-
     user_input: str = ""
     """User input argument for submit."""
 
@@ -62,11 +59,10 @@ class SupplementaryFile(BaseModel):
     content: str | None
     source: str | None
     task_directory: str | None = None
-    absolute_file_path: str | None = None
-
 
 
 _task_type_split_re = re.compile(r"[/,; ]")
+
 
 class TaskData(BaseModel):
     """
@@ -112,6 +108,17 @@ class TaskData(BaseModel):
     max_points: float | None = None
     """Maximum points for the task"""
 
+    def get_default_task_directory(self) -> Path:
+        """Return default task directory."""
+        return Path(Path(self.path).name) / self.ide_task_id
+
+    def get_task_directory(self) -> Path:
+        """Return the directory to which task files will be save."""
+        if self.task_directory is not None:
+            return Path(self.task_directory)
+        else:
+            return self.get_default_task_directory()
+
     @property
     def run_type(self) -> str:
         """Return run type eg. cc from cc/input/comtest."""
@@ -133,7 +140,9 @@ class TaskData(BaseModel):
     def to_json(self) -> dict:
         """Convert to dict."""
         task_data = self.model_dump()
-        task_data["task_files"] = [task_file.model_dump() for task_file in self.task_files]
+        task_data["task_files"] = [
+            task_file.model_dump() for task_file in self.task_files
+        ]
 
         return task_data
 
@@ -143,6 +152,7 @@ class TideCoursePartData(BaseModel):
     Model for Tide course part data. Could be like a week or something else
 
     """
+
     tasks: Dict[str, TaskData] = {}
 
 
@@ -151,6 +161,5 @@ class TideCourseData(BaseModel):
     Model for Tide course data.
 
     """
+
     course_parts: Dict[str, TideCoursePartData] = {}
-
-
