@@ -1,4 +1,5 @@
 import os
+import sys
 import unittest
 from pathlib import Path
 
@@ -7,13 +8,13 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from tests.test_data import (
+from unit.test_data import (
     get_ide_courses_test_response,
     validate_token_response,
     get_tasks_by_doc_test_response,
     get_task_by_ide_task_id_test_response,
 )
-from tests.test_routes import _create_mock_request
+from unit.test_routes import _create_mock_request
 from src.tidecli.main import login, logout, courses, task
 from src.tidecli.models.course import Course
 from src.tidecli.models.user import User
