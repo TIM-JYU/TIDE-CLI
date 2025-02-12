@@ -35,7 +35,7 @@ class TestMain(unittest.TestCase):
         result = self.runner.invoke(login)
         self.assertEqual(
             result.output,
-            "Login successful!\n",
+            "Logging in...\nPlease, finish authenticating in the browser.\nLogin successful!\n",
         )
 
     @patch("tidecli.api.routes.requests.request")
