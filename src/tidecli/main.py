@@ -185,7 +185,13 @@ def points(doc_path: str, ide_task_id: str, print_json: bool):
 @click.argument("ide_task_id", type=str, default=None, required=False)
 @click.argument("course_id", type=str, default=None, required=False)
 def create(
-    demo_path: str, ide_task_id: str, all_tasks: bool, force: bool, user_dir: str, by_course: bool, course_id: str
+    demo_path: str,
+    ide_task_id: str,
+    all_tasks: bool,
+    force: bool,
+    user_dir: str,
+    by_course: bool,
+    course_id: str,
 ) -> None:
     """Create tasks based on options."""
     if not is_logged_in():
@@ -198,8 +204,11 @@ def create(
 
     elif by_course:
         # Create tasks by course
-        tasks: List[TaskData] = get_tasks_by_course(doc_id=course_id, doc_path=demo_path)
-        create_tasks(tasks=tasks, overwrite=force, user_path=user_dir)
+        tasks: List[TaskData] = get_tasks_by_course(
+            doc_id=course_id, doc_path=demo_path
+        )
+        for taskSet in tasks:
+            create_tasks(tasks=taskSet, overwrite=force, user_path=user_dir)
 
     elif ide_task_id:
         # Create a single task
@@ -209,7 +218,9 @@ def create(
         create_task(task=task_data, overwrite=force, user_path=user_dir)
 
     else:
-        click.echo("Please provide either --all or an ide_task_id.")
+        click.echo(
+            "Please provide either --all or an ide_task_id."
+        )  # TODO: update this message
 
 
 @task.command()
