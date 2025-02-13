@@ -11,6 +11,7 @@ __date__ = "11.5.2024"
 from typing import Any
 import click
 import requests
+from itertools import chain
 
 from urllib.parse import urljoin
 from tidecli.models.course import Course
@@ -185,7 +186,7 @@ def get_task_by_ide_task_id(
 def get_tasks_by_course(doc_id: int, doc_path: str) -> list[TaskData]:
     """
     Get all tasks from a single course by document id or document path
-    
+
     :param doc_path: Tasks document path
     return: JSON response of tasks
     """
@@ -196,7 +197,12 @@ def get_tasks_by_course(doc_id: int, doc_path: str) -> list[TaskData]:
         params={"doc_path": doc_path, "doc_id": doc_id},
     )
 
-    tasks = [TaskData(**task) for task in res]
+    # while isinstance(res, list) and len(res) == 1 and isinstance(res[0], list):
+    # res = res[0]
+
+    flat_data = list(chain.from_iterable(chain.from_iterable(res)))
+
+    tasks = [TaskData(**task) for task in flat_data]
 
     return tasks
 
