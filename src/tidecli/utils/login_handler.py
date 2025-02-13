@@ -62,7 +62,8 @@ def is_logged_in(
 
 
 def login(jsondata: bool = False):
-    click.echo(f"Logging in...\nPlease, finish authenticating in the browser.")
+    if not jsondata:
+        click.echo(f"Logging in...\nPlease, finish authenticating in the browser.")
     if authenticate():
         if jsondata:
             return {"login_success": True}
