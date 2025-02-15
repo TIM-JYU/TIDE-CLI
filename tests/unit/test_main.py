@@ -70,7 +70,8 @@ class TestMain(unittest.TestCase):
         self.assertEqual(
             result.output,
             "Error: Could not complete API call /oauth/introspect\ninvalid_token\n"
-            "Please try to log in again.\nLogin successful!\n",
+            "Please, login.\n"
+            "Error: Error deleting token: TIDE\n",
         )
 
     @patch("tidecli.main.delete_token")
