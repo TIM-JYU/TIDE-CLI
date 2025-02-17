@@ -35,7 +35,10 @@ class TestMain(unittest.TestCase):
         result = self.runner.invoke(login)
         self.assertEqual(
             result.output,
-            "Logging in...\nPlease, finish authenticating in the browser.\nLogin successful!\n",
+            "Please, login.\n"
+            "Logging in...\n"
+            "Please, finish authenticating in the browser."
+            "\nLogin successful!\n",
         )
 
     @patch("tidecli.api.routes.requests.request")
@@ -83,10 +86,12 @@ class TestMain(unittest.TestCase):
 
     @patch("tidecli.api.routes.requests.request")
     @patch("tidecli.api.routes.get_signed_in_user")
-    def test_courses(self, mock_get_signed_in_user, mock_request):
+    @patch("tidecli.main.is_logged_in") 
+    def test_courses(self, mock_is_logged_in, mock_get_signed_in_user, mock_request):
         """
         Test listing courses
         """
+        mock_is_logged_in.return_value = True
         mock_get_signed_in_user.return_value = User("test", "test")
         mock_request.return_value = _create_mock_request(get_ide_courses_test_response)
         validated_value = [Course(**course) for course in get_ide_courses_test_response]
