@@ -185,10 +185,12 @@ class TestMainFileAccess(TestCase):
 
     @patch("tidecli.api.routes.requests.request")
     @patch("tidecli.api.routes.get_signed_in_user")
-    def test_task_create_one(self, mock_get_signed_in_user, mock_request):
+    @patch("tidecli.main.is_logged_in")
+    def test_task_create_one(self, mock_is_logged_in, mock_get_signed_in_user, mock_request):
         """
         Test creating a single task
         """
+        mock_is_logged_in.return_value = True
         mock_get_signed_in_user.return_value = User("test", "test")
         mock_request.return_value = _create_mock_request(
             get_task_by_ide_task_id_test_response
@@ -203,13 +205,14 @@ class TestMainFileAccess(TestCase):
             ],
         )
 
+        file_path = Path(self.working_dir, "Demo1", "t3").relative_to(self.working_dir)
         self.assertEqual(
-            result.output, f"Task created in {self.working_dir}Demo1{os.sep}t3\n"
+            result.output, f"Wrote file {file_path}: test.c\n"
         )
 
-        test_path1 = f"{self.working_dir}Demo1/t3"
-        test_metadata1 = f"{self.working_dir}Demo1/t3/.timdata"
-        test_file1 = f"{self.working_dir}Demo1/t3/test.c"
+        test_path1 = f"{self.working_dir}Demo1{os.sep}t3"
+        test_metadata1 = f"{self.working_dir}.timdata"
+        test_file1 = f"{self.working_dir}Demo1{os.sep}t3{os.sep}test.c"
         self.assertTrue(os.path.exists(test_path1))
         self.assertTrue(os.path.exists(test_metadata1))
         self.assertTrue(os.path.exists(test_file1))
