@@ -102,10 +102,12 @@ class TestMain(unittest.TestCase):
 
     @patch("tidecli.api.routes.requests.request")
     @patch("tidecli.api.routes.get_signed_in_user")
-    def test_task_list(self, mock_get_signed_in_user, mock_request):
+    @patch("tidecli.main.is_logged_in")
+    def test_task_list(self, mock_is_logged_in, mock_get_signed_in_user, mock_request):
         """
         Test listing tasks by document
         """
+        mock_is_logged_in.return_value = True
         mock_get_signed_in_user.return_value = User("test", "test")
         mock_request.return_value = _create_mock_request(get_tasks_by_doc_test_response)
 
