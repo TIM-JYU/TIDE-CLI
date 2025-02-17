@@ -56,11 +56,12 @@ class TestMain(unittest.TestCase):
             "Logged in as test_token\nToken is still valid for 10 days, 0:00:00\n",
         )
 
+    @patch("tidecli.utils.login_handler.delete_token")
     @patch("tidecli.api.routes.requests.request")
     @patch("keyring.get_password")
     @patch("tidecli.utils.login_handler.authenticate")
     def test_failed_login_invalid_token(
-        self, mock_authenticate, mock_get_password, mock_request
+        self, mock_authenticate, mock_get_password, mock_request, mock_delete
     ):
         """
         Test failed login due to invalid token
@@ -68,13 +69,16 @@ class TestMain(unittest.TestCase):
         mock_get_password.return_value = "test_token"
         mock_authenticate.return_value = True
         mock_request.return_value = _create_mock_request({"error": "invalid_token"})
+        mock_delete.return_value = "Token for user deleted successfully."
 
         result = self.runner.invoke(login)
         self.assertEqual(
             result.output,
             "Error: Could not complete API call /oauth/introspect\ninvalid_token\n"
             "Please, login.\n"
-            "Error: Error deleting token: TIDE\n",
+            "Logging in...\n"
+            "Please, finish authenticating in the browser."
+            "\nLogin successful!\n",
         )
 
     @patch("tidecli.main.delete_token")
