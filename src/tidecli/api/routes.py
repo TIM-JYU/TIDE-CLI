@@ -190,7 +190,6 @@ def get_tasks_by_course(doc_id: int, doc_path: str) -> list[TaskData]:
     :param doc_path: Tasks document path
     return: JSON response of tasks
     """
-    doc_id = None  # Tim requires doc_id to be None if not used
 
     res = tim_request(
         endpoint=TASKS_BY_COURSE_ENDPOINT,
