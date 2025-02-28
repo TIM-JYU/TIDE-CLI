@@ -22,7 +22,7 @@ Step 1: Clone TIDE-CLI repository https://github.com/TIDE-project/TIDE-CLI
 
 Step 2: Modify src/tidecli/tide_config.py BASE_URL to correspond the TIM-server being used
 
-Step 3: Run `poetry shell` to enter virtual environment. Skip this step if you installed Poetry via **pipx** (see "Requirements" above).
+Step 3: Run `poetry shell` to enter virtual environment (or `poetry env activate` if poetry has been installed with pipx). 
 
 Step 4: Run `poetry install` to install dependencies. If Poetry install fails, run first `poetry lock`
 
