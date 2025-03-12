@@ -48,6 +48,34 @@ def tim_ide() -> None:
 
 @tim_ide.command()
 @click.option("--json", "-j", "jsondata", is_flag=True, default=False)
+def check_login(jsondata: bool) -> None:
+    """
+    Check login status, prints the username when logged in.
+
+    If the --json flag is used, the output is printed in JSON format.
+    """
+    user = login_handler.get_signed_in_user()
+    if not is_logged_in(print_errors=False, print_token_info=False) or not user:
+        if jsondata:
+            click.echo(json.dumps({"logged_in": None}, ensure_ascii=False, indent=4))
+        else:
+            click.echo("Not logged in.")
+        return
+
+    if jsondata:
+        click.echo(
+            json.dumps(
+                {"logged_in": user.username},
+                ensure_ascii=False,
+                indent=4,
+            )
+        )
+    else:
+        click.echo(f"Logged in as {user.username}")
+
+
+@tim_ide.command()
+@click.option("--json", "-j", "jsondata", is_flag=True, default=False)
 def login(jsondata: bool) -> None:
     """
     Log in the user and saves the token to the keyring.
@@ -154,7 +182,9 @@ def points(doc_path: str, ide_task_id: str, print_json: bool):
 @click.option("--dir", "-d", "user_dir", type=str, default=None)
 @click.argument("demo_path", type=str)
 @click.argument("ide_task_id", type=str, default=None, required=False)
-def create(demo_path: str, ide_task_id: str, all_tasks: bool, force: bool, user_dir: str) -> None:
+def create(
+    demo_path: str, ide_task_id: str, all_tasks: bool, force: bool, user_dir: str
+) -> None:
     """Create tasks based on options."""
     if not is_logged_in():
         return
@@ -187,17 +217,21 @@ def reset(file_path_string: str) -> None:
     if not is_logged_in():
         return
 
-    file_path = Path(file_path_string).absolute()
+    file_path = Path(file_path_string)
     if not file_path.exists() or not file_path.is_file():
-        raise click.ClickException("Invalid path. Please provide a valid path to the task file you want to reset.")
+        raise click.ClickException(
+            "Invalid path. Please provide a valid path to the task file you want to reset."
+        )
 
     file_contents = file_path.read_text()
 
-    metadata = get_metadata(file_path.parent)
+    metadata, metadata_dir = get_metadata(file_path.parent)
 
     file_dir = file_path.parent
 
-    task_files = get_task_file_data(file_path, file_dir, metadata, with_starter_content=True)
+    task_files = get_task_file_data(
+        file_path, file_dir, metadata_dir, metadata, with_starter_content=True
+    )
     if not task_files:
         raise click.ClickException("Invalid task file")
 
@@ -218,19 +252,18 @@ def reset(file_path_string: str) -> None:
 
 @tim_ide.command()
 @click.argument("path", type=str, required=True)
-@click.option("--all", "-a", "all_files", is_flag=True, default=False)
-def submit(path: str, all_files: bool = False) -> None:
+def submit(path: str) -> None:
     """
-    Enter the path of the task folder to submit the task/tasks to TIM.
+    Enter the path of a task folder or a file to submit the task/tasks to TIM.
+    If the path is a folder, all task files in the folder will be submitted.
+    If the path is a file, only that task file will be submitted.
 
-    Path must be inserted in the following format: "/path/to/task/folder".
-    param path: Path to the task folder in the local file system. Or path to the task file.
-    param all_files: If True, submits all files in the task folder.
+    param path: Path to a task folder or a file.
     """
     if not is_logged_in():
         return
 
-    path: Path = Path(path).absolute()
+    path: Path = Path(path)
     if not path.exists():
         raise click.ClickException(
             "Invalid path. Give a path to the task folder "
@@ -244,11 +277,11 @@ def submit(path: str, all_files: bool = False) -> None:
         file_path = None
 
     # Get metadata from the task folder
-    metadata = get_metadata(file_dir)
+    metadata, metadata_dir = get_metadata(file_dir)
+
     if not metadata:
         raise click.ClickException("Invalid metadata")
-
-    answer_files = get_task_file_data(file_path, file_dir, metadata, all_files)
+    answer_files = get_task_file_data(file_path, file_dir, metadata_dir, metadata)
     if not answer_files:
         raise click.ClickException("Invalid task file")
 
