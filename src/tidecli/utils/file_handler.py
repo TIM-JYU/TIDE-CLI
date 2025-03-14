@@ -179,7 +179,9 @@ def save_task_file(
         with open(file_path, "wb") as file:
             file.write(content)
             file.close()
-    click.echo(f"Wrote file {save_path.relative_to(Path.cwd())}: {task_file.file_name}")
+    click.echo(
+        f"Wrote file {save_path.relative_to(Path.cwd()) if save_path.is_relative_to(Path.cwd()) else file_path}: {task_file.file_name}"
+    )
 
 
 def save_task_files(task: TaskData, save_path: Path, overwrite: bool = False) -> bool:
