@@ -179,8 +179,10 @@ def save_task_file(
         with open(file_path, "wb") as file:
             file.write(content)
             file.close()
+
+    working_dir = Path.cwd()
     click.echo(
-        f"Wrote file {save_path.relative_to(Path.cwd()) if save_path.is_relative_to(Path.cwd()) else file_path}: {task_file.file_name}"
+        f"Wrote file {save_path.relative_to(working_dir) if save_path.is_relative_to(working_dir) else save_path}: {task_file.file_name}"
     )
 
 
