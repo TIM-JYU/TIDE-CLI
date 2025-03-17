@@ -35,7 +35,6 @@ class TestMain(unittest.TestCase):
         result = self.runner.invoke(login)
         self.assertEqual(
             result.output,
-            "Please, login.\n"
             "Logging in...\n"
             "Please, finish authenticating in the browser."
             "\nLogin successful!\n",
