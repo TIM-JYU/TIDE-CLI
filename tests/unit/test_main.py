@@ -59,11 +59,11 @@ class TestMain(unittest.TestCase):
     @patch("tidecli.api.routes.requests.request")
     @patch("keyring.get_password")
     @patch("tidecli.utils.login_handler.authenticate")
-    def test_failed_login_invalid_token(
+    def test_login_invalid_token(
         self, mock_authenticate, mock_get_password, mock_request, mock_delete
     ):
         """
-        Test failed login due to invalid token
+        Test login with invalid token
         """
         mock_get_password.return_value = "test_token"
         mock_authenticate.return_value = True
