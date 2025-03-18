@@ -84,7 +84,6 @@ def login(jsondata: bool) -> None:
     """
     if is_logged_in(print_errors=False, print_token_info=True):
         return
-
     if jsondata:
         click.echo(
             json.dumps(login_handler.login(jsondata=True), ensure_ascii=False, indent=4)
