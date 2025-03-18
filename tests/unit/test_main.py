@@ -70,14 +70,9 @@ class TestMain(unittest.TestCase):
         mock_request.return_value = _create_mock_request({"error": "invalid_token"})
         mock_delete.return_value = "Token for user deleted successfully."
 
-        # "Error: Could not complete API call /oauth/introspect\ninvalid_token\n"
-        # "Please, login.\n"
-        #  prints with is_logged_in(print_errors=True, print_token_info=True)
         result = self.runner.invoke(login)
         self.assertEqual(
             result.output,
-            # "Error: Could not complete API call /oauth/introspect\ninvalid_token\n"
-            # "Please, login.\n"
             "Logging in...\n"
             "Please, finish authenticating in the browser."
             "\nLogin successful!\n",
