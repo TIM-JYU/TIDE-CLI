@@ -15,7 +15,7 @@ from unit.test_data import (
     get_tasks_by_course_test_response,
 )
 from unit.test_routes import _create_mock_request
-from tidecli.main import login, logout, courses, task
+from tidecli.main import login, logout, courses, task, course
 from tidecli.models.course import Course
 from tidecli.models.user import User
 
@@ -246,8 +246,8 @@ class TestMainFileAccess(TestCase):
         )
 
         result = self.runner.invoke(
-            task,
-            ["create-course", "--path", "kurssit/tie/ohj2/2025k/kotisivu"],
+            course,
+            ["create", "--path", "kurssit/tie/ohj2/2025k/kotisivu"],
         )
 
         file_path_1 = Path(self.working_dir, "demo1", "t1").relative_to(
