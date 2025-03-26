@@ -176,7 +176,15 @@ def points(doc_path: str, ide_task_id: str, print_json: bool):
         click.echo(points.pretty_print())
 
 
-@task.command(name="create-course")
+@click.group()
+def course() -> None:
+    """
+    Course related commands.
+    """
+    pass
+
+
+@course.command(name="create")
 @click.option(
     "--force",
     "-f",
@@ -194,8 +202,24 @@ def points(doc_path: str, ide_task_id: str, print_json: bool):
     default=None,
     help="Path to a user defined folder for created tasks",
 )
-@click.option("--path", "-p", "course_path", type=str, default=None, required=False)
-@click.option("--id", "-i", "course_id", type=int, default=None, required=False)
+@click.option(
+    "--path",
+    "-p",
+    "course_path",
+    type=str,
+    default=None,
+    required=False,
+    help="Path to the course document",
+)
+@click.option(
+    "--id",
+    "-i",
+    "course_id",
+    type=int,
+    default=None,
+    required=False,
+    help="ID for the course document",
+)
 def create_course(course_path: str, course_id: int, force: bool, user_dir: str) -> None:
     """
     Create all ide tasks from a course.
@@ -204,7 +228,7 @@ def create_course(course_path: str, course_id: int, force: bool, user_dir: str) 
     Course path and ID refer to the document where the paths to ide tasks are defined.
 
     Providing either COURSE_PATH or COURSE_ID is required.
-
+    \f
     :param course_path: Path to the course document
     :param course_id: ID for the course document
     :force: If True, overwrites existing task files
@@ -223,6 +247,9 @@ def create_course(course_path: str, course_id: int, force: bool, user_dir: str) 
         raise click.UsageError(
             "Please provide either course path or course document ID."
         )
+
+
+tim_ide.add_command(course)
 
 
 @task.command()
