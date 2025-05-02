@@ -256,6 +256,7 @@ tim_ide.add_command(course)
 @click.option("--all", "-a", "all_tasks", is_flag=True, default=False)
 @click.option("--force", "-f", "force", is_flag=True, default=False)
 @click.option("--dir", "-d", "user_dir", type=str, default=None)
+@click.option("--json", "-j", "json_output", is_flag=True, default=False)
 @click.argument("demo_path", type=str)
 @click.argument("ide_task_id", type=str, default=None, required=False)
 def create(
@@ -264,6 +265,7 @@ def create(
     all_tasks: bool,
     force: bool,
     user_dir: str,
+    json_output: bool,
 ) -> None:
     """Create tasks based on options."""
     if not is_logged_in():
@@ -272,14 +274,18 @@ def create(
     if all_tasks:
         # Create all tasks
         tasks: List[TaskData] = get_tasks_by_doc(doc_path=demo_path)
-        create_tasks(tasks=tasks, overwrite=force, user_path=user_dir)
+        create_tasks(
+            tasks=tasks, overwrite=force, user_path=user_dir, json_output=json_output
+        )
 
     elif ide_task_id:
         # Create a single task
         task_data: TaskData = get_task_by_ide_task_id(
             ide_task_id=ide_task_id, doc_path=demo_path
         )
-        create_task(task=task_data, overwrite=force, user_path=user_dir)
+        create_task(
+            task=task_data, overwrite=force, user_path=user_dir, json_output=json_output
+        )
 
     else:
         click.echo(
