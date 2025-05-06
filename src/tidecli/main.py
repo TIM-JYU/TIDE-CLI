@@ -208,17 +208,17 @@ def create(
 @click.option(
     "--non-editable-only",
     "-n",
-    "keep_user_code",
+    "non_editable_only",
     is_flag=True,
     default=False,
 )
 @click.argument("file_path_string", type=str, required=True)
-def reset(file_path_string: str, keep_user_code: bool) -> None:
+def reset(file_path_string: str, non_editable_only: bool) -> None:
     """
     Reset the contents of a task file.
 
     :param file_path_string: Path to the task file in the local file system.
-    :param keep_user_code: If set, resets only the non-editable parts of the task file, preserving user code.
+    :param non_editable_only: If set, resets only the non-editable parts of the task file, preserving user code.
     """
     if not is_logged_in():
         return
@@ -247,7 +247,7 @@ def reset(file_path_string: str, keep_user_code: bool) -> None:
     if task_file_contents is None:
         raise click.ClickException("File is not part of this task")
 
-    if keep_user_code:
+    if non_editable_only:
         combined_contents = answer_with_original_noneditable_sections(
             file_contents, task_file_contents
         )
