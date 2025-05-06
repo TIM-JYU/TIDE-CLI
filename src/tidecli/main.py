@@ -288,14 +288,21 @@ def create(
 
 
 @task.command()
+@click.option(
+    "--non-editable-only",
+    "-n",
+    "non_editable_only",
+    is_flag=True,
+    default=False,
+)
 @click.argument("file_path_string", type=str, required=True)
-def reset(file_path_string: str) -> None:
+def reset(file_path_string: str, non_editable_only: bool) -> None:
     """
-    Enter the path of the task file to reset.
+    Reset the contents of a task file.
 
-    param file_path_string: Path to the task file in the local file system.
+    :param file_path_string: Path to the task file in the local file system.
+    :param non_editable_only: If set, resets only the non-editable parts of the task file, preserving user code.
     """
-    # TODO: currently resets only non-gap parts, should reset all parts or be renamed
     if not is_logged_in():
         return
 
@@ -323,13 +330,13 @@ def reset(file_path_string: str) -> None:
     if task_file_contents is None:
         raise click.ClickException("File is not part of this task")
 
-    file_path.write_text(task_file_contents)
-
-    combined_contents = answer_with_original_noneditable_sections(
-        file_contents, task_file_contents
-    )
-
-    file_path.write_text(combined_contents)
+    if non_editable_only:
+        combined_contents = answer_with_original_noneditable_sections(
+            file_contents, task_file_contents
+        )
+        file_path.write_text(combined_contents)
+    else:
+        file_path.write_text(task_file_contents)
 
 
 @tim_ide.command()
