@@ -11,6 +11,7 @@ from typing import Any
 import click.exceptions
 from pathlib import Path
 import itertools
+from os.path import relpath
 
 from tidecli.models.task_data import (
     SupplementaryFile,
