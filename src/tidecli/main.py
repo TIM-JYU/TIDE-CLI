@@ -279,7 +279,7 @@ def create(
             tasks=tasks, overwrite=force, user_path=user_dir
         )
         if json_output:
-            click.echo(json.dumps(feedback, indent=2))
+            click.echo(json.dumps(feedback, indent=2).encode("utf-8"))
         else:
             for demo in feedback:
                 for task in demo:
@@ -300,7 +300,7 @@ def create(
             task=task_data, overwrite=force, user_path=user_dir
         ) 
         if json_output:
-            click.echo(json.dumps(feedback, indent=2))
+            click.echo(json.dumps(feedback, indent=2).encode("utf-8"))
         else:
             for task in feedback:
                 if task['status']=="written":
