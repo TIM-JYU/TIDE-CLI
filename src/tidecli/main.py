@@ -287,17 +287,15 @@ def create(
     else:
         click.echo(
             "Please provide either --all or an ide_task_id."
-        ) # TODO: update this message
-        return  
+        )  # TODO: update this message
+        return
 
     if json_output:
         click.echo(json.dumps(feedback, indent=2).encode("utf-8"))
     else:
         for task in feedback:
             if task["status"] == "written":
-                click.echo(
-                    f"Wrote file {task['relative_path']}: {task['file_name']}"
-                )
+                click.echo(f"Wrote file {task['relative_path']}: {task['file_name']}")
             else:
                 click.echo(
                     f"File {task['path']} already exists\n"
