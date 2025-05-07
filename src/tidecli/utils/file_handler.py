@@ -157,13 +157,14 @@ def create_task(
 
 def save_task_file(
     task_file: TaskFile | SupplementaryFile, save_path: Path, overwrite: bool = False
-) -> dict | None:
+) -> dict :
     """
     Save task file and return info dict for JSON reporting.
 
     :param task_file: TaskFile object
     :param save_path: Path to save the file
     :param overwrite: Flag if overwrite
+    :return: Dictionary with file status information
     """
 
     file_path = save_path / task_file.file_name
@@ -197,7 +198,7 @@ def save_task_file(
     }
 
 
-def save_task_files(task: TaskData, save_path: Path, overwrite: bool = False) -> dict:
+def save_task_files(task: TaskData, save_path: Path, overwrite: bool = False) -> list[dict]:
     """
     Save task files in the given path.
 
