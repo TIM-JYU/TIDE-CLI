@@ -282,7 +282,10 @@ def create(
         task_data: TaskData = get_task_by_ide_task_id(
             ide_task_id=ide_task_id, doc_path=demo_path
         )
-        feedback = create_task(task=task_data, overwrite=force, user_path=user_dir)
+        # create_task returns a list of task file statuses for a single task.
+        # However, print_task_create_feedback expects a list of task sets (i.e., a list of task file lists).
+        # Therefore, we wrap the result in an outer list: [ ... ]
+        feedback = [create_task(task=task_data, overwrite=force, user_path=user_dir)]
 
     else:
         click.echo(
@@ -290,17 +293,7 @@ def create(
         )  # TODO: update this message
         return
 
-    if json_output:
-        click.echo(json.dumps(feedback, indent=2).encode("utf-8"))
-    else:
-        for task in feedback:
-            if task["status"] == "written":
-                click.echo(f"Wrote file {task['relative_path']}: {task['file_name']}")
-            else:
-                click.echo(
-                    f"File {task['path']} already exists\n"
-                    f"To overwrite add -f to previous command\n"
-                )
+    print_task_create_feedback(feedback, json_output)
 
 
 @task.command()
@@ -391,6 +384,33 @@ def submit(path: str) -> None:
 
 
 tim_ide.add_command(task)
+
+
+def print_task_create_feedback(feedback: list[list[dict]], json_output: bool) -> None:
+    """
+    Print feedback from the task creation process.
+
+    Displays feedback on which files were created or skipped during task generation,
+    either in JSON format or as human-readable text.
+
+    :param feedback: A list of task sets, each being a list of dictionaries
+                     containing task creation results.
+    :param json_output: If True, prints the output in JSON format.
+    """
+
+    if json_output:
+        click.echo(json.dumps(feedback, indent=2).encode("utf-8"))
+    else:
+        for demo in feedback:
+            for task in demo:
+                if task['status']=="written":
+                    click.echo(f"Wrote file {task['relative_path']}: {task['file_name']}")
+                else:
+                    click.echo(
+                    f"File {task['path']} already exists\n"
+                    f"To overwrite add -f to previous command\n"
+                )
+
 
 if __name__ == "__main__":
     tim_ide()
