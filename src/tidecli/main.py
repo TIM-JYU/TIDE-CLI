@@ -276,20 +276,6 @@ def create(
         # Create all tasks
         tasks: List[TaskData] = get_tasks_by_doc(doc_path=demo_path)
         feedback = create_tasks(tasks=tasks, overwrite=force, user_path=user_dir)
-        if json_output:
-            click.echo(json.dumps(feedback, indent=2).encode("utf-8"))
-        else:
-            for demo in feedback:
-                for task in demo:
-                    if task["status"] == "written":
-                        click.echo(
-                            f"Wrote file {task['relative_path']}: {task['file_name']}"
-                        )
-                    else:
-                        click.echo(
-                            f"File {task['path']} already exists\n"
-                            f"To overwrite add -f to previous command\n"
-                        )
 
     elif ide_task_id:
         # Create a single task
@@ -297,24 +283,26 @@ def create(
             ide_task_id=ide_task_id, doc_path=demo_path
         )
         feedback = create_task(task=task_data, overwrite=force, user_path=user_dir)
-        if json_output:
-            click.echo(json.dumps(feedback, indent=2).encode("utf-8"))
-        else:
-            for task in feedback:
-                if task["status"] == "written":
-                    click.echo(
-                        f"Wrote file {task['relative_path']}: {task['file_name']}"
-                    )
-                else:
-                    click.echo(
-                        f"File {task['path']} already exists\n"
-                        f"To overwrite add -f to previous command\n"
-                    )
 
     else:
         click.echo(
             "Please provide either --all or an ide_task_id."
-        )  # TODO: update this message
+        ) # TODO: update this message
+        return  
+
+    if json_output:
+        click.echo(json.dumps(feedback, indent=2).encode("utf-8"))
+    else:
+        for task in feedback:
+            if task["status"] == "written":
+                click.echo(
+                    f"Wrote file {task['relative_path']}: {task['file_name']}"
+                )
+            else:
+                click.echo(
+                    f"File {task['path']} already exists\n"
+                    f"To overwrite add -f to previous command\n"
+                )
 
 
 @task.command()
