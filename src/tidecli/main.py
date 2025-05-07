@@ -403,13 +403,15 @@ def print_task_create_feedback(feedback: list[list[dict]], json_output: bool) ->
     else:
         for demo in feedback:
             for task in demo:
-                if task['status']=="written":
-                    click.echo(f"Wrote file {task['relative_path']}: {task['file_name']}")
+                if task["status"] == "written":
+                    click.echo(
+                        f"Wrote file {task['relative_path']}: {task['file_name']}"
+                    )
                 else:
                     click.echo(
-                    f"File {task['path']} already exists\n"
-                    f"To overwrite add -f to previous command\n"
-                )
+                        f"File {task['path']} already exists\n"
+                        f"To overwrite add -f to previous command\n"
+                    )
 
 
 if __name__ == "__main__":
