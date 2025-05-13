@@ -170,12 +170,16 @@ def save_task_file(
     file_path = save_path / task_file.file_name
 
     if file_path.exists() and not overwrite:
-        return {
+        file_data = {
             "file_name": task_file.file_name,
             "path": str(file_path),
             "relative_path": relpath(save_path, Path.cwd()),
             "status": "skipped",
         }
+        # Add task_id_ext if it exists. Supplementary files do not have it
+        if hasattr(task_file,"task_id_ext"):
+            file_data["task_id_ext"] = task_file.task_id_ext
+        return file_data
 
     file_path.parent.mkdir(parents=True, exist_ok=True)
     if task_file.content is not None:
@@ -190,12 +194,16 @@ def save_task_file(
             file.write(content)
             file.close()
 
-    return {
+    file_data = {
         "file_name": task_file.file_name,
         "path": str(file_path),
         "relative_path": relpath(save_path, Path.cwd()),
         "status": "written",
     }
+    # Add task_id_ext if it exists. Supplementary files do not have it
+    if hasattr(task_file,"task_id_ext"):
+        file_data["task_id_ext"] = task_file.task_id_ext
+    return file_data
 
 
 def save_task_files(
