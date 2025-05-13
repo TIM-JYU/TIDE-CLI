@@ -177,7 +177,7 @@ def save_task_file(
             "status": "skipped",
         }
         # Add task_id_ext if it exists. Supplementary files do not have it
-        if hasattr(task_file,"task_id_ext"):
+        if hasattr(task_file, "task_id_ext"):
             file_data["task_id_ext"] = task_file.task_id_ext
         return file_data
 
@@ -201,7 +201,7 @@ def save_task_file(
         "status": "written",
     }
     # Add task_id_ext if it exists. Supplementary files do not have it
-    if hasattr(task_file,"task_id_ext"):
+    if hasattr(task_file, "task_id_ext"):
         file_data["task_id_ext"] = task_file.task_id_ext
     return file_data
 
