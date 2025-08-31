@@ -315,6 +315,33 @@ def include_user_answer_to_task_file(f1: TaskFile, f2: Path) -> bool:
         return True  # Do not be so spesific about the validation
 
 
+def get_task_data(
+    task_path: Path | None,
+    metadata: TideCourseData,
+    metadata_dir: Path,
+) -> TaskData:
+    """
+    Get task data from the given path.
+
+    :param metadata: TaskData object
+    :param task_path: Path to task to search for
+    :return: TaskData object
+    """
+    if task_path is None:
+        raise click.ClickException("Task path not given.")
+
+    task_path = task_path.absolute()
+    for course_part in metadata.course_parts.values():
+        for task in course_part.tasks.values():
+            timdata_task_directory = task.get_task_directory()
+            timdata_task_path = (Path.cwd() / metadata_dir / timdata_task_directory).absolute()
+
+            if task_path == timdata_task_path or timdata_task_path in task_path.parents:
+                return task
+
+    raise click.ClickException(f"Task not found in path {task_path}")
+
+
 def get_task_file_data(
     file_path: Path | None,
     file_dir: Path,
@@ -381,7 +408,7 @@ def get_metadata(metadata_dir: Path) -> tuple[TideCourseData, Path]:
     Get metadata from the given path.
 
     :param metadata_dir: Path to the directory containing the
-    metadata.json file.
+    .timdata file.
     :return: Tuple of metadata and metadata directory
     :raises: ClickException if metadata not found
     """

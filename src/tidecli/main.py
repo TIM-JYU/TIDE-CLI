@@ -32,6 +32,7 @@ from tidecli.models.task_data import TaskData
 from tidecli.utils.file_handler import (
     answer_with_original_noneditable_sections,
     create_task,
+    get_task_data,
     get_task_file_data,
     get_metadata,
     create_tasks,
@@ -249,6 +250,26 @@ def create_course(course_path: str, course_id: int, force: bool, user_dir: str) 
             "Please provide either course path or course document ID."
         )
 
+@course.command(name="init-dotnet-projects")
+@click.argument("course_path", type=str, required=True)
+def init_dotnet_solution(course_path: str) -> None:
+    """
+    Initialize a .NET solution for the course.
+
+    This command initializes a .NET solution for the given course path.
+    The course path should point to a valid course document.
+    """
+    from tidecli import csharp
+    course_data = get_metadata(Path(course_path))
+
+
+    if not is_logged_in():
+        raise click.UsageError("Could not initialize solution: User is not logged in")
+
+
+    csharp.init_dotnet_projects(*course_data)
+    click.echo(f"Initialized .NET solution for course: {course.name}")
+
 
 tim_ide.add_command(course)
 
@@ -346,6 +367,45 @@ def reset(file_path_string: str, non_editable_only: bool) -> None:
         file_path.write_text(combined_contents)
     else:
         file_path.write_text(task_file_contents)
+
+@task.command()
+@click.option("--json", "-j", "json_output", is_flag=True, default=False)
+@click.argument("task_path_string", type=str, required=True)
+def info(task_path_string: str, json_output: bool) -> None:
+    """
+    Get task info for a given path.
+
+    :param file_path_string: Path to the task directory in the local file system.
+    """
+    task_path = Path(task_path_string).absolute()
+    if task_path.is_file():
+        task_path = task_path.parent
+
+    if not task_path.exists() or not task_path.is_dir():
+        raise click.ClickException(
+            f"Invalid path {task_path}. Please provide a valid path to the task directory."
+        )
+
+    metadata, metadata_dir = get_metadata(task_path.parent)
+    task_data = get_task_data(task_path, metadata, metadata_dir)
+
+    if not task_data:
+        raise click.ClickException("Could not retrieve task data.")
+
+    if json_output:
+        task_json = task_data.model_dump()
+        task_json["metadata_path"] = str(metadata_dir)
+        click.echo(json.dumps(task_json, ensure_ascii=False, indent=4))
+        return
+
+    if not json_output:
+        click.echo(f"Task ID: {task_data.ide_task_id}")
+        click.echo(f"Task TIM path: {task_data.path}")
+        click.echo(f"Metadata location: {metadata_dir}")
+        click.echo(f"Task directory (relative to metadata location): {task_data.get_task_directory()}")
+        click.echo(f"Task files:")
+        for f in task_data.task_files:
+            click.echo(f" - {f.file_name} ({f.task_type})")
 
 
 @tim_ide.command()
