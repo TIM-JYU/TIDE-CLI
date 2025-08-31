@@ -250,6 +250,7 @@ def create_course(course_path: str, course_id: int, force: bool, user_dir: str) 
             "Please provide either course path or course document ID."
         )
 
+
 @course.command(name="init-dotnet-projects")
 @click.argument("course_path", type=str, required=True)
 def init_dotnet_solution(course_path: str) -> None:
@@ -260,12 +261,11 @@ def init_dotnet_solution(course_path: str) -> None:
     The course path should point to a valid course document.
     """
     from tidecli import csharp
-    course_data = get_metadata(Path(course_path))
 
+    course_data = get_metadata(Path(course_path))
 
     if not is_logged_in():
         raise click.UsageError("Could not initialize solution: User is not logged in")
-
 
     csharp.init_dotnet_projects(*course_data)
     click.echo(f"Initialized .NET solution for course: {course.name}")
@@ -368,6 +368,7 @@ def reset(file_path_string: str, non_editable_only: bool) -> None:
     else:
         file_path.write_text(task_file_contents)
 
+
 @task.command()
 @click.option("--json", "-j", "json_output", is_flag=True, default=False)
 @click.argument("task_path_string", type=str, required=True)
@@ -402,7 +403,9 @@ def info(task_path_string: str, json_output: bool) -> None:
         click.echo(f"Task ID: {task_data.ide_task_id}")
         click.echo(f"Task TIM path: {task_data.path}")
         click.echo(f"Metadata location: {metadata_dir}")
-        click.echo(f"Task directory (relative to metadata location): {task_data.get_task_directory()}")
+        click.echo(
+            f"Task directory (relative to metadata location): {task_data.get_task_directory()}"
+        )
         click.echo(f"Task files:")
         for f in task_data.task_files:
             click.echo(f" - {f.file_name} ({f.task_type})")
