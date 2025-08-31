@@ -260,7 +260,7 @@ def init_dotnet_solution(course_path: str) -> None:
     This command initializes a .NET solution for the given course path.
     The course path should point to a valid course document.
     """
-    from tidecli import csharp
+    from tidecli.utils import csharp
 
     course_data = get_metadata(Path(course_path))
 

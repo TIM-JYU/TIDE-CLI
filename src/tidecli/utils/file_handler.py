@@ -334,7 +334,9 @@ def get_task_data(
     for course_part in metadata.course_parts.values():
         for task in course_part.tasks.values():
             timdata_task_directory = task.get_task_directory()
-            timdata_task_path = (Path.cwd() / metadata_dir / timdata_task_directory).absolute()
+            timdata_task_path = (
+                Path.cwd() / metadata_dir / timdata_task_directory
+            ).absolute()
 
             if task_path == timdata_task_path or timdata_task_path in task_path.parents:
                 return task
