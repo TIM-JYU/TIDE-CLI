@@ -53,7 +53,7 @@ def add_project_to_solution(solution_path: Path, project_path: Path) -> None:
     print(f"Project {project_path} added to solution {solution_path}")
 
 
-def init_dotnet_projects(course_data: TideCourseData, course_path: Path) -> bool:
+def init_dotnet_projects(course_data: TideCourseData, course_path: Path) -> None:
 
     verify_dotnet_installed()
 
@@ -75,5 +75,3 @@ def init_dotnet_projects(course_data: TideCourseData, course_path: Path) -> bool
                         / supplementary_file.file_name
                     )
                     add_project_to_solution(solution_file_path, project_file_path)
-
-    return True

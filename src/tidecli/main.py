@@ -264,9 +264,6 @@ def init_dotnet_solution(course_path: str) -> None:
 
     course_data = get_metadata(Path(course_path))
 
-    if not is_logged_in():
-        raise click.UsageError("Could not initialize solution: User is not logged in")
-
     csharp.init_dotnet_projects(*course_data)
     click.echo(f"Initialized .NET solution for course: {course.name}")
 
