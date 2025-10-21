@@ -100,7 +100,7 @@ def tim_request(
 
     except Exception as e:
         raise click.ClickException(
-            f"Could not complete API call {endpoint}\n{e}"
+            f"API call to {endpoint} failed (HTTP status code {res.status_code})\n{e}"
         ) from e
 
 
